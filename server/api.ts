@@ -37,6 +37,12 @@ const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
 const SESSION_SECRET = process.env.SESSION_SECRET ?? "change-me-in-prod";
 const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_FALLBACK !== "false";
+const SESSION_COOKIE_SECURE =
+  process.env.SESSION_COOKIE_SECURE === "true"
+    ? true
+    : process.env.SESSION_COOKIE_SECURE === "false"
+      ? false
+      : process.env.NODE_ENV === "production";
 const CLIENT_ID_GITHUB = process.env.CLIENT_ID_GITHUB ?? process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET_GITHUB = process.env.CLIENT_SECRET_GITHUB ?? process.env.GITHUB_CLIENT_SECRET;
 const CALLBACK_URL_GITHUB =
@@ -64,7 +70,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: SESSION_COOKIE_SECURE,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),

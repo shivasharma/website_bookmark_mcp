@@ -103,6 +103,7 @@ jobs:
               -e "PORT=3001" \
               -e "DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@bookmark-postgres:5432/bookmark_mcp" \
               -e "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" \
+              -e "SESSION_COOKIE_SECURE=false" \
               -e "ALLOW_LOCAL_FALLBACK=false" \
               -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
