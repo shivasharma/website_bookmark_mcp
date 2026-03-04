@@ -58,9 +58,8 @@ jobs:
           echo "----- Git status AFTER pull -----"
           git status || echo "git status failed"
 
-          echo "Building Docker image (bookmark-app) from ./server"
-          cd server
-          docker build -t bookmark-app . 2>&1
+          echo "Building Docker image (bookmark-app) from repo root using server/Dockerfile"
+          docker build -t bookmark-app -f server/Dockerfile . 2>&1
 
           echo "Stopping existing bookmark-app container if running"
           if [ "\$(docker ps -q -f name=bookmark-app)" ]; then
