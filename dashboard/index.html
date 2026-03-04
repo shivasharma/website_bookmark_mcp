@@ -620,16 +620,23 @@
         if (showFavs) params.set('favorite', 'true');
 
         const res = await fetch(`${API}/bookmarks?${params}`);
+        if (res.status === 401) {
+          showAuthRequired();
+          return;
+        }
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+
         const { data } = await res.json();
-        renderBookmarks(data);
+        renderBookmarks(Array.isArray(data) ? data : []);
       } catch {
-        grid.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><h3>Cannot connect to API</h3><p>Make sure the server is running on port 3001</p></div>`;
+        grid.innerHTML = `<div class="empty"><div class="empty-icon">[!]</div><h3>Cannot connect to API</h3><p>Make sure the server is running on port 3001</p></div>`;
       }
     }
 
     async function loadStats() {
       try {
         const res = await fetch(`${API}/stats`);
+        if (res.status === 401 || !res.ok) return;
         const { data } = await res.json();
         document.getElementById('statTotal').textContent = data.total;
         document.getElementById('statFavs').textContent = data.favorites;
@@ -646,6 +653,10 @@
 
     function renderBookmarks(bookmarks) {
       const grid = document.getElementById('bookmarkGrid');
+      if (!Array.isArray(bookmarks)) {
+        showAuthRequired();
+        return;
+      }
       if (!bookmarks.length) {
         grid.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No bookmarks found</h3><p>Save your first link or adjust your filters</p></div>`;
         return;
@@ -685,6 +696,11 @@
           </div>
         </div>
       `).join('');
+    }
+
+    function showAuthRequired() {
+      const grid = document.getElementById('bookmarkGrid');
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">[LOCK]</div><h3>Login required</h3><p>Please <a href="/register" style="color:inherit;text-decoration:underline">sign in with Google or GitHub</a> to view bookmarks.</p></div>`;
     }
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
