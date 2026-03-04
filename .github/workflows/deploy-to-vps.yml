@@ -22,35 +22,60 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH connection (verbose)
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          echo "Testing SSH to $VPS_USER@$VPS_HOST"
+          ssh -vvv -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" "echo '✅ SSH connected to:' \$(hostname)"
+
       - name: Deploy via SSH (pull, build, restart container)
         env:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
         run: |
-          ssh $VPS_USER@$VPS_HOST << 'EOF'
-          set -e
+          ssh "$VPS_USER@$VPS_HOST" << 'EOF'
+          set -euxo pipefail
+
+          echo "===== Starting deploy on VPS ====="
+          echo "Current user: \$(whoami)"
+          echo "Hostname: \$(hostname)"
+          echo "Current dir before cd: \$(pwd)"
 
           # Go to app directory (should already be a git clone of this repo)
           cd "$VPS_APP_DIR"
+          echo "Now in app dir: \$(pwd)"
 
-          # Pull latest code
-          git fetch --all
-          git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
+          echo "----- Git status BEFORE pull -----"
+          git status || echo "git status failed (maybe not a git repo?)"
 
-          # Build Docker image (from server/Dockerfile)
+          echo "Pulling latest code from origin/main"
+          git fetch origin main
+          git reset --hard origin/main
+
+          echo "----- Git status AFTER pull -----"
+          git status || echo "git status failed"
+
+          echo "Building Docker image (bookmark-app) from ./server"
           cd server
-          docker build -t bookmark-app .
+          docker build -t bookmark-app . 2>&1
 
-          # Stop existing container if running
-          if [ "$(docker ps -q -f name=bookmark-app)" ]; then
+          echo "Stopping existing bookmark-app container if running"
+          if [ "\$(docker ps -q -f name=bookmark-app)" ]; then
             docker stop bookmark-app
             docker rm bookmark-app
           fi
 
-          # Run new container
+          echo "Starting new bookmark-app container on port 3001"
           docker run -d --name bookmark-app -p 3001:3001 \
             -v /opt/bookmark-data:/app/server \
             bookmark-app
+
+          echo "Current running containers:"
+          docker ps
+
+          echo "===== Deploy completed successfully ====="
           EOF
 
