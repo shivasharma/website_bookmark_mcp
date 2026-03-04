@@ -41,6 +41,17 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
+
+            if [ -z "${{ secrets.POSTGRES_PASSWORD }}" ]; then
+              echo "Missing required secret: POSTGRES_PASSWORD"
+              exit 1
+            fi
+            if [ -z "${{ secrets.SESSION_SECRET }}" ]; then
+              echo "Missing required secret: SESSION_SECRET"
+              exit 1
+            fi
+
             # Log in to GHCR on the VPS so it can pull the image
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
@@ -59,9 +70,9 @@ jobs:
               --name bookmark-postgres \
               --restart always \
               --network bookmark-net \
-              -e POSTGRES_DB=bookmark_mcp \
-              -e POSTGRES_USER=postgres \
-              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
+              -e "POSTGRES_DB=bookmark_mcp" \
+              -e "POSTGRES_USER=postgres" \
+              -e "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
               -v bookmark-postgres-data:/var/lib/postgresql/data \
               postgres:16-alpine
 
@@ -75,16 +86,16 @@ jobs:
               --restart always \
               --network bookmark-net \
               -p 3001:3001 \
-              -e NODE_ENV=production \
-              -e HOST=0.0.0.0 \
-              -e PORT=3001 \
-              -e DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@bookmark-postgres:5432/bookmark_mcp \
-              -e SESSION_SECRET=${{ secrets.SESSION_SECRET }} \
-              -e ALLOW_LOCAL_FALLBACK=false \
-              -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-              -e GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-              -e GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }} \
-              -e GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }} \
-              -e GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }} \
-              -e GITHUB_CALLBACK_URL=${{ secrets.GITHUB_CALLBACK_URL }} \
+              -e "NODE_ENV=production" \
+              -e "HOST=0.0.0.0" \
+              -e "PORT=3001" \
+              -e "DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@bookmark-postgres:5432/bookmark_mcp" \
+              -e "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" \
+              -e "ALLOW_LOCAL_FALLBACK=false" \
+              -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
+              -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+              -e "GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}" \
+              -e "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" \
+              -e "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" \
+              -e "GITHUB_CALLBACK_URL=${{ secrets.GITHUB_CALLBACK_URL }}" \
               ghcr.io/${{ github.repository }}:latest
