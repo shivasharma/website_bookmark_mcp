@@ -8,18 +8,19 @@ WORKDIR /app
 
 # Install dependencies from root package.json/package-lock.json
 COPY package*.json ./
-RUN npm install --production
+COPY tsconfig.json ./
+RUN npm install
 
 # Copy only what the container needs
 COPY server ./server
 COPY dashboard ./dashboard
 
-# Run the API from the server folder
-WORKDIR /app/server
+RUN npm run build
 
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOST=0.0.0.0
 
 EXPOSE 3001
 
-CMD ["node", "api.js"]
+CMD ["node", "dist/api.js"]
