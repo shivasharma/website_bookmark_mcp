@@ -51,6 +51,18 @@ jobs:
               echo "Missing required secret: SESSION_SECRET"
               exit 1
             fi
+            HAS_GITHUB=false
+            HAS_GOOGLE=false
+            if [ -n "${{ secrets.CLIENT_ID_GITHUB }}" ] && [ -n "${{ secrets.CLIENT_SECRET_GITHUB }}" ] && [ -n "${{ secrets.CALLBACK_URL_GITHUB }}" ]; then
+              HAS_GITHUB=true
+            fi
+            if [ -n "${{ secrets.GOOGLE_CLIENT_ID }}" ] && [ -n "${{ secrets.GOOGLE_CLIENT_SECRET }}" ] && [ -n "${{ secrets.GOOGLE_CALLBACK_URL }}" ]; then
+              HAS_GOOGLE=true
+            fi
+            if [ "$HAS_GITHUB" = false ] && [ "$HAS_GOOGLE" = false ]; then
+              echo "Missing OAuth config: configure GitHub or Google OAuth secrets"
+              exit 1
+            fi
 
             # Log in to GHCR on the VPS so it can pull the image
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -95,7 +107,7 @@ jobs:
               -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
               -e "GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}" \
-              -e "GITHUB_CLIENT_ID=${{ secrets.GITHUB_CLIENT_ID }}" \
-              -e "GITHUB_CLIENT_SECRET=${{ secrets.GITHUB_CLIENT_SECRET }}" \
-              -e "GITHUB_CALLBACK_URL=${{ secrets.GITHUB_CALLBACK_URL }}" \
+              -e "GITHUB_CLIENT_ID=${{ secrets.CLIENT_ID_GITHUB }}" \
+              -e "GITHUB_CLIENT_SECRET=${{ secrets.CLIENT_SECRET_GITHUB }}" \
+              -e "GITHUB_CALLBACK_URL=${{ secrets.CALLBACK_URL_GITHUB }}" \
               ghcr.io/${{ github.repository }}:latest
