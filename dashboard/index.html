@@ -78,6 +78,49 @@
     }
 
     .logo span { color: var(--accent); }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .user-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      min-height: 36px;
+    }
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent2);
+      color: #0a2b20;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-name {
+      font-size: 12px;
+      color: var(--text);
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .user-link {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .user-link:hover { text-decoration: underline; }
 
     /* ── Stats Bar ── */
     .stats-bar {
@@ -522,8 +565,10 @@
         <div class="logo-icon">🔖</div>
         <h1>Bookmark<span>Vault</span></h1>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <a href="/register" class="btn btn-ghost" style="text-decoration:none">Register</a>
+      <div class="header-actions">
+        <div class="user-status" id="userStatus">
+          <a href="/register" class="user-link">Sign in</a>
+        </div>
         <button class="btn btn-primary" onclick="openAddModal()">
           <span>+</span> Add Bookmark
         </button>
@@ -604,6 +649,50 @@
     let editingId = null;
     let showFavs = false;
     let debounceTimer = null;
+    let currentUser = null;
+
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch(`${API}/me`, { credentials: 'include' });
+        if (!res.ok) {
+          currentUser = null;
+          renderUserStatus();
+          return;
+        }
+        const json = await res.json();
+        currentUser = json.success ? json.data : null;
+      } catch {
+        currentUser = null;
+      }
+      renderUserStatus();
+    }
+
+    function renderUserStatus() {
+      const el = document.getElementById('userStatus');
+      if (!currentUser || !currentUser.name) {
+        el.innerHTML = `<a href="/register" class="user-link">Sign in</a>`;
+        return;
+      }
+      const name = escHtml(currentUser.name);
+      const initial = escHtml((name.charAt(0) || 'U').toUpperCase());
+      el.innerHTML = `
+        <div class="avatar">${initial}</div>
+        <div class="user-name">${name}</div>
+        <a href="#" class="user-link" onclick="logoutUser(event)">Logout</a>
+      `;
+    }
+
+    async function logoutUser(event) {
+      event.preventDefault();
+      try {
+        await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+      } catch {}
+      currentUser = null;
+      renderUserStatus();
+      loadBookmarks();
+      loadStats();
+      toast('Logged out');
+    }
 
     // ── Load ──────────────────────────────────────────────────────────────────
 
@@ -814,6 +903,7 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
+    loadCurrentUser();
     loadBookmarks();
     loadStats();
     setInterval(() => { loadBookmarks(); loadStats(); }, 10000); // auto-refresh every 10s
