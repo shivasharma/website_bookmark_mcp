@@ -1,0 +1,56 @@
+name: Deploy Bookmark App to VPS
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH (pull, build, restart container)
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          ssh $VPS_USER@$VPS_HOST << 'EOF'
+          set -e
+
+          # Go to app directory (should already be a git clone of this repo)
+          cd "$VPS_APP_DIR"
+
+          # Pull latest code
+          git fetch --all
+          git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
+
+          # Build Docker image (from server/Dockerfile)
+          cd server
+          docker build -t bookmark-app .
+
+          # Stop existing container if running
+          if [ "$(docker ps -q -f name=bookmark-app)" ]; then
+            docker stop bookmark-app
+            docker rm bookmark-app
+          fi
+
+          # Run new container
+          docker run -d --name bookmark-app -p 3001:3001 \
+            -v /opt/bookmark-data:/app/server \
+            bookmark-app
+          EOF
+
