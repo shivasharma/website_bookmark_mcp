@@ -72,50 +72,11 @@ jobs:
             # Recreate app + postgres stack
             docker network create bookmark-net || true
             docker volume create bookmark-postgres-data || true
-            mkdir -p /opt/bookmark-proxy
-            mkdir -p /opt/bookmark-tls
-
-            if ! command -v openssl >/dev/null 2>&1; then
-              echo "openssl is required on VPS to generate default TLS cert"
-              exit 1
-            fi
-
-            if [ ! -f /opt/bookmark-tls/server.key ] || [ ! -f /opt/bookmark-tls/server.crt ]; then
-              openssl req -x509 -nodes -newkey rsa:2048 \
-                -keyout /opt/bookmark-tls/server.key \
-                -out /opt/bookmark-tls/server.crt \
-                -days 365 \
-                -subj "/CN=66.179.137.126"
-            fi
-
-            cat > /opt/bookmark-proxy/nginx.conf <<'EOF'
-            events {}
-            http {
-              server {
-                listen 3001 ssl;
-                ssl_certificate /etc/nginx/certs/server.crt;
-                ssl_certificate_key /etc/nginx/certs/server.key;
-                ssl_protocols TLSv1.2 TLSv1.3;
-                ssl_prefer_server_ciphers on;
-
-                location / {
-                  proxy_pass http://bookmark-app:3001;
-                  proxy_http_version 1.1;
-                  proxy_set_header Host $host;
-                  proxy_set_header X-Real-IP $remote_addr;
-                  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto https;
-                }
-              }
-            }
-            EOF
 
             docker stop bookmark-app || true
             docker rm bookmark-app || true
             docker stop bookmark-postgres || true
             docker rm bookmark-postgres || true
-            docker stop bookmark-proxy || true
-            docker rm bookmark-proxy || true
 
             docker run -d \
               --name bookmark-postgres \
@@ -136,12 +97,13 @@ jobs:
               --name bookmark-app \
               --restart always \
               --network bookmark-net \
+              -p 3001:3001 \
               -e "NODE_ENV=production" \
               -e "HOST=0.0.0.0" \
               -e "PORT=3001" \
               -e "DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@bookmark-postgres:5432/bookmark_mcp" \
               -e "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" \
-              -e "SESSION_COOKIE_SECURE=true" \
+              -e "SESSION_COOKIE_SECURE=false" \
               -e "ALLOW_LOCAL_FALLBACK=false" \
               -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
@@ -150,12 +112,3 @@ jobs:
               -e "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" \
               -e "CALLBACK_URL_GITHUB=${{ secrets.CALLBACK_URL_GITHUB }}" \
               ghcr.io/${{ github.repository }}:latest
-
-            docker run -d \
-              --name bookmark-proxy \
-              --restart always \
-              --network bookmark-net \
-              -p 3001:3001 \
-              -v /opt/bookmark-proxy/nginx.conf:/etc/nginx/nginx.conf:ro \
-              -v /opt/bookmark-tls:/etc/nginx/certs:ro \
-              nginx:1.27-alpine
