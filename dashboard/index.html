@@ -650,6 +650,7 @@
     let showFavs = false;
     let debounceTimer = null;
     let currentUser = null;
+    let events = null;
 
     async function loadCurrentUser() {
       try {
@@ -692,6 +693,22 @@
       loadBookmarks();
       loadStats();
       toast('Logged out');
+      if (events) {
+        events.close();
+        events = null;
+      }
+    }
+
+    function startRealtime() {
+      if (events) events.close();
+      events = new EventSource(`${API}/events`);
+      events.addEventListener('bookmark', () => {
+        loadBookmarks();
+        loadStats();
+      });
+      events.onerror = () => {
+        // Keep browser auto-reconnect behavior
+      };
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -903,10 +920,11 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
-    loadCurrentUser();
+    loadCurrentUser().then(() => {
+      if (currentUser) startRealtime();
+    });
     loadBookmarks();
     loadStats();
-    setInterval(() => { loadBookmarks(); loadStats(); }, 10000); // auto-refresh every 10s
   </script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import session from "express-session";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
@@ -15,12 +17,15 @@ import {
   getStats,
   getUserById,
   getUserByEmail,
+  initRealtimeListener,
   initDb,
   listBookmarks,
   saveBookmark,
+  subscribeBookmarkEvents,
   updateBookmark,
 } from "./db.js";
 import type { User } from "./types.js";
+import { z } from "zod";
 
 declare global {
   namespace Express {
@@ -51,6 +56,7 @@ const CALLBACK_URL_GITHUB =
   "http://localhost:3001/auth/github/callback";
 
 app.set("trust proxy", 1);
+app.disable("x-powered-by");
 
 app.use(
   cors({
@@ -60,6 +66,20 @@ app.use(
       "http://66.179.137.126:3001",
     ],
     credentials: true,
+  }),
+);
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
   }),
 );
 app.use(express.json());
@@ -78,6 +98,13 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -178,6 +205,25 @@ function toPublicUser(user: User) {
   };
 }
 
+const saveBookmarkSchema = z.object({
+  url: z.string().url().max(2048),
+  title: z.string().max(300).optional(),
+  description: z.string().max(2000).optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
+  notes: z.string().max(4000).optional(),
+  favicon: z.string().url().max(2048).optional(),
+});
+
+const updateBookmarkSchema = z.object({
+  url: z.string().url().max(2048).optional(),
+  title: z.string().max(300).optional(),
+  description: z.string().max(2000).optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
+  notes: z.string().max(4000).optional(),
+  favicon: z.string().url().max(2048).optional(),
+  is_favorite: z.boolean().optional(),
+});
+
 app.get("/", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "index.html"));
 });
@@ -186,7 +232,7 @@ app.get("/register", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "register.html"));
 });
 
-app.get("/auth/google", (req, res, next) => {
+app.get("/auth/google", authLimiter, (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     res.status(400).json({ success: false, error: "Google OAuth is not configured" });
     return;
@@ -202,7 +248,7 @@ app.get(
   },
 );
 
-app.get("/auth/github", (req, res, next) => {
+app.get("/auth/github", authLimiter, (req, res, next) => {
   if (!CLIENT_ID_GITHUB || !CLIENT_SECRET_GITHUB) {
     res.status(400).json({ success: false, error: "GitHub OAuth is not configured" });
     return;
@@ -264,6 +310,38 @@ app.get("/api/health", (_req, res) => {
   res.json({ success: true, status: "ok" });
 });
 
+app.get("/api/events", (req, res) => {
+  let userId: number;
+  try {
+    userId = getUserId(req);
+  } catch {
+    res.status(401).json({ success: false, error: "Authentication required" });
+    return;
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders?.();
+
+  const unsubscribe = subscribeBookmarkEvents((event) => {
+    if (event.user_id !== userId) {
+      return;
+    }
+    res.write(`event: bookmark\n`);
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  });
+
+  const keepAlive = setInterval(() => {
+    res.write(`event: ping\ndata: {}\n\n`);
+  }, 25000);
+
+  req.on("close", () => {
+    clearInterval(keepAlive);
+    unsubscribe();
+  });
+});
+
 app.get("/api/bookmarks", async (req, res) => {
   try {
     const search = typeof req.query.search === "string" ? req.query.search : undefined;
@@ -296,7 +374,11 @@ app.get("/api/bookmarks/:id", async (req, res) => {
 
 app.post("/api/bookmarks", async (req, res) => {
   try {
-    const bookmark = await saveBookmark({ ...req.body, user_id: getUserId(req) });
+    const parsed = saveBookmarkSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ success: false, error: "Invalid bookmark payload" });
+    }
+    const bookmark = await saveBookmark({ ...parsed.data, user_id: getUserId(req) });
     return res.status(201).json({ success: true, data: bookmark });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -312,7 +394,11 @@ app.patch("/api/bookmarks/:id", async (req, res) => {
     if (!existing) {
       return res.status(404).json({ success: false, error: "Not found" });
     }
-    const updated = await updateBookmark(id, req.body, userId);
+    const parsed = updateBookmarkSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ success: false, error: "Invalid bookmark update payload" });
+    }
+    const updated = await updateBookmark(id, parsed.data, userId);
     return res.json({ success: true, data: updated });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -344,6 +430,7 @@ app.get("/api/stats", async (req, res) => {
 });
 
 await initDb();
+await initRealtimeListener();
 const defaultUserId = await ensureLocalDefaultUser();
 process.env.DEFAULT_USER_ID = String(defaultUserId);
 

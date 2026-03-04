@@ -1,5 +1,6 @@
 import "dotenv/config";
-import { Pool } from "pg";
+import { EventEmitter } from "node:events";
+import { Client, Pool } from "pg";
 import { randomUUID } from "node:crypto";
 import type {
   Bookmark,
@@ -13,8 +14,54 @@ import type {
 const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/bookmark_mcp";
 
 const pool = new Pool({ connectionString });
+const realtimeEvents = new EventEmitter();
+realtimeEvents.setMaxListeners(200);
+const BOOKMARKS_CHANNEL = "bookmark_events";
+let listenerClient: Client | null = null;
+let listenerStarted = false;
 
 type AuthProvider = "google" | "github" | "local";
+type BookmarkEvent = {
+  action: "created" | "updated" | "deleted";
+  user_id: number;
+  bookmark_id: number;
+  at: string;
+};
+
+async function emitBookmarkEvent(event: BookmarkEvent): Promise<void> {
+  await pool.query(`SELECT pg_notify($1, $2)`, [BOOKMARKS_CHANNEL, JSON.stringify(event)]);
+}
+
+export async function initRealtimeListener(): Promise<void> {
+  if (listenerStarted) {
+    return;
+  }
+  listenerStarted = true;
+  listenerClient = new Client({ connectionString });
+  await listenerClient.connect();
+  await listenerClient.query(`LISTEN ${BOOKMARKS_CHANNEL}`);
+  listenerClient.on("notification", (msg) => {
+    if (msg.channel !== BOOKMARKS_CHANNEL || !msg.payload) {
+      return;
+    }
+    try {
+      const parsed = JSON.parse(msg.payload) as BookmarkEvent;
+      realtimeEvents.emit(BOOKMARKS_CHANNEL, parsed);
+    } catch {
+      // Ignore invalid event payloads
+    }
+  });
+  listenerClient.on("error", () => {
+    listenerStarted = false;
+  });
+}
+
+export function subscribeBookmarkEvents(handler: (event: BookmarkEvent) => void): () => void {
+  realtimeEvents.on(BOOKMARKS_CHANNEL, handler);
+  return () => {
+    realtimeEvents.off(BOOKMARKS_CHANNEL, handler);
+  };
+}
 
 function rowToBookmark(row: Record<string, unknown>): Bookmark {
   return {
@@ -102,7 +149,7 @@ export async function registerUser(input: {
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const { rows } = await pool.query(
-    `SELECT id, name, email, password_hash, created_at FROM users WHERE email = $1 LIMIT 1`,
+    `SELECT id, name, email, password_hash, auth_provider, provider_id, created_at FROM users WHERE email = $1 LIMIT 1`,
     [email],
   );
   if (!rows.length) {
@@ -280,8 +327,14 @@ export async function saveBookmark(input: SaveBookmarkInput): Promise<Bookmark> 
       input.notes ?? "",
     ],
   );
-
-  return rowToBookmark(rows[0]);
+  const created = rowToBookmark(rows[0]);
+  await emitBookmarkEvent({
+    action: "created",
+    user_id: created.user_id,
+    bookmark_id: created.id,
+    at: new Date().toISOString(),
+  });
+  return created;
 }
 
 export async function getBookmarkById(id: number, userId?: number): Promise<Bookmark | null> {
@@ -297,7 +350,14 @@ export async function getBookmarkById(id: number, userId?: number): Promise<Book
   if (!rows.length) {
     return null;
   }
-  return rowToBookmark(rows[0]);
+  const updated = rowToBookmark(rows[0]);
+  await emitBookmarkEvent({
+    action: "updated",
+    user_id: effectiveUserId,
+    bookmark_id: updated.id,
+    at: new Date().toISOString(),
+  });
+  return updated;
 }
 
 export async function listBookmarks(input: ListBookmarksInput = {}): Promise<Bookmark[]> {
@@ -385,7 +445,14 @@ export async function updateBookmark(id: number, fields: UpdateBookmarkInput, us
   if (!rows.length) {
     return null;
   }
-  return rowToBookmark(rows[0]);
+  const deleted = rowToBookmark(rows[0]);
+  await emitBookmarkEvent({
+    action: "deleted",
+    user_id: effectiveUserId,
+    bookmark_id: deleted.id,
+    at: new Date().toISOString(),
+  });
+  return deleted;
 }
 
 export async function deleteBookmark(id: number, userId?: number): Promise<Bookmark | null> {
@@ -426,5 +493,9 @@ export async function getStats(userId?: number): Promise<BookmarkStats> {
 }
 
 export async function closeDb(): Promise<void> {
+  if (listenerClient) {
+    await listenerClient.end();
+    listenerClient = null;
+  }
   await pool.end();
 }
