@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy Bookmark MCP
 
 on:
   push:
@@ -6,61 +6,55 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS via SSH
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 1. Build the image and save it as a file
+      - name: Build and Archive Image
+        run: |
+          docker build -t bookmark-app -f server/Dockerfile .
+          docker save bookmark-app > bookmark-app.tar
+
+      # 2. Upload the file to the VPS
+      - name: Transfer Image to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "bookmark-app.tar"
+          target: "/tmp"
+
+      # 3. Load the image and restart the container
+      - name: Execute Remote Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          # Pass the app directory secret into the script environment
-          envs: VPS_APP_DIR
           script: |
-            echo "===== Starting deploy on VPS ====="
-            echo "Current user: $(whoami)"
-            
-            # Ensure directory exists and move into it
-            mkdir -p ${{ secrets.VPS_APP_DIR }}
-            cd ${{ secrets.VPS_APP_DIR }}
-            echo "Now in app dir: $(pwd)"
+            echo "Loading new image..."
+            docker load < /tmp/bookmark-app.tar
+            rm /tmp/bookmark-app.tar
 
-            # Handle Git Repo Initialization
-            if [ ! -d .git ]; then
-              echo "Cloning repository for the first time..."
-              git clone https://github.com/shivasharma/website_bookmark_mcp.git .
-            else
-              echo "Fetching and resetting to origin/main"
-              git fetch origin main
-              git reset --hard origin/main
-            fi
+            echo "Restarting container..."
+            docker stop bookmark-app || true
+            docker rm bookmark-app || true
 
-            echo "----- Building Docker Image -----"
-            # Note: We use -f to specify the Dockerfile location if it's inside server/
-            docker build -t bookmark-app -f server/Dockerfile .
-
-            echo "----- Managing Containers -----"
-            # Stop and remove existing container if it exists
-            if [ "$(docker ps -aq -f name=bookmark-app)" ]; then
-              echo "Stopping/Removing old container..."
-              docker stop bookmark-app || true
-              docker rm bookmark-app || true
-            fi
-
-            echo "Starting new bookmark-app container on port 3001"
-            # Ensure /opt/bookmark-data exists on your host for the volume mount
+            # Ensure data persistence directory exists
             sudo mkdir -p /opt/bookmark-data
-            
+            sudo chmod 777 /opt/bookmark-data
+
             docker run -d \
               --name bookmark-app \
               --restart always \
               -p 3001:3001 \
-              -v /opt/bookmark-data:/app/server \
+              -v /opt/bookmark-data:/app/server/data \
               bookmark-app
-
-            echo "Current running containers:"
-            docker ps | grep bookmark-app
-
-            echo "===== Deploy completed successfully ====="
