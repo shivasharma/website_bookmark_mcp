@@ -107,7 +107,7 @@ jobs:
               -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
               -e "GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}" \
-              -e "GITHUB_CLIENT_ID=${{ secrets.CLIENT_ID_GITHUB }}" \
-              -e "GITHUB_CLIENT_SECRET=${{ secrets.CLIENT_SECRET_GITHUB }}" \
-              -e "GITHUB_CALLBACK_URL=${{ secrets.CALLBACK_URL_GITHUB }}" \
+              -e "CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}" \
+              -e "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" \
+              -e "CALLBACK_URL_GITHUB=${{ secrets.CALLBACK_URL_GITHUB }}" \
               ghcr.io/${{ github.repository }}:latest

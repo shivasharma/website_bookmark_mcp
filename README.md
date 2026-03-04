@@ -35,9 +35,9 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
 
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
-GITHUB_CALLBACK_URL=http://localhost:3001/auth/github/callback
+CLIENT_ID_GITHUB=
+CLIENT_SECRET_GITHUB=
+CALLBACK_URL_GITHUB=http://localhost:3001/auth/github/callback
 ```
 
 For deployment at `http://66.179.137.126:3001`, callbacks should be:

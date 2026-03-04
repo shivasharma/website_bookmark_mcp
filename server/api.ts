@@ -37,6 +37,12 @@ const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
 const SESSION_SECRET = process.env.SESSION_SECRET ?? "change-me-in-prod";
 const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_FALLBACK !== "false";
+const CLIENT_ID_GITHUB = process.env.CLIENT_ID_GITHUB ?? process.env.GITHUB_CLIENT_ID;
+const CLIENT_SECRET_GITHUB = process.env.CLIENT_SECRET_GITHUB ?? process.env.GITHUB_CLIENT_SECRET;
+const CALLBACK_URL_GITHUB =
+  process.env.CALLBACK_URL_GITHUB ??
+  process.env.GITHUB_CALLBACK_URL ??
+  "http://localhost:3001/auth/github/callback";
 
 app.set("trust proxy", 1);
 
@@ -109,13 +115,13 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+if (CLIENT_ID_GITHUB && CLIENT_SECRET_GITHUB) {
   passport.use(
     new GitHubStrategy(
       {
-        clientID: process.env.GITHUB_CLIENT_ID,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        callbackURL: process.env.GITHUB_CALLBACK_URL ?? "http://localhost:3001/auth/github/callback",
+        clientID: CLIENT_ID_GITHUB,
+        clientSecret: CLIENT_SECRET_GITHUB,
+        callbackURL: CALLBACK_URL_GITHUB,
         scope: ["user:email"],
       },
       async (
@@ -190,7 +196,7 @@ app.get(
 );
 
 app.get("/auth/github", (req, res, next) => {
-  if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+  if (!CLIENT_ID_GITHUB || !CLIENT_SECRET_GITHUB) {
     res.status(400).json({ success: false, error: "GitHub OAuth is not configured" });
     return;
   }
@@ -199,9 +205,26 @@ app.get("/auth/github", (req, res, next) => {
 
 app.get(
   "/auth/github/callback",
-  passport.authenticate("github", { failureRedirect: "/register?error=github_auth_failed" }),
-  (_req, res) => {
-    res.redirect("/");
+  (req, res, next) => {
+    passport.authenticate("github", (error: unknown, user: Express.User | false) => {
+      if (error) {
+        console.error("GitHub OAuth callback error:", error);
+        res.redirect("/register?error=github_callback_error");
+        return;
+      }
+      if (!user) {
+        res.redirect("/register?error=github_auth_failed");
+        return;
+      }
+      req.logIn(user, (loginError) => {
+        if (loginError) {
+          console.error("GitHub OAuth login session error:", loginError);
+          res.redirect("/register?error=github_session_error");
+          return;
+        }
+        res.redirect("/");
+      });
+    })(req, res, next);
   },
 );
 
