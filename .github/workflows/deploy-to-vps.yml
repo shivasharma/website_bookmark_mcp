@@ -1,4 +1,4 @@
-name: Deploy Bookmark App to VPS
+name: Deploy Bookmark App to VPS Test
 
 on:
   push:
