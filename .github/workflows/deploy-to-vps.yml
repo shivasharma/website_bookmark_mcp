@@ -1,4 +1,4 @@
-name: Deploy to VPS Using Docker
+name: Deploy to VPS Using Docker Test
 
 on:
   push:
