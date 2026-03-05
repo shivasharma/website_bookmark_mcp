@@ -9,20 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #050b18;
-      --bg-grad-1: #08142b;
-      --bg-grad-2: #030712;
-      --surface: #0b1730;
-      --surface-2: #0e1f3f;
-      --surface-3: #12284d;
-      --line: #28487a;
-      --line-soft: #1e3458;
-      --text: #ecf3ff;
-      --muted: #97aed8;
+      --bg: #04070e;
+      --bg-grad-1: #060c1a;
+      --bg-grad-2: #02040a;
+      --surface: #0a1326;
+      --surface-2: #0d1a32;
+      --surface-3: #112343;
+      --line: #2a416b;
+      --line-soft: #1b2d4d;
+      --text: #ecf4ff;
+      --muted: #8ea6cf;
       --accent: #f4b21c;
       --accent-soft: #f5ce70;
       --radius: 16px;
       --shadow: 0 16px 44px rgba(2, 8, 21, 0.5);
+      --top-clearance: 72px;
     }
 
     body[data-theme="light"] {
@@ -59,7 +60,7 @@
       display: grid;
       grid-template-columns: 286px 1fr;
       gap: 14px;
-      padding: 14px;
+      padding: var(--top-clearance) 14px 14px;
     }
 
     .sidebar {
@@ -226,6 +227,42 @@
     }
 
     .top-actions { display: inline-flex; gap: 8px; align-items: center; }
+
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 4px 10px 4px 6px;
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.3px;
+      max-width: 220px;
+    }
+
+    .user-chip.show {
+      display: inline-flex;
+    }
+
+    .user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #1a1b23;
+      font: 800 11px "JetBrains Mono", monospace;
+      flex: 0 0 auto;
+    }
+
+    .user-chip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     .pill,
     .gear {
@@ -504,6 +541,82 @@
       gap: 10px;
     }
 
+    .bookmark-form {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .bookmark-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .bookmark-form-grid .full { grid-column: 1 / -1; }
+
+    .bookmark-form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .login-note {
+      border: 1px solid #3e5f95;
+      border-radius: 10px;
+      background: rgba(21, 44, 83, 0.55);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 9px 10px;
+    }
+
+    .login-note a {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .bookmark-sections {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bm-section {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bm-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bm-section-head h3 {
+      margin: 0;
+      font: 800 13px "JetBrains Mono", monospace;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .bm-count {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font: 700 10px "JetBrains Mono", monospace;
+      letter-spacing: .5px;
+      padding: 2px 8px;
+    }
+
     .bm-card {
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -668,11 +781,16 @@
     }
 
     @media (max-width: 1024px) {
-      .layout { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+      .layout {
+        --top-clearance: 56px;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: var(--top-clearance) 10px 10px;
+      }
 
       .sidebar {
         position: fixed;
-        top: 10px;
+        top: var(--top-clearance);
         left: 10px;
         bottom: 10px;
         width: 282px;
@@ -697,6 +815,7 @@
       #clock { display: none; }
 
       .bookmark-stats { grid-template-columns: 1fr; }
+      .bookmark-form-grid { grid-template-columns: 1fr; }
 
       .overlay.sidebar-open { display: block; }
     }
@@ -704,6 +823,7 @@
     @media (max-width: 640px) {
       .topbar h2 { font-size: 17px; }
       .topbar p { font-size: 11px; }
+      .user-chip-text { max-width: 92px; }
       .tile-title { font-size: 19px; }
       .toolbar { padding: 9px; }
       .search { width: 100%; }
@@ -746,6 +866,10 @@
         <div class="top-actions">
           <span class="pill" id="projectCount">0 projects</span>
           <span class="pill" id="clock">--:--</span>
+          <span class="user-chip" id="userChip" aria-live="polite">
+            <span class="user-avatar" id="userAvatar">U</span>
+            <span class="user-chip-text" id="userChipText">Logged in</span>
+          </span>
           <button class="gear" id="settingsButton" aria-label="Open settings">&#9881;</button>
         </div>
       </header>
@@ -826,7 +950,7 @@
       activeRoute: normalizePath(location.pathname),
       search: "",
       bookmarks: [],
-      showFavorites: false,
+      authRequired: false,
       currentUser: null,
       editingId: null,
       activeBookmarkTab: "bookmarks"
@@ -843,6 +967,9 @@
       projectCount: document.getElementById("projectCount"),
       toolbarHint: document.getElementById("toolbarHint"),
       clock: document.getElementById("clock"),
+      userChip: document.getElementById("userChip"),
+      userAvatar: document.getElementById("userAvatar"),
+      userChipText: document.getElementById("userChipText"),
       mobileMenu: document.getElementById("mobileMenu"),
       settingsButton: document.getElementById("settingsButton"),
       settingsPanel: document.getElementById("settingsPanel"),
@@ -899,6 +1026,21 @@
         hour12: true
       });
       els.clock.textContent = fmt.format(new Date());
+    }
+
+    function renderUserChip() {
+      if (!els.userChip || !els.userAvatar || !els.userChipText) return;
+      if (!state.currentUser) {
+        els.userChip.classList.remove("show");
+        return;
+      }
+
+      const label = state.currentUser.name || state.currentUser.email || "User";
+      const initial = String(label).trim().charAt(0).toUpperCase() || "U";
+      els.userAvatar.textContent = initial;
+      els.userChipText.textContent = `Logged in: ${label}`;
+      els.userChip.title = `Logged in as ${label}`;
+      els.userChip.classList.add("show");
     }
 
     function themeInit() {
@@ -993,11 +1135,14 @@
         const { response, payload } = await api("/me", { method: "GET" });
         if (!response.ok || !payload?.success) {
           state.currentUser = null;
+          renderUserChip();
           return;
         }
         state.currentUser = payload.data;
+        renderUserChip();
       } catch {
         state.currentUser = null;
+        renderUserChip();
       }
     }
 
@@ -1005,14 +1150,19 @@
       const search = state.search.trim();
       const params = new URLSearchParams();
       if (search) params.set("search", search);
-      if (state.showFavorites) params.set("favorite", "true");
 
       try {
         const { response, payload } = await api(`/bookmarks?${params.toString()}`, { method: "GET" });
+        if (response.status === 401) {
+          state.bookmarks = [];
+          state.authRequired = true;
+          return;
+        }
         if (!response.ok || !payload?.success) {
           state.bookmarks = [];
           return;
         }
+        state.authRequired = false;
         state.bookmarks = Array.isArray(payload.data) ? payload.data : [];
       } catch {
         state.bookmarks = [];
@@ -1146,7 +1296,25 @@
     }
 
     function bookmarkListMarkup() {
-      const cards = state.bookmarks.length
+      const favorites = state.bookmarks.filter((item) => item.is_favorite);
+      const favoriteCards = favorites.length
+        ? favorites.map((bookmark) => `
+          <article class="bm-card">
+            <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
+            <div class="bm-url">${escapeHtml(bookmark.url)}</div>
+            <div class="bm-desc">${escapeHtml(bookmark.description || "No description")}</div>
+            <div class="tags">${(bookmark.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+            <div class="bm-meta">${escapeHtml(getDomain(bookmark.url))} | ${escapeHtml(formatDate(bookmark.created_at))}</div>
+            <div class="bm-actions">
+              <button class="btn" data-edit-bookmark="${bookmark.id}">Edit</button>
+              <button class="btn" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</button>
+              <button class="btn" data-del-bookmark="${bookmark.id}">Delete</button>
+            </div>
+          </article>
+        `).join("")
+        : `<div class="empty">No favorites yet. Mark bookmarks as favorite to pin them here.</div>`;
+
+      const allCards = state.bookmarks.length
         ? state.bookmarks.map((bookmark) => `
           <article class="bm-card">
             <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
@@ -1161,7 +1329,7 @@
             </div>
           </article>
         `).join("")
-        : `<div class="empty">No bookmarks yet. Click Add Bookmark to save your first item.</div>`;
+        : `<div class="empty">No bookmarks yet. Use the form above to save your first item.</div>`;
 
       return `
         <div class="bookmark-stats">
@@ -1173,14 +1341,44 @@
         <div class="bm-toolbar">
           <div class="bm-left">
             <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.search)}" placeholder="Search bookmarks" />
-            <button class="btn" id="toggleFavoritesBtn">${state.showFavorites ? "Showing Favorites" : "Show Favorites"}</button>
           </div>
-          <div class="bm-right">
-            <button class="btn primary" id="addBookmarkBtn">Add Bookmark</button>
-          </div>
+          <div class="bm-right"></div>
         </div>
 
-        <div class="bm-grid" id="bookmarkGrid">${cards}</div>
+        <form class="bookmark-form" id="quickBookmarkForm">
+          <div class="bookmark-form-grid">
+            <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
+            <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
+            <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
+            <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
+            <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
+          </div>
+          <div class="bookmark-form-footer">
+            <div class="login-note">
+              ${state.currentUser && !state.authRequired
+                ? `Signed in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>.`
+                : `Fill the form now, then <a href="/register">login</a> to save bookmarks.`}
+            </div>
+            <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
+          </div>
+        </form>
+
+        <div class="bookmark-sections" id="bookmarkGrid">
+          <section class="bm-section">
+            <div class="bm-section-head">
+              <h3>Favorites</h3>
+              <span class="bm-count">${favorites.length}</span>
+            </div>
+            <div class="bm-grid">${favoriteCards}</div>
+          </section>
+          <section class="bm-section">
+            <div class="bm-section-head">
+              <h3>All Bookmarks</h3>
+              <span class="bm-count">${state.bookmarks.length}</span>
+            </div>
+            <div class="bm-grid">${allCards}</div>
+          </section>
+        </div>
       `;
     }
 
@@ -1280,6 +1478,7 @@
           logoutBtn.addEventListener("click", async () => {
             try { await api("/logout", { method: "POST" }); } catch {}
             state.currentUser = null;
+            renderUserChip();
             toast("Logged out");
             renderBookmarkTab();
           });
@@ -1298,8 +1497,7 @@
 
     function bindBookmarkInteractions() {
       const searchInput = document.getElementById("bookmarkSearch");
-      const addBtn = document.getElementById("addBookmarkBtn");
-      const favBtn = document.getElementById("toggleFavoritesBtn");
+      const quickForm = document.getElementById("quickBookmarkForm");
 
       if (searchInput) {
         searchInput.addEventListener("input", async (event) => {
@@ -1309,16 +1507,56 @@
         });
       }
 
-      if (favBtn) {
-        favBtn.addEventListener("click", async () => {
-          state.showFavorites = !state.showFavorites;
+      if (quickForm) {
+        quickForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const urlEl = document.getElementById("quickBmUrl");
+          const titleEl = document.getElementById("quickBmTitle");
+          const descEl = document.getElementById("quickBmDescription");
+          const tagsEl = document.getElementById("quickBmTags");
+          const notesEl = document.getElementById("quickBmNotes");
+          if (!urlEl || !titleEl || !descEl || !tagsEl || !notesEl) return;
+
+          if (!state.currentUser || state.authRequired) {
+            toast("Login required to save bookmarks.", true);
+            return;
+          }
+
+          const payload = {
+            url: urlEl.value.trim(),
+            title: titleEl.value.trim(),
+            description: descEl.value.trim(),
+            tags: tagsEl.value.split(",").map((item) => item.trim()).filter(Boolean),
+            notes: notesEl.value.trim()
+          };
+
+          if (!payload.url) {
+            toast("URL is required", true);
+            return;
+          }
+
+          const { response, payload: result } = await api("/bookmarks", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+
+          if (response.status === 401) {
+            state.authRequired = true;
+            toast("Login required to save bookmarks.", true);
+            renderBookmarkTab();
+            return;
+          }
+
+          if (!response.ok || !result?.success) {
+            toast(result?.error || "Save failed", true);
+            return;
+          }
+
+          quickForm.reset();
           await loadBookmarks();
           renderBookmarkTab();
+          toast("Bookmark saved");
         });
-      }
-
-      if (addBtn) {
-        addBtn.addEventListener("click", () => openModal(false));
       }
 
       document.querySelectorAll("[data-edit-bookmark]").forEach((button) => {
@@ -1411,6 +1649,7 @@
     }
 
     async function render() {
+      renderUserChip();
       const route = state.activeRoute;
       const active = byRoute(route) || PROJECTS.find((project) => route.startsWith(project.route + "/"));
 
@@ -1444,7 +1683,7 @@
       if (route === "/bookmarks") {
         els.pageTitle.textContent = "Bookmarks";
         els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
-        els.toolbarHint.textContent = "All bookmark operations stay in this panel.";
+        els.toolbarHint.textContent = "Use the inline form to add bookmarks and manage favorites by section.";
         await renderBookmarksWorkspace();
         return;
       }
