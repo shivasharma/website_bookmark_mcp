@@ -25,7 +25,7 @@ jobs:
           test -n "${{ secrets.VPS_HOST }}" || { echo "Missing secret: VPS_HOST"; exit 1; }
           test -n "${{ secrets.VPS_USER }}" || { echo "Missing secret: VPS_USER"; exit 1; }
           test -n "${{ secrets.VPS_SSH_KEY }}" || { echo "Missing secret: VPS_SSH_KEY"; exit 1; }
-          test -n "${{ secrets.POSTGRES_PASSWORD }}" || { echo "Missing secret: POSTGRES_PASSWORD"; exit 1; }
+          test -n "${{ secrets.POSTGRES_PASSWORD || secrets.DB_PASSWORD }}" || { echo "Missing secret: POSTGRES_PASSWORD or DB_PASSWORD"; exit 1; }
           test -n "${{ secrets.SESSION_SECRET }}" || { echo "Missing secret: SESSION_SECRET"; exit 1; }
           test -n "${{ secrets.CERTBOT_EMAIL }}" || { echo "Missing secret: CERTBOT_EMAIL"; exit 1; }
 
@@ -84,8 +84,9 @@ jobs:
               fi
             done
 
-            if [ -z "${{ secrets.POSTGRES_PASSWORD }}" ]; then
-              echo "Missing required secret: POSTGRES_PASSWORD"
+            DB_PASSWORD_VALUE="${{ secrets.POSTGRES_PASSWORD || secrets.DB_PASSWORD }}"
+            if [ -z "$DB_PASSWORD_VALUE" ]; then
+              echo "Missing required secret: POSTGRES_PASSWORD or DB_PASSWORD"
               exit 1
             fi
             if [ -z "${{ secrets.SESSION_SECRET }}" ]; then
@@ -103,7 +104,7 @@ jobs:
             fi
 
             cat > .env <<'ENVFILE'
-            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD || secrets.DB_PASSWORD }}
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
             SESSION_COOKIE_SECURE=true
             PUBLIC_BASE_URL=https://ai.shivaprogramming.com
@@ -136,6 +137,8 @@ jobs:
             echo "[INFO] Stopping previous containers..."
             docker stop bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
             docker rm bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
+            docker ps --filter publish=80 --format '{{.ID}}' | xargs -r docker stop || true
+            docker ps --filter publish=443 --format '{{.ID}}' | xargs -r docker stop || true
 
             CERT_FILE="docker-data/letsencrypt/live/ai.shivaprogramming.com/fullchain.pem"
             if [ ! -f "$CERT_FILE" ]; then
@@ -155,7 +158,20 @@ jobs:
             $COMPOSE_CMD ps
 
             echo "[INFO] Running health checks..."
-            $COMPOSE_CMD exec -T app node -e "fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+            for i in $(seq 1 20); do
+              if $COMPOSE_CMD exec -T app node -e "fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then
+                break
+              fi
+              echo "[INFO] app health pending ($i/20)"
+              sleep 3
+            done
+            for i in $(seq 1 20); do
+              if curl -fkfsS https://ai.shivaprogramming.com/api/health >/dev/null; then
+                break
+              fi
+              echo "[INFO] public health pending ($i/20)"
+              sleep 3
+            done
             curl -fkfsS https://ai.shivaprogramming.com/api/health >/dev/null
 
             echo "Deployment succeeded: https://ai.shivaprogramming.com"
