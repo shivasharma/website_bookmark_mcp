@@ -301,23 +301,52 @@ function getHttpStatusForError(message: string, fallback = 400): number {
 }
 
 const saveBookmarkSchema = z.object({
-  url: z.string().url().max(2048),
-  title: z.string().max(300).optional(),
-  description: z.string().max(2000).optional(),
+  url: z.string().trim().url().max(2048),
+  title: z.string().trim().max(300).optional(),
+  description: z.string().trim().max(2000).optional(),
   tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
-  notes: z.string().max(4000).optional(),
-  favicon: z.string().url().max(2048).optional(),
+  notes: z.string().trim().max(4000).optional(),
+  favicon: z.string().trim().url().max(2048).optional(),
 });
 
 const updateBookmarkSchema = z.object({
-  url: z.string().url().max(2048).optional(),
-  title: z.string().max(300).optional(),
-  description: z.string().max(2000).optional(),
+  url: z.string().trim().url().max(2048).optional(),
+  title: z.string().trim().max(300).optional(),
+  description: z.string().trim().max(2000).optional(),
   tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
-  notes: z.string().max(4000).optional(),
-  favicon: z.string().url().max(2048).optional(),
+  notes: z.string().trim().max(4000).optional(),
+  favicon: z.string().trim().url().max(2048).optional(),
   is_favorite: z.boolean().optional(),
 });
+
+function ensureUrlProtocol(input: string): string {
+  const value = input.trim();
+  return /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(value) ? value : `https://${value}`;
+}
+
+function normalizeBookmarkPayload(input: unknown): Record<string, unknown> {
+  if (!input || typeof input !== "object") {
+    return {};
+  }
+  const payload = { ...(input as Record<string, unknown>) };
+  const keys = ["title", "description", "notes", "favicon"] as const;
+  for (const key of keys) {
+    if (typeof payload[key] === "string") {
+      const trimmed = payload[key].trim();
+      payload[key] = trimmed === "" ? undefined : trimmed;
+    }
+  }
+  if (typeof payload.url === "string" && payload.url.trim() !== "") {
+    payload.url = ensureUrlProtocol(payload.url);
+  }
+  if (Array.isArray(payload.tags)) {
+    const tags = payload.tags
+      .map((tag) => (typeof tag === "string" ? tag.trim() : ""))
+      .filter((tag) => tag.length > 0);
+    payload.tags = tags.length ? tags : undefined;
+  }
+  return payload;
+}
 
 app.get("/", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "index.html"));
@@ -512,9 +541,13 @@ app.get("/api/bookmarks/:id", async (req, res) => {
 
 app.post("/api/bookmarks", async (req, res) => {
   try {
-    const parsed = saveBookmarkSchema.safeParse(req.body);
+    const parsed = saveBookmarkSchema.safeParse(normalizeBookmarkPayload(req.body));
     if (!parsed.success) {
-      return res.status(400).json({ success: false, error: "Invalid bookmark payload" });
+      const firstIssue = parsed.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        error: firstIssue ? `Invalid field "${firstIssue.path.join(".")}": ${firstIssue.message}` : "Invalid bookmark payload",
+      });
     }
     const bookmark = await saveBookmark({ ...parsed.data, user_id: getUserId(req) });
     return res.status(201).json({ success: true, data: bookmark });
@@ -532,9 +565,15 @@ app.patch("/api/bookmarks/:id", async (req, res) => {
     if (!existing) {
       return res.status(404).json({ success: false, error: "Not found" });
     }
-    const parsed = updateBookmarkSchema.safeParse(req.body);
+    const parsed = updateBookmarkSchema.safeParse(normalizeBookmarkPayload(req.body));
     if (!parsed.success) {
-      return res.status(400).json({ success: false, error: "Invalid bookmark update payload" });
+      const firstIssue = parsed.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        error: firstIssue
+          ? `Invalid field "${firstIssue.path.join(".")}": ${firstIssue.message}`
+          : "Invalid bookmark update payload",
+      });
     }
     const updated = await updateBookmark(id, parsed.data, userId);
     return res.json({ success: true, data: updated });
