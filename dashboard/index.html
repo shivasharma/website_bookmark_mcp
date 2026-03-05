@@ -9,18 +9,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #04070e;
-      --bg-grad-1: #060c1a;
-      --bg-grad-2: #02040a;
-      --surface: #0a1326;
-      --surface-2: #0d1a32;
-      --surface-3: #112343;
-      --line: #2a416b;
-      --line-soft: #1b2d4d;
-      --text: #ecf4ff;
-      --muted: #8ea6cf;
-      --accent: #f4b21c;
-      --accent-soft: #f5ce70;
+      --bg: #0f0f10;
+      --bg-grad-1: #17181a;
+      --bg-grad-2: #09090a;
+      --surface: #161719;
+      --surface-2: #1e2023;
+      --surface-3: #25272b;
+      --line: #34383f;
+      --line-soft: #2a2e35;
+      --text: #f2f2f3;
+      --muted: #b4b7bd;
+      --accent: #f3f3f3;
+      --accent-soft: #d1d3d8;
       --radius: 16px;
       --shadow: 0 16px 44px rgba(2, 8, 21, 0.5);
       --top-clearance: 72px;
@@ -50,8 +50,8 @@
       font-family: "Manrope", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(860px 420px at 98% 0%, rgba(76, 201, 240, 0.14), transparent 62%),
-        radial-gradient(640px 340px at 0% 100%, rgba(244, 178, 28, 0.12), transparent 60%),
+        radial-gradient(860px 420px at 98% 0%, rgba(255, 255, 255, 0.06), transparent 62%),
+        radial-gradient(640px 340px at 0% 100%, rgba(255, 255, 255, 0.05), transparent 60%),
         linear-gradient(160deg, var(--bg-grad-1) 0%, var(--bg) 58%, var(--bg-grad-2) 100%);
     }
 
@@ -431,9 +431,9 @@
     body[data-theme="light"] .chip { border-color: #c9d9f3; color: #29497e; background: #f6faff; }
 
     .btn {
-      border: 1px solid #3f659c;
+      border: 1px solid #454a52;
       border-radius: 10px;
-      background: #142d58;
+      background: #282b30;
       color: var(--text);
       text-decoration: none;
       padding: 8px 12px;
@@ -444,16 +444,16 @@
     }
 
     .btn.primary {
-      border-color: #e2aa1c;
-      background: linear-gradient(135deg, #edaf1e, #f4c04c);
-      color: #26262e;
+      border-color: #f2f2f3;
+      background: linear-gradient(135deg, #f0f0f1, #d8dade);
+      color: #141518;
     }
 
     body[data-theme="light"] .btn { border-color: #cad9f2; background: #f5f9ff; color: #29497e; }
 
     .bookmark-shell {
       display: grid;
-      gap: 12px;
+      gap: 14px;
     }
 
     .bookmark-subnav {
@@ -475,7 +475,7 @@
     }
 
     .bookmark-subnav button.active {
-      border-color: #4875b7;
+      border-color: #6a6f77;
       color: var(--text);
       background: var(--surface-3);
     }
@@ -506,19 +506,39 @@
       font-weight: 800;
     }
 
-    .bm-toolbar {
-      display: flex;
-      gap: 8px;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      align-items: center;
+    .bm-workspace {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 12px;
+      align-items: start;
     }
 
-    .bm-left,
-    .bm-right {
-      display: inline-flex;
+    .bm-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bm-panel h3 {
+      margin: 0;
+      font: 800 14px "JetBrains Mono", monospace;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .bm-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .bm-inline-actions {
+      display: flex;
       gap: 8px;
-      align-items: center;
       flex-wrap: wrap;
     }
 
@@ -542,10 +562,6 @@
     }
 
     .bookmark-form {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--surface-2);
-      padding: 12px;
       display: grid;
       gap: 8px;
     }
@@ -567,9 +583,9 @@
     }
 
     .login-note {
-      border: 1px solid #3e5f95;
+      border: 1px solid #4c5159;
       border-radius: 10px;
-      background: rgba(21, 44, 83, 0.55);
+      background: rgba(255, 255, 255, 0.03);
       color: var(--muted);
       font-size: 12px;
       padding: 9px 10px;
@@ -580,9 +596,28 @@
       font-weight: 700;
     }
 
-    .bookmark-sections {
+    .bookmark-results {
       display: grid;
-      gap: 12px;
+      gap: 10px;
+    }
+
+    .bm-results-head {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .bm-results-head h3 {
+      margin: 0;
+      font: 800 13px "JetBrains Mono", monospace;
+      letter-spacing: .4px;
+      text-transform: uppercase;
     }
 
     .bm-section {
@@ -620,7 +655,7 @@
     .bm-card {
       border: 1px solid var(--line);
       border-radius: 12px;
-      background: var(--surface-2);
+      background: #1b1d20;
       padding: 10px;
       display: flex;
       flex-direction: column;
@@ -659,6 +694,16 @@
     }
 
     .bm-actions { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .guide-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
 
     .stack { display: grid; gap: 10px; }
 
@@ -816,6 +861,7 @@
 
       .bookmark-stats { grid-template-columns: 1fr; }
       .bookmark-form-grid { grid-template-columns: 1fr; }
+      .bm-workspace { grid-template-columns: 1fr; }
 
       .overlay.sidebar-open { display: block; }
     }
@@ -829,8 +875,7 @@
       .search { width: 100%; }
       .btn { width: 100%; text-align: center; }
       .bm-actions { width: 100%; }
-      .bm-toolbar .input { width: 100%; }
-      .bm-right, .bm-left { width: 100%; }
+      .bm-results-head .input { width: 100%; }
       .settings { width: calc(100% - 20px); left: 10px; right: 10px; top: auto; bottom: 10px; }
     }
   </style>
@@ -909,6 +954,22 @@
     </div>
   </div>
 
+  <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal-card">
+      <h3 id="guideTitle" style="margin:0;font-size:16px;">Quick Setup Guide</h3>
+      <ol class="guide-list" style="margin-top:10px;">
+        <li>Use the form on the left to add URL, title, and optional tags/notes.</li>
+        <li>Sign in from the login panel if you are not authenticated yet.</li>
+        <li>Click save after login. Your bookmark will appear in results below.</li>
+        <li>Use search in Results to quickly find saved links.</li>
+        <li>Use Favorite, Edit, and Delete buttons on each card as needed.</li>
+      </ol>
+      <div class="modal-actions">
+        <button class="btn" id="closeGuideBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API = "/api";
     const PROJECTS = [
@@ -974,7 +1035,9 @@
       settingsButton: document.getElementById("settingsButton"),
       settingsPanel: document.getElementById("settingsPanel"),
       bookmarkModal: document.getElementById("bookmarkModal"),
+      guideModal: document.getElementById("guideModal"),
       modalTitle: document.getElementById("modalTitle"),
+      closeGuideBtn: document.getElementById("closeGuideBtn"),
       bmUrl: document.getElementById("bmUrl"),
       bmTitle: document.getElementById("bmTitle"),
       bmDescription: document.getElementById("bmDescription"),
@@ -1074,7 +1137,7 @@
     function closeSidebar() {
       els.sidebar.classList.remove("open");
       els.overlay.classList.remove("sidebar-open");
-      if (!els.bookmarkModal.classList.contains("open")) {
+      if (!els.bookmarkModal.classList.contains("open") && !els.guideModal.classList.contains("open")) {
         els.overlay.classList.remove("open");
       }
     }
@@ -1093,10 +1156,22 @@
 
     function closeModal() {
       els.bookmarkModal.classList.remove("open");
-      if (!els.sidebar.classList.contains("open")) {
+      if (!els.sidebar.classList.contains("open") && !els.guideModal.classList.contains("open")) {
         els.overlay.classList.remove("open");
       }
       state.editingId = null;
+    }
+
+    function openGuideModal() {
+      els.guideModal.classList.add("open");
+      els.overlay.classList.add("open");
+    }
+
+    function closeGuideModal() {
+      els.guideModal.classList.remove("open");
+      if (!els.sidebar.classList.contains("open") && !els.bookmarkModal.classList.contains("open")) {
+        els.overlay.classList.remove("open");
+      }
     }
 
     function toast(message, isError = false) {
@@ -1338,32 +1413,46 @@
           <div class="stat"><div class="k">Recent</div><div class="v" id="statRecent">0</div></div>
         </div>
 
-        <div class="bm-toolbar">
-          <div class="bm-left">
-            <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.search)}" placeholder="Search bookmarks" />
-          </div>
-          <div class="bm-right"></div>
-        </div>
+        <div class="bm-workspace">
+          <section class="bm-panel">
+            <h3>Add Bookmark</h3>
+            <p>Paste your link, add a short title, and save after login.</p>
+            <form class="bookmark-form" id="quickBookmarkForm">
+              <div class="bookmark-form-grid">
+                <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
+                <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
+                <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
+                <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
+                <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
+              </div>
+              <div class="bookmark-form-footer">
+                <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
+                <button class="btn" type="button" id="openGuideBtn">How It Works</button>
+              </div>
+            </form>
+          </section>
 
-        <form class="bookmark-form" id="quickBookmarkForm">
-          <div class="bookmark-form-grid">
-            <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
-            <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
-            <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
-            <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
-            <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
-          </div>
-          <div class="bookmark-form-footer">
+          <section class="bm-panel">
+            <h3>Login & Setup</h3>
             <div class="login-note">
               ${state.currentUser && !state.authRequired
-                ? `Signed in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>.`
-                : `Fill the form now, then <a href="/register">login</a> to save bookmarks.`}
+                ? `You are logged in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>. You can save bookmarks now.`
+                : `You need to <a href="/register">login</a> before bookmarks can be saved.`}
             </div>
-            <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
-          </div>
-        </form>
+            <p>Use the guide for a quick 5-step overview of adding, finding, and managing links.</p>
+            <div class="bm-inline-actions">
+              ${state.currentUser && !state.authRequired
+                ? `<button class="btn" type="button" id="openGuideBtnSecondary">Open Guide</button>`
+                : `<a class="btn primary" href="/register">Login / Register</a>`}
+            </div>
+          </section>
+        </div>
 
-        <div class="bookmark-sections" id="bookmarkGrid">
+        <div class="bookmark-results" id="bookmarkGrid">
+          <div class="bm-results-head">
+            <h3>Results</h3>
+            <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.search)}" placeholder="Search bookmarks" />
+          </div>
           <section class="bm-section">
             <div class="bm-section-head">
               <h3>Favorites</h3>
@@ -1498,6 +1587,8 @@
     function bindBookmarkInteractions() {
       const searchInput = document.getElementById("bookmarkSearch");
       const quickForm = document.getElementById("quickBookmarkForm");
+      const guideBtn = document.getElementById("openGuideBtn");
+      const guideBtnSecondary = document.getElementById("openGuideBtnSecondary");
 
       if (searchInput) {
         searchInput.addEventListener("input", async (event) => {
@@ -1519,6 +1610,7 @@
 
           if (!state.currentUser || state.authRequired) {
             toast("Login required to save bookmarks.", true);
+            openGuideModal();
             return;
           }
 
@@ -1543,6 +1635,7 @@
           if (response.status === 401) {
             state.authRequired = true;
             toast("Login required to save bookmarks.", true);
+            openGuideModal();
             renderBookmarkTab();
             return;
           }
@@ -1557,6 +1650,14 @@
           renderBookmarkTab();
           toast("Bookmark saved");
         });
+      }
+
+      if (guideBtn) {
+        guideBtn.addEventListener("click", openGuideModal);
+      }
+
+      if (guideBtnSecondary) {
+        guideBtnSecondary.addEventListener("click", openGuideModal);
       }
 
       document.querySelectorAll("[data-edit-bookmark]").forEach((button) => {
@@ -1683,7 +1784,7 @@
       if (route === "/bookmarks") {
         els.pageTitle.textContent = "Bookmarks";
         els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
-        els.toolbarHint.textContent = "Use the inline form to add bookmarks and manage favorites by section.";
+        els.toolbarHint.textContent = "Fill the form on the left, login/setup on the right, and view results below.";
         await renderBookmarksWorkspace();
         return;
       }
@@ -1751,6 +1852,7 @@
       els.overlay.addEventListener("click", () => {
         closeSidebar();
         closeModal();
+        closeGuideModal();
         toggleSettings(false);
       });
 
@@ -1765,15 +1867,24 @@
 
       els.cancelBookmarkBtn.addEventListener("click", closeModal);
       els.saveBookmarkBtn.addEventListener("click", saveBookmark);
+      if (els.closeGuideBtn) {
+        els.closeGuideBtn.addEventListener("click", closeGuideModal);
+      }
 
       els.bookmarkModal.addEventListener("click", (event) => {
         if (event.target === els.bookmarkModal) closeModal();
       });
+      if (els.guideModal) {
+        els.guideModal.addEventListener("click", (event) => {
+          if (event.target === els.guideModal) closeGuideModal();
+        });
+      }
 
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           closeSidebar();
           closeModal();
+          closeGuideModal();
           toggleSettings(false);
         }
       });
