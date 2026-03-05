@@ -708,8 +708,7 @@
     let debounceTimer = null;
     let currentUser = null;
     let events = null;
-
-    async function loadCurrentUser() {
+    async function loadCurrentUser() {
       try {
         const res = await fetch(`${API}/me`, { credentials: 'include' });
         if (!res.ok) {
@@ -739,8 +738,7 @@
         <a href="#" class="user-link" onclick="logoutUser(event)">Logout</a>
       `;
     }
-
-    async function logoutUser(event) {
+    async function logoutUser(event) {
       event.preventDefault();
       try {
         await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
@@ -769,8 +767,7 @@
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
-
-    async function loadBookmarks() {
+    async function loadBookmarks() {
       const search = document.getElementById('searchInput').value.trim();
       const tag = document.getElementById('tagFilter').value.trim();
       const grid = document.getElementById('bookmarkGrid');
@@ -782,7 +779,7 @@
         if (tag) params.set('tag', tag);
         if (showFavs) params.set('favorite', 'true');
 
-        const res = await fetch(`${API}/bookmarks?${params}`);
+        const res = await fetch(`${API}/bookmarks?${params}`, { credentials: 'include' });
         if (res.status === 401) {
           showAuthRequired();
           return;
@@ -795,10 +792,9 @@
         grid.innerHTML = `<div class="empty"><div class="empty-icon">[!]</div><h3>Cannot connect to API</h3><p>Make sure the server is running on port 3001</p></div>`;
       }
     }
-
-    async function loadStats() {
+    async function loadStats() {
       try {
-        const res = await fetch(`${API}/stats`);
+        const res = await fetch(`${API}/stats`, { credentials: 'include' });
         if (res.status === 401 || !res.ok) return;
         const { data } = await res.json();
         document.getElementById('statTotal').textContent = data.total;
@@ -883,11 +879,17 @@
       try {
         const endpoint = editingId ? `${API}/bookmarks/${editingId}` : `${API}/bookmarks`;
         const method = editingId ? 'PATCH' : 'POST';
-        const res = await fetch(endpoint, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const res = await fetch(endpoint, {
+          method,
+          credentials: 'include',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (res.status === 401) throw new Error('Login required');
         const json = await res.json();
         if (!json.success) throw new Error(json.error);
         closeModal();
-        toast(editingId ? '✅ Bookmark updated!' : '✅ Bookmark saved!');
+        toast(editingId ? 'Bookmark updated' : 'Bookmark saved');
         loadBookmarks(); loadStats();
       } catch (e) { toast(e.message, true); }
     }
@@ -895,22 +897,27 @@
     async function deleteBookmark(id) {
       if (!confirm('Delete this bookmark?')) return;
       try {
-        await fetch(`${API}/bookmarks/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API}/bookmarks/${id}`, { method: 'DELETE', credentials: 'include' });
+        if (res.status === 401) throw new Error('Login required');
+        if (!res.ok) throw new Error('Delete failed');
         document.getElementById(`card-${id}`)?.remove();
-        toast('🗑️ Deleted');
+        toast('Deleted');
         loadStats();
-      } catch { toast('Error deleting', true); }
+      } catch (e) { toast(e.message || 'Error deleting', true); }
     }
 
     async function toggleFav(id, current) {
       try {
-        await fetch(`${API}/bookmarks/${id}`, {
+        const res = await fetch(`${API}/bookmarks/${id}`, {
           method: 'PATCH',
+          credentials: 'include',
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ is_favorite: !current })
         });
+        if (res.status === 401) throw new Error('Login required');
+        if (!res.ok) throw new Error('Update failed');
         loadBookmarks(); loadStats();
-      } catch { toast('Error', true); }
+      } catch (e) { toast(e.message || 'Error', true); }
     }
 
     // ── Modal ─────────────────────────────────────────────────────────────────
@@ -924,9 +931,10 @@
 
     async function openEditModal(id) {
       editingId = id;
-      document.getElementById('modalTitle').textContent = `✏️ Edit Bookmark #${id}`;
+      document.getElementById('modalTitle').textContent = `Edit Bookmark #${id}`;
       try {
-        const res = await fetch(`${API}/bookmarks/${id}`);
+        const res = await fetch(`${API}/bookmarks/${id}`, { credentials: 'include' });
+        if (res.status === 401) throw new Error('Login required');
         const { data: b } = await res.json();
         document.getElementById('fUrl').value = b.url;
         document.getElementById('fTitle').value = b.title || '';
@@ -934,7 +942,7 @@
         document.getElementById('fTags').value = (b.tags || []).join(', ');
         document.getElementById('fNotes').value = b.notes || '';
         document.getElementById('modal').style.display = 'flex';
-      } catch { toast('Error loading bookmark', true); }
+      } catch (e) { toast(e.message || 'Error loading bookmark', true); }
     }
 
     function closeModal() { document.getElementById('modal').style.display = 'none'; }
@@ -985,3 +993,7 @@
   </script>
 </body>
 </html>
+
+
+
+

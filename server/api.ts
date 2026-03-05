@@ -289,6 +289,17 @@ function toPublicUser(user: User) {
   };
 }
 
+function getHttpStatusForError(message: string, fallback = 400): number {
+  if (
+    message === "Authentication required" ||
+    message === "Invalid or expired API token" ||
+    message === "Not authenticated"
+  ) {
+    return 401;
+  }
+  return fallback;
+}
+
 const saveBookmarkSchema = z.object({
   url: z.string().url().max(2048),
   title: z.string().max(300).optional(),
@@ -509,7 +520,7 @@ app.post("/api/bookmarks", async (req, res) => {
     return res.status(201).json({ success: true, data: bookmark });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    return res.status(400).json({ success: false, error: message });
+    return res.status(getHttpStatusForError(message, 400)).json({ success: false, error: message });
   }
 });
 
@@ -529,7 +540,7 @@ app.patch("/api/bookmarks/:id", async (req, res) => {
     return res.json({ success: true, data: updated });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    return res.status(400).json({ success: false, error: message });
+    return res.status(getHttpStatusForError(message, 400)).json({ success: false, error: message });
   }
 });
 
@@ -542,7 +553,7 @@ app.delete("/api/bookmarks/:id", async (req, res) => {
     res.json({ success: true, data: deleted });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    res.status(400).json({ success: false, error: message });
+    res.status(getHttpStatusForError(message, 400)).json({ success: false, error: message });
   }
 });
 
