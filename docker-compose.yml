@@ -36,6 +36,8 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/bookmark_mcp
       SESSION_SECRET: ${SESSION_SECRET:-change-me-in-prod}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://ai.shivaprogramming.com,http://localhost:3001,http://127.0.0.1:3001}
       ALLOW_LOCAL_FALLBACK: "false"
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
@@ -50,7 +52,13 @@ services:
     security_opt:
       - no-new-privileges:true
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3

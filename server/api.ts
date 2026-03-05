@@ -55,17 +55,24 @@ const CALLBACK_URL_GITHUB =
   process.env.CALLBACK_URL_GITHUB ??
   process.env.GITHUB_CALLBACK_URL ??
   "http://localhost:3001/auth/github/callback";
+const CORS_ORIGINS = (
+  process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
+    : [
+        "http://localhost:3001",
+        "http://127.0.0.1:3001",
+        "https://localhost:3001",
+        "https://127.0.0.1:3001",
+        "https://ai.shivaprogramming.com",
+      ]
+).filter(Boolean);
 
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://127.0.0.1:3001",
-      "http://66.179.137.126:3001",
-    ],
+    origin: CORS_ORIGINS,
     credentials: true,
   }),
 );
