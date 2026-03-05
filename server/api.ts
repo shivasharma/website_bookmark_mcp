@@ -352,6 +352,10 @@ app.get("/", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
+app.get("/app", (_req, res) => {
+  res.sendFile(path.join(dashboardDir, "app.html"));
+});
+
 app.get("/register", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "register.html"));
 });

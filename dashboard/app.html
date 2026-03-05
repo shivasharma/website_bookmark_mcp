@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bookmark Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141416;
+      --surface2: #1c1c1f;
+      --border: #2a2a2e;
+      --accent: #f0e040;
+      --accent2: #40e0a0;
+      --danger: #ff4d6d;
+      --text: #e8e8e0;
+      --muted: #6b6b70;
+      --radius: 8px;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ── */
+    header {
+      padding: 28px 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+
+    .logo:hover .logo-icon { transform: scale(1.05); }
+
+    .logo h1 {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .logo span { color: var(--accent); }
+
+    .header-actions {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .user-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: transparent;
+      min-height: 36px;
+      transition: all 0.2s;
+    }
+
+    .user-status:hover { border-color: var(--accent); background: rgba(240, 224, 64, 0.03); }
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent2);
+      color: #0a2b20;
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 11px;
+      color: var(--text);
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-link {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .user-link:hover { text-decoration: underline; }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 100px;
+      background: linear-gradient(135deg, rgba(240, 224, 64, 0.05) 0%, rgba(20, 20, 22, 1) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(240, 224, 64, 0.08) 0%, rgba(28, 28, 31, 1) 100%);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card:nth-child(1)::before { background: var(--accent); }
+    .stat-card:nth-child(2)::before { background: var(--accent2); }
+    .stat-card:nth-child(3)::before { background: #a78bfa; }
+
+    .stat-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'Fira Mono', monospace;
+      color: var(--text);
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 180px;
+      position: relative;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input[type="text"], input[type="url"], textarea, select {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      background: #1a1a1d;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+    }
+
+    .filter-select {
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border-radius: var(--radius);
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover { background: #ffe600; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(240, 224, 64, 0.2); }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(240, 224, 64, 0.05); }
+
+    .btn-ghost.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(240,224,64,0.1);
+    }
+
+    .setup-hint {
+      margin: -8px 0 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(64, 224, 160, 0.3);
+      border-radius: var(--radius);
+      background: rgba(64,224,160,0.08);
+      font-size: 12px;
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+    .setup-hint:hover { border-color: var(--accent2); background: rgba(64,224,160,0.12); }
+    .setup-hint a {
+      color: var(--accent2);
+      text-decoration: underline;
+      font-weight: 700;
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid transparent;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .btn-danger:hover { border-color: var(--danger); background: rgba(255,77,109,0.08); }
+
+    /* ── Bookmarks Grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+      animation: fadeIn 0.3s ease forwards;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      background: #1a1a1d;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(240, 224, 64, 0.08);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .favicon {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      background: var(--surface2);
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fav-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px;
+      line-height: 1;
+      opacity: 0.5;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .fav-btn:hover { opacity: 1; transform: scale(1.2); }
+    .fav-btn.active { opacity: 1; }
+
+    .card-url {
+      font-family: 'Fira Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 11px;
+      color: #8a8a90;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex-grow: 1;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 3px;
+      background: rgba(240,224,64,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(240,224,64,0.2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tag:hover { background: rgba(240,224,64,0.2); }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid rgba(42, 42, 46, 0.5);
+      margin-top: auto;
+    }
+
+    .card-date {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: 'Fira Mono', monospace;
+    }
+
+    .card-actions { display: flex; gap: 3px; }
+
+    .action-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .action-btn:hover { border-color: var(--border); color: var(--text); background: rgba(240, 224, 64, 0.05); }
+
+    /* ── Empty state ── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty h3 { font-size: 18px; margin-bottom: 8px; color: var(--text); }
+    .empty p { font-size: 14px; }
+
+    /* ── Loading ── */
+    .loading {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-family: 'Fira Mono', monospace;
+      font-size: 13px;
+    }
+    .loading::after {
+      content: '...';
+      animation: dots 1.2s infinite;
+    }
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* ── Modal ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeOverlay 0.2s ease;
+    }
+    @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 510px;
+      padding: 28px;
+      animation: slideUp 0.25s ease;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text);
+    }
+
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 9px 12px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      font-size: 12px;
+      max-width: 300px;
+      animation: toastIn 0.25s ease, toastOut 0.25s ease 2.75s forwards;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .toast.error { border-left-color: var(--danger); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(20px); }
+    }
+
+    /* ── ID badge ── */
+    .id-badge {
+      font-family: 'Fira Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      background: rgba(42, 42, 46, 0.6);
+      padding: 2px 6px;
+      border-radius: 3px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover .id-badge { opacity: 1; }
+
+    /* ── Notes preview ── */
+    .notes-preview {
+      font-size: 10px;
+      color: #6b6b88;
+      background: rgba(167,139,250,0.05);
+      border-left: 2px solid #a78bfa;
+      padding: 5px 8px;
+      border-radius: 0 3px 3px 0;
+      margin-bottom: 10px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      .stats-bar { gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🔖</div>
+        <h1>Bookmark<span>Vault</span></h1>
+      </div>
+      <div class="header-actions">
+        <div class="user-status" id="userStatus">
+          <a href="/register" class="user-link">Sign in</a>
+        </div>
+        <a class="btn btn-ghost" href="/mcp-setup">MCP Setup</a>
+        <button class="btn btn-primary" onclick="openAddModal()">
+          <span>+</span> Add Bookmark
+        </button>
+      </div>
+    </header>
+
+    <div class="setup-hint">
+      Want to connect Claude, Cursor, or VS Code? Open <a href="/mcp-setup">MCP Setup</a> to generate your token and copy config.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Favorites</div>
+        <div class="stat-value" id="statFavs">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This Week</div>
+        <div class="stat-value" id="statWeek">—</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search bookmarks…" oninput="debounceLoad()" />
+      </div>
+      <input type="text" id="tagFilter" placeholder="Filter by tag…"
+        style="padding:10px 14px;width:160px;" oninput="debounceLoad()" />
+      <button class="btn btn-ghost" id="favToggle" onclick="toggleFavFilter()">⭐ Favorites</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid" id="bookmarkGrid">
+      <div class="loading">Loading bookmarks test</div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Add / Edit Modal -->
+  <div class="overlay" id="modal" style="display:none" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">🔖 Save Bookmark</div>
+
+      <div class="form-group">
+        <label>URL *</label>
+        <input type="url" id="fUrl" placeholder="https://example.com" />
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="fTitle" placeholder="Page title" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="fDesc" placeholder="What is this page about?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tags <span style="font-weight:400;text-transform:none;letter-spacing:0">(comma separated)</span></label>
+        <input type="text" id="fTags" placeholder="ai, tools, design" />
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="fNotes" placeholder="Your personal notes…" style="min-height:60px"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitForm()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = '/api';
+    let editingId = null;
+    let showFavs = false;
+    let debounceTimer = null;
+    let currentUser = null;
+    let events = null;
+    async function loadCurrentUser() {
+      try {
+        const res = await fetch(`${API}/me`, { credentials: 'include' });
+        if (!res.ok) {
+          currentUser = null;
+          renderUserStatus();
+          return;
+        }
+        const json = await res.json();
+        currentUser = json.success ? json.data : null;
+      } catch {
+        currentUser = null;
+      }
+      renderUserStatus();
+    }
+
+    function renderUserStatus() {
+      const el = document.getElementById('userStatus');
+      if (!currentUser || !currentUser.name) {
+        el.innerHTML = `<a href="/register" class="user-link">Sign in</a>`;
+        return;
+      }
+      const name = escHtml(currentUser.name);
+      const initial = escHtml((name.charAt(0) || 'U').toUpperCase());
+      el.innerHTML = `
+        <div class="avatar">${initial}</div>
+        <div class="user-name">${name}</div>
+        <a href="#" class="user-link" onclick="logoutUser(event)">Logout</a>
+      `;
+    }
+    async function logoutUser(event) {
+      event.preventDefault();
+      try {
+        await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
+      } catch {}
+      currentUser = null;
+      renderUserStatus();
+      loadBookmarks();
+      loadStats();
+      toast('Logged out');
+      if (events) {
+        events.close();
+        events = null;
+      }
+    }
+
+    function startRealtime() {
+      if (events) events.close();
+      events = new EventSource(`${API}/events`);
+      events.addEventListener('bookmark', () => {
+        loadBookmarks();
+        loadStats();
+      });
+      events.onerror = () => {
+        // Keep browser auto-reconnect behavior
+      };
+    }
+
+    // ── Load ──────────────────────────────────────────────────────────────────
+    async function loadBookmarks() {
+      const search = document.getElementById('searchInput').value.trim();
+      const tag = document.getElementById('tagFilter').value.trim();
+      const grid = document.getElementById('bookmarkGrid');
+      grid.innerHTML = '<div class="loading">Loading bookmarks</div>';
+
+      try {
+        const params = new URLSearchParams();
+        if (search) params.set('search', search);
+        if (tag) params.set('tag', tag);
+        if (showFavs) params.set('favorite', 'true');
+
+        const res = await fetch(`${API}/bookmarks?${params}`, { credentials: 'include' });
+        if (res.status === 401) {
+          showAuthRequired();
+          return;
+        }
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+
+        const { data } = await res.json();
+        renderBookmarks(Array.isArray(data) ? data : []);
+      } catch {
+        grid.innerHTML = `<div class="empty"><div class="empty-icon">[!]</div><h3>Cannot connect to API</h3><p>Make sure the server is running on port 3001</p></div>`;
+      }
+    }
+    async function loadStats() {
+      try {
+        const res = await fetch(`${API}/stats`, { credentials: 'include' });
+        if (res.status === 401 || !res.ok) return;
+        const { data } = await res.json();
+        document.getElementById('statTotal').textContent = data.total;
+        document.getElementById('statFavs').textContent = data.favorites;
+        document.getElementById('statWeek').textContent = data.recent;
+      } catch {}
+    }
+
+    function debounceLoad() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(loadBookmarks, 300);
+    }
+
+    // ── Render ────────────────────────────────────────────────────────────────
+
+    function renderBookmarks(bookmarks) {
+      const grid = document.getElementById('bookmarkGrid');
+      if (!Array.isArray(bookmarks)) {
+        showAuthRequired();
+        return;
+      }
+      if (!bookmarks.length) {
+        grid.innerHTML = `<div class="empty"><div class="empty-icon">📭</div><h3>No bookmarks found</h3><p>Save your first link or adjust your filters</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = bookmarks.map(b => `
+        <div class="card" id="card-${b.id}">
+          <span class="id-badge">#${b.id}</span>
+
+          <div class="card-header">
+            <img class="favicon" src="${b.favicon || `https://www.google.com/s2/favicons?domain=${getDomain(b.url)}&sz=64`}"
+              onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22/>'"/>
+            <div class="card-title">${escHtml(b.title || b.url)}</div>
+            <button class="fav-btn ${b.is_favorite ? 'active' : ''}" onclick="toggleFav(${b.id}, ${b.is_favorite})"
+              title="${b.is_favorite ? 'Unfavorite' : 'Favorite'}">⭐</button>
+          </div>
+
+          <div class="card-url">
+            <a href="${escHtml(b.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">
+              ${escHtml(b.url)}
+            </a>
+          </div>
+
+          ${b.description ? `<div class="card-desc">${escHtml(b.description)}</div>` : ''}
+          ${b.notes ? `<div class="notes-preview">📓 ${escHtml(b.notes)}</div>` : ''}
+
+          ${b.tags.length ? `<div class="tags">${b.tags.map(t =>
+            `<span class="tag" onclick="filterByTag('${t}')">${escHtml(t)}</span>`
+          ).join('')}</div>` : ''}
+
+          <div class="card-footer">
+            <span class="card-date">${formatDate(b.created_at)}</span>
+            <div class="card-actions">
+              <button class="action-btn" onclick="openEditModal(${b.id})" title="Edit">✏️</button>
+              <button class="action-btn btn-danger" onclick="deleteBookmark(${b.id})" title="Delete">🗑</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showAuthRequired() {
+      const grid = document.getElementById('bookmarkGrid');
+      grid.innerHTML = `<div class="empty"><div class="empty-icon">[LOCK]</div><h3>Login required</h3><p>Please <a href="/register" style="color:inherit;text-decoration:underline">sign in with Google or GitHub</a> to view bookmarks.</p></div>`;
+    }
+
+    // ── CRUD ──────────────────────────────────────────────────────────────────
+
+    async function submitForm() {
+      const url = document.getElementById('fUrl').value.trim();
+      if (!url) { toast('URL is required', true); return; }
+
+      const body = {
+        url,
+        title: document.getElementById('fTitle').value.trim(),
+        description: document.getElementById('fDesc').value.trim(),
+        tags: document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean),
+        notes: document.getElementById('fNotes').value.trim(),
+      };
+
+      try {
+        const endpoint = editingId ? `${API}/bookmarks/${editingId}` : `${API}/bookmarks`;
+        const method = editingId ? 'PATCH' : 'POST';
+        const res = await fetch(endpoint, {
+          method,
+          credentials: 'include',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (res.status === 401) throw new Error('Login required');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        closeModal();
+        toast(editingId ? 'Bookmark updated' : 'Bookmark saved');
+        loadBookmarks(); loadStats();
+      } catch (e) { toast(e.message, true); }
+    }
+
+    async function deleteBookmark(id) {
+      if (!confirm('Delete this bookmark?')) return;
+      try {
+        const res = await fetch(`${API}/bookmarks/${id}`, { method: 'DELETE', credentials: 'include' });
+        if (res.status === 401) throw new Error('Login required');
+        if (!res.ok) throw new Error('Delete failed');
+        document.getElementById(`card-${id}`)?.remove();
+        toast('Deleted');
+        loadStats();
+      } catch (e) { toast(e.message || 'Error deleting', true); }
+    }
+
+    async function toggleFav(id, current) {
+      try {
+        const res = await fetch(`${API}/bookmarks/${id}`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ is_favorite: !current })
+        });
+        if (res.status === 401) throw new Error('Login required');
+        if (!res.ok) throw new Error('Update failed');
+        loadBookmarks(); loadStats();
+      } catch (e) { toast(e.message || 'Error', true); }
+    }
+
+    // ── Modal ─────────────────────────────────────────────────────────────────
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = '🔖 Save Bookmark';
+      ['fUrl','fTitle','fDesc','fTags','fNotes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('modal').style.display = 'flex';
+    }
+
+    async function openEditModal(id) {
+      editingId = id;
+      document.getElementById('modalTitle').textContent = `Edit Bookmark #${id}`;
+      try {
+        const res = await fetch(`${API}/bookmarks/${id}`, { credentials: 'include' });
+        if (res.status === 401) throw new Error('Login required');
+        const { data: b } = await res.json();
+        document.getElementById('fUrl').value = b.url;
+        document.getElementById('fTitle').value = b.title || '';
+        document.getElementById('fDesc').value = b.description || '';
+        document.getElementById('fTags').value = (b.tags || []).join(', ');
+        document.getElementById('fNotes').value = b.notes || '';
+        document.getElementById('modal').style.display = 'flex';
+      } catch (e) { toast(e.message || 'Error loading bookmark', true); }
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
+
+    // ── Filters ───────────────────────────────────────────────────────────────
+
+    function toggleFavFilter() {
+      showFavs = !showFavs;
+      document.getElementById('favToggle').classList.toggle('active', showFavs);
+      loadBookmarks();
+    }
+
+    function filterByTag(tag) {
+      document.getElementById('tagFilter').value = tag;
+      loadBookmarks();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    function getDomain(url) {
+      try { return new URL(url).hostname; } catch { return ''; }
+    }
+
+    function formatDate(str) {
+      const d = new Date(str);
+      return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function toast(msg, error = false) {
+      const el = document.createElement('div');
+      el.className = 'toast' + (error ? ' error' : '');
+      el.textContent = msg;
+      document.getElementById('toastContainer').appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadCurrentUser().then(() => {
+      if (currentUser) startRealtime();
+    });
+    loadBookmarks();
+    loadStats();
+  </script>
+</body>
+</html>
+
+
+
+
