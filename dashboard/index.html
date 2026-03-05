@@ -229,6 +229,7 @@
       display: flex;
       align-items: center;
       gap: 7px;
+      text-decoration: none;
     }
 
     .btn-primary {
@@ -248,6 +249,21 @@
       border-color: var(--accent);
       color: var(--accent);
       background: rgba(240,224,64,0.08);
+    }
+
+    .setup-hint {
+      margin: -8px 0 20px;
+      padding: 10px 12px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      background: rgba(64,224,160,0.06);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .setup-hint a {
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: 700;
     }
 
     .btn-danger {
@@ -569,11 +585,16 @@
         <div class="user-status" id="userStatus">
           <a href="/register" class="user-link">Sign in</a>
         </div>
+        <a class="btn btn-ghost" href="/mcp-setup">MCP Setup</a>
         <button class="btn btn-primary" onclick="openAddModal()">
           <span>+</span> Add Bookmark
         </button>
       </div>
     </header>
+
+    <div class="setup-hint">
+      Want to connect Claude, Cursor, or VS Code? Open <a href="/mcp-setup">MCP Setup</a> to generate your token and copy config.
+    </div>
 
     <!-- Stats -->
     <div class="stats-bar" id="statsBar">
