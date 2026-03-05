@@ -30,14 +30,15 @@ const API_BASE_URL = (process.env.BOOKMARK_API_BASE_URL ?? "http://66.179.137.12
 const API_TOKEN = process.env.BOOKMARK_API_TOKEN?.trim();
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const authHeaders = API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {};
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+  if (API_TOKEN) {
+    headers.set("Authorization", `Bearer ${API_TOKEN}`);
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...authHeaders,
-      ...(init?.headers ?? {}),
-    },
+    headers,
   });
 
   const json = (await response.json()) as ApiResponse<T>;

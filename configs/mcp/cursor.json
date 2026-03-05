@@ -4,7 +4,11 @@
       "command": "node",
       "args": [
         "D:/Project2026/AI/website_bookmark_mcp/dist/mcp/index.js"
-      ]
+      ],
+      "env": {
+        "BOOKMARK_API_BASE_URL": "http://66.179.137.126:3001",
+        "BOOKMARK_API_TOKEN": "PASTE_YOUR_TOKEN_HERE"
+      }
     }
   }
 }
