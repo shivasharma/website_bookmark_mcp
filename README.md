@@ -37,6 +37,19 @@ This script:
 - Creates TLS cert with Docker Certbot (first run)
 - Starts `postgres`, `app`, `nginx`, and `certbot` via Docker Compose
 
+## Fully automatic deployment (no manual `.sh`)
+
+After initial server setup, deployment is automatic from GitHub Actions on every push to `main`.
+You do not need to run `deploy.sh` or `deploy-vps.sh` manually.
+
+Required one-time GitHub secrets:
+- `VPS_HOST`
+- `VPS_USER`
+- `VPS_SSH_KEY`
+- `POSTGRES_PASSWORD`
+- `SESSION_SECRET`
+- `CERTBOT_EMAIL`
+
 4. Build MCP server:
 
 ```bash
