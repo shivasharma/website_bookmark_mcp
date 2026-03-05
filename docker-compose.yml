@@ -2,10 +2,11 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
+    container_name: bookmark_postgres
     environment:
       POSTGRES_DB: bookmark_mcp
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5433:5432"
     volumes:
@@ -15,12 +16,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - bookmark_network
+    security_opt:
+      - no-new-privileges:true
 
   app:
     build:
       context: .
       dockerfile: server/Dockerfile
     restart: unless-stopped
+    container_name: bookmark_app
     depends_on:
       postgres:
         condition: service_healthy
@@ -28,17 +34,49 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3001
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/bookmark_mcp
-      SESSION_SECRET: change-me-in-prod
-      ALLOW_LOCAL_FALLBACK: "true"
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/bookmark_mcp
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-prod}
+      ALLOW_LOCAL_FALLBACK: "false"
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost:3001/auth/google/callback}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://ai.shivaprogramming.com/auth/google/callback}
       CLIENT_ID_GITHUB: ${CLIENT_ID_GITHUB:-}
       CLIENT_SECRET_GITHUB: ${CLIENT_SECRET_GITHUB:-}
-      CALLBACK_URL_GITHUB: ${CALLBACK_URL_GITHUB:-http://localhost:3001/auth/github/callback}
+      CALLBACK_URL_GITHUB: ${CALLBACK_URL_GITHUB:-https://ai.shivaprogramming.com/auth/github/callback}
+    expose:
+      - "3001"
+    networks:
+      - bookmark_network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    container_name: bookmark_nginx
     ports:
-      - "3001:3001"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - ./certbot:/var/www/certbot:ro
+    depends_on:
+      - app
+    networks:
+      - bookmark_network
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   postgres_data:
+
+networks:
+  bookmark_network:
+    driver: bridge
