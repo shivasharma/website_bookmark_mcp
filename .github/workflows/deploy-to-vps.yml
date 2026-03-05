@@ -2,7 +2,7 @@ name: Deploy to VPS Using Docker Test
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 permissions:

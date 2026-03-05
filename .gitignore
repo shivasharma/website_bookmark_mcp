@@ -67,4 +67,3 @@ certbot/
 node_modules
 npm-debug.log
 .git
-.github
