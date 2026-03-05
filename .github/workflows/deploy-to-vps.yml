@@ -1,47 +1,75 @@
-name: Fast Deploy to VPS
+name: Deploy to VPS
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  DEPLOY_DIR: /opt/website_bookmark_mcp
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Grants permission to upload to GitHub Packages
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Log in to GitHub's Container Registry
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ github.token }}
 
-      # Build and push the image to GitHub
-      - name: Build and Push
-        uses: docker/build-push-action@v5
+      - name: Build and push app image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: server/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
 
-      # Tell the VPS to pull the new image and restart
-      - name: SSH Deploy
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Copy deployment files to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "docker-compose.yml,nginx.conf"
+          target: ${{ env.DEPLOY_DIR }}
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
+
+            DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
+            APP_IMAGE="ghcr.io/${{ github.repository }}:latest"
+
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+
+            if [ -d "$DEPLOY_DIR/website_bookmark_mcp" ]; then
+              cp "$DEPLOY_DIR/website_bookmark_mcp/docker-compose.yml" "$DEPLOY_DIR/docker-compose.yml"
+              cp "$DEPLOY_DIR/website_bookmark_mcp/nginx.conf" "$DEPLOY_DIR/nginx.conf"
+              rm -rf "$DEPLOY_DIR/website_bookmark_mcp"
+            fi
+
+            for file in docker-compose.yml nginx.conf; do
+              if [ ! -f "$file" ]; then
+                echo "Missing deploy file: $file"
+                exit 1
+              fi
+            done
 
             if [ -z "${{ secrets.POSTGRES_PASSWORD }}" ]; then
               echo "Missing required secret: POSTGRES_PASSWORD"
@@ -51,64 +79,51 @@ jobs:
               echo "Missing required secret: SESSION_SECRET"
               exit 1
             fi
-            HAS_GITHUB=false
-            HAS_GOOGLE=false
-            if [ -n "${{ secrets.CLIENT_ID_GITHUB }}" ] && [ -n "${{ secrets.CLIENT_SECRET_GITHUB }}" ] && [ -n "${{ secrets.CALLBACK_URL_GITHUB }}" ]; then
-              HAS_GITHUB=true
-            fi
-            if [ -n "${{ secrets.GOOGLE_CLIENT_ID }}" ] && [ -n "${{ secrets.GOOGLE_CLIENT_SECRET }}" ] && [ -n "${{ secrets.GOOGLE_CALLBACK_URL }}" ]; then
-              HAS_GOOGLE=true
-            fi
-            if [ "$HAS_GITHUB" = false ] && [ "$HAS_GOOGLE" = false ]; then
-              echo "Missing OAuth config: configure GitHub or Google OAuth secrets"
+
+            CERT_BASE="/etc/letsencrypt/live/ai.shivaprogramming.com"
+            if [ ! -f "$CERT_BASE/fullchain.pem" ] || [ ! -f "$CERT_BASE/privkey.pem" ]; then
+              echo "Missing TLS cert files in $CERT_BASE"
               exit 1
             fi
 
-            # Log in to GHCR on the VPS so it can pull the image
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            
-            docker pull ghcr.io/${{ github.repository }}:latest
-            
-            # Recreate app + postgres stack
-            docker network create bookmark-net || true
-            docker volume create bookmark-postgres-data || true
+            cat > .env <<'ENVFILE'
+            DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            SESSION_COOKIE_SECURE=true
+            CORS_ORIGINS=https://ai.shivaprogramming.com,http://localhost:3001,http://127.0.0.1:3001
+            ALLOW_LOCAL_FALLBACK=false
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}
+            CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}
+            CALLBACK_URL_GITHUB=${{ secrets.CALLBACK_URL_GITHUB }}
+            ENVFILE
+            chmod 600 .env
 
-            docker stop bookmark-app || true
-            docker rm bookmark-app || true
-            docker stop bookmark-postgres || true
-            docker rm bookmark-postgres || true
+            if docker compose version >/dev/null 2>&1; then
+              COMPOSE_CMD="docker compose"
+            elif command -v docker-compose >/dev/null 2>&1; then
+              COMPOSE_CMD="docker-compose"
+            else
+              echo "Docker Compose is not installed on VPS"
+              exit 1
+            fi
 
-            docker run -d \
-              --name bookmark-postgres \
-              --restart always \
-              --network bookmark-net \
-              -e "POSTGRES_DB=bookmark_mcp" \
-              -e "POSTGRES_USER=postgres" \
-              -e "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" \
-              -v bookmark-postgres-data:/var/lib/postgresql/data \
-              postgres:16-alpine
+            echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            until docker exec bookmark-postgres pg_isready -U postgres -d bookmark_mcp; do
-              echo "Waiting for postgres..."
-              sleep 2
-            done
+            mkdir -p certbot
+            export APP_IMAGE
 
-            docker run -d \
-              --name bookmark-app \
-              --restart always \
-              --network bookmark-net \
-              -p 3001:3001 \
-              -e "NODE_ENV=production" \
-              -e "HOST=0.0.0.0" \
-              -e "PORT=3001" \
-              -e "DATABASE_URL=postgresql://postgres:${{ secrets.POSTGRES_PASSWORD }}@bookmark-postgres:5432/bookmark_mcp" \
-              -e "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" \
-              -e "SESSION_COOKIE_SECURE=false" \
-              -e "ALLOW_LOCAL_FALLBACK=false" \
-              -e "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" \
-              -e "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-              -e "GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}" \
-              -e "CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}" \
-              -e "CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}" \
-              -e "CALLBACK_URL_GITHUB=${{ secrets.CALLBACK_URL_GITHUB }}" \
-              ghcr.io/${{ github.repository }}:latest
+            docker stop bookmark-app bookmark-postgres bookmark-nginx 2>/dev/null || true
+            docker rm bookmark-app bookmark-postgres bookmark-nginx 2>/dev/null || true
+
+            $COMPOSE_CMD pull
+            $COMPOSE_CMD up -d --remove-orphans --no-build
+
+            $COMPOSE_CMD ps
+
+            $COMPOSE_CMD exec -T app node -e "fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+            curl -fkfsS https://ai.shivaprogramming.com/api/health >/dev/null
+
+            echo "Deployment succeeded: https://ai.shivaprogramming.com"

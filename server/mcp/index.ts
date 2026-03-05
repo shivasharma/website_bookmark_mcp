@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -26,7 +26,7 @@ type BookmarkStats = {
   recent: number;
 };
 
-const API_BASE_URL = (process.env.BOOKMARK_API_BASE_URL ?? "http://66.179.137.126:3001").replace(/\/+$/, "");
+const API_BASE_URL = (process.env.BOOKMARK_API_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
 const API_TOKEN = process.env.BOOKMARK_API_TOKEN?.trim();
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -219,3 +219,4 @@ await server.connect(transport);
 console.error(`Bookmark MCP Server running on stdio (API: ${API_BASE_URL})`);
 
 export { server };
+

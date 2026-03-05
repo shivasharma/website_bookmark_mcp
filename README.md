@@ -1,4 +1,4 @@
-﻿# Bookmark Vault (TypeScript + PostgreSQL + OAuth)
+# Bookmark Vault (TypeScript + PostgreSQL + OAuth)
 
 This repo now has a clean split:
 - `server/api.ts` -> HTTP API + dashboard + OAuth
@@ -12,6 +12,8 @@ This repo now has a clean split:
 ```bash
 docker compose up --build -d
 ```
+
+Production note: public traffic should use `https://ai.shivaprogramming.com` on port `443`. Port `3001` is internal app HTTP behind Nginx.
 
 3. Build MCP server:
 
@@ -31,9 +33,9 @@ npm run build
 
 Client-specific MCP configs are now in `configs/mcp/`.
 Setup instructions are in `docs/mcp-clients.md`.
-MCP defaults to hosted API `http://66.179.137.126:3001` (no DB config needed in client settings).
+MCP defaults to hosted API `https://ai.shivaprogramming.com` (no DB config needed in client settings).
 MCP requests should include `BOOKMARK_API_TOKEN` (generated via `POST /api/mcp-token` after login).
-Non-technical flow: open `http://66.179.137.126:3001/mcp-setup` after login and use the setup wizard.
+Non-technical flow: open `https://ai.shivaprogramming.com/mcp-setup` after login and use the setup wizard.
 
 ## OAuth setup (API only)
 
@@ -53,3 +55,4 @@ CALLBACK_URL_GITHUB=http://localhost:3001/auth/github/callback
 
 `ALLOW_LOCAL_FALLBACK=true` lets API work locally without OAuth.
 Set `ALLOW_LOCAL_FALLBACK=false` in production.
+

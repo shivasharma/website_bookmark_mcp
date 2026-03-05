@@ -3,7 +3,7 @@
 This project has a separate MCP server entrypoint:
 - `server/mcp/index.ts` (source)
 - `dist/mcp/index.js` (built file used by clients)
-- MCP server calls hosted API by default: `http://66.179.137.126:3001`
+- MCP server calls hosted API by default: `https://ai.shivaprogramming.com`
 
 ## 1) Build once
 
@@ -32,8 +32,8 @@ BOOKMARK_API_BASE_URL=http://your-host:3001
 
 ## Easiest Setup (No Technical Steps)
 
-1. Login at `http://66.179.137.126:3001/register`
-2. Open `http://66.179.137.126:3001/mcp-setup`
+1. Login at `https://ai.shivaprogramming.com/register`
+2. Open `https://ai.shivaprogramming.com/mcp-setup`
 3. Click `Generate Token`
 4. Click `Copy Config`
 5. Paste into Claude Desktop / Cursor / VS Code MCP settings
@@ -45,9 +45,9 @@ BOOKMARK_API_BASE_URL=http://your-host:3001
 
 MCP now uses Bearer token auth for user-specific data.
 
-1. Login in browser at `http://66.179.137.126:3001/register`
+1. Login in browser at `https://ai.shivaprogramming.com/register`
 2. Open this URL in the same browser:
-`http://66.179.137.126:3001/api/mcp-token?expires_in_days=30`
+`https://ai.shivaprogramming.com/api/mcp-token?expires_in_days=30`
 3. Copy `data.token` from the JSON response.
 4. Put it into `BOOKMARK_API_TOKEN` in your client config.
 
@@ -77,3 +77,4 @@ npm run start:mcp
 
 If MCP starts correctly, it stays connected over stdio and logs:
 - `Bookmark MCP Server running on stdio`
+
