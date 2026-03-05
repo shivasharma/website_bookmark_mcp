@@ -79,11 +79,14 @@ jobs:
               echo "Missing required secret: SESSION_SECRET"
               exit 1
             fi
-
-            CERT_BASE="/etc/letsencrypt/live/ai.shivaprogramming.com"
-            if [ ! -f "$CERT_BASE/fullchain.pem" ] || [ ! -f "$CERT_BASE/privkey.pem" ]; then
-              echo "Missing TLS cert files in $CERT_BASE"
+            if [ -z "${{ secrets.CERTBOT_EMAIL }}" ]; then
+              echo "Missing required secret: CERTBOT_EMAIL"
               exit 1
+            fi
+
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo systemctl stop nginx 2>/dev/null || true
+              sudo systemctl disable nginx 2>/dev/null || true
             fi
 
             cat > .env <<'ENVFILE'
@@ -112,11 +115,21 @@ jobs:
 
             echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            mkdir -p certbot
+            mkdir -p docker-data/letsencrypt docker-data/certbot-www
             export APP_IMAGE
 
-            docker stop bookmark-app bookmark-postgres bookmark-nginx 2>/dev/null || true
-            docker rm bookmark-app bookmark-postgres bookmark-nginx 2>/dev/null || true
+            docker stop bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
+            docker rm bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
+
+            CERT_FILE="docker-data/letsencrypt/live/ai.shivaprogramming.com/fullchain.pem"
+            if [ ! -f "$CERT_FILE" ]; then
+              docker run --rm -p 80:80 \
+                -v "$PWD/docker-data/letsencrypt:/etc/letsencrypt" \
+                certbot/certbot:latest certonly --standalone \
+                --non-interactive --agree-tos --no-eff-email \
+                -m "${{ secrets.CERTBOT_EMAIL }}" \
+                -d ai.shivaprogramming.com
+            fi
 
             $COMPOSE_CMD pull
             $COMPOSE_CMD up -d --remove-orphans --no-build

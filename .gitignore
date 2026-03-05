@@ -60,6 +60,8 @@ __pycache__/
 .cache/
 .temp/
 tmp/
+docker-data/
+certbot/
 
 
 node_modules

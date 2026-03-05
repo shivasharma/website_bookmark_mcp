@@ -15,7 +15,29 @@ docker compose up --build -d
 
 Production note: public traffic should use `https://ai.shivaprogramming.com` on port `443`. Port `3001` is internal app HTTP behind Nginx.
 
-3. Build MCP server:
+## Docker-only HTTPS on VPS
+
+Use only Docker containers (including Nginx). Do not use host Nginx.
+
+1. Set DNS A record for `ai.shivaprogramming.com` to your VPS.
+2. On VPS, in this repo:
+
+```bash
+cp .env.example .env
+```
+
+3. Run deployment script with email for Let's Encrypt:
+
+```bash
+CERTBOT_EMAIL=you@example.com ./deploy-vps.sh
+```
+
+This script:
+- Stops/disables host `nginx` service
+- Creates TLS cert with Docker Certbot (first run)
+- Starts `postgres`, `app`, `nginx`, and `certbot` via Docker Compose
+
+4. Build MCP server:
 
 ```bash
 npm install
