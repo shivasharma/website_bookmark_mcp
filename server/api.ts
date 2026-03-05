@@ -9,6 +9,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import {
   deleteBookmark,
   ensureLocalDefaultUser,
@@ -185,7 +186,82 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dashboardDir = path.join(__dirname, "../dashboard");
 app.use(express.static(dashboardDir));
 
+const MCP_TOKEN_PREFIX = "mcpv1";
+
+function toBase64Url(input: string): string {
+  return Buffer.from(input, "utf8").toString("base64url");
+}
+
+function fromBase64Url(input: string): string {
+  return Buffer.from(input, "base64url").toString("utf8");
+}
+
+function signTokenPayload(payloadBase64: string): string {
+  return createHmac("sha256", SESSION_SECRET).update(`${MCP_TOKEN_PREFIX}.${payloadBase64}`).digest("base64url");
+}
+
+function generateMcpToken(userId: number, expiresInDays = 30): string {
+  const exp = Math.floor(Date.now() / 1000) + Math.max(1, Math.min(expiresInDays, 365)) * 24 * 60 * 60;
+  const payloadBase64 = toBase64Url(JSON.stringify({ sub: userId, exp }));
+  const signature = signTokenPayload(payloadBase64);
+  return `${MCP_TOKEN_PREFIX}.${payloadBase64}.${signature}`;
+}
+
+function verifyMcpToken(token: string): number | null {
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts[0] !== MCP_TOKEN_PREFIX) {
+    return null;
+  }
+
+  const payloadBase64 = parts[1];
+  const signature = parts[2];
+  const expected = signTokenPayload(payloadBase64);
+
+  const signatureBuffer = Buffer.from(signature, "utf8");
+  const expectedBuffer = Buffer.from(expected, "utf8");
+  if (signatureBuffer.length !== expectedBuffer.length) {
+    return null;
+  }
+  if (!timingSafeEqual(signatureBuffer, expectedBuffer)) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(fromBase64Url(payloadBase64)) as { sub?: unknown; exp?: unknown };
+    const userId = Number(parsed.sub);
+    const exp = Number(parsed.exp);
+    const now = Math.floor(Date.now() / 1000);
+    if (!Number.isInteger(userId) || userId <= 0 || !Number.isFinite(exp) || exp <= now) {
+      return null;
+    }
+    return userId;
+  } catch {
+    return null;
+  }
+}
+
+function getBearerToken(req: express.Request): string | null {
+  const header = req.header("authorization");
+  if (!header) {
+    return null;
+  }
+  const [scheme, token] = header.split(" ");
+  if (!scheme || !token || scheme.toLowerCase() !== "bearer") {
+    return null;
+  }
+  return token.trim() || null;
+}
+
 function getUserId(req: express.Request): number {
+  const bearer = getBearerToken(req);
+  if (bearer) {
+    const userId = verifyMcpToken(bearer);
+    if (userId) {
+      return userId;
+    }
+    throw new Error("Invalid or expired API token");
+  }
+
   if (req.isAuthenticated() && req.user?.id) {
     return req.user.id;
   }
@@ -282,16 +358,34 @@ app.get(
 );
 
 app.get("/api/me", async (req, res) => {
-  if (req.isAuthenticated() && req.user?.id) {
-    const current = await getUserById(req.user.id);
+  try {
+    const userId = getUserId(req);
+    const current = await getUserById(userId);
     if (current) {
       res.json({ success: true, data: toPublicUser(current) });
       return;
     }
-    res.json({ success: true, data: req.user });
+    res.status(404).json({ success: false, error: "User not found" });
+  } catch {
+    res.status(401).json({ success: false, error: "Not authenticated" });
+  }
+});
+
+app.post("/api/mcp-token", async (req, res) => {
+  if (!req.isAuthenticated() || !req.user?.id) {
+    res.status(401).json({ success: false, error: "Login required" });
     return;
   }
-  res.status(401).json({ success: false, error: "Not authenticated" });
+  const daysRaw = typeof req.body?.expires_in_days === "number" ? req.body.expires_in_days : 30;
+  const expiresInDays = Number.isFinite(daysRaw) ? Math.trunc(daysRaw) : 30;
+  const token = generateMcpToken(req.user.id, expiresInDays);
+  res.json({
+    success: true,
+    data: {
+      token,
+      expires_in_days: Math.max(1, Math.min(expiresInDays, 365)),
+    },
+  });
 });
 
 app.post("/api/logout", (req, res) => {

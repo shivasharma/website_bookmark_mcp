@@ -27,12 +27,15 @@ type BookmarkStats = {
 };
 
 const API_BASE_URL = (process.env.BOOKMARK_API_BASE_URL ?? "http://66.179.137.126:3001").replace(/\/+$/, "");
+const API_TOKEN = process.env.BOOKMARK_API_TOKEN?.trim();
 
 async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const authHeaders = API_TOKEN ? { Authorization: `Bearer ${API_TOKEN}` } : {};
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders,
       ...(init?.headers ?? {}),
     },
   });
