@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCP Setup Wizard</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #0f766e;
+      --accent-dark: #115e59;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+    }
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    p { margin: 0 0 10px; color: var(--muted); line-height: 1.5; }
+    .step {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 15px;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover { background: var(--accent-dark); }
+    button.secondary {
+      background: #f3f4f6;
+      color: #111827;
+      border: 1px solid var(--border);
+    }
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      resize: vertical;
+      background: #f9fafb;
+    }
+    .token {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      background: #f9fafb;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      word-break: break-all;
+      margin-top: 10px;
+    }
+    .hidden { display: none; }
+    .ok { color: #047857; font-weight: 600; }
+    .err { color: #b91c1c; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>MCP Setup Wizard</h1>
+      <p>This page helps you connect Bookmark MCP to Claude Desktop, Cursor, or VS Code in 2 minutes.</p>
+      <p><strong>Before you start:</strong> login first at <code>/register</code>, then come back here.</p>
+    </div>
+
+    <div class="card">
+      <div class="step">Step 1: Generate your secure token</div>
+      <p>Click once. This token links MCP to your account only.</p>
+      <button id="generateTokenBtn">Generate Token</button>
+      <button id="copyTokenBtn" class="secondary hidden">Copy Token</button>
+      <div id="status"></div>
+      <div id="tokenBox" class="token hidden"></div>
+    </div>
+
+    <div class="card hidden" id="configCard">
+      <div class="step">Step 2: Copy config for your app</div>
+      <p>Pick your app, copy, then paste into MCP settings.</p>
+      <button id="claudeBtn">Claude Desktop</button>
+      <button id="cursorBtn" class="secondary">Cursor</button>
+      <button id="vscodeBtn" class="secondary">VS Code</button>
+      <textarea id="configOutput" readonly></textarea>
+      <div>
+        <button id="copyConfigBtn">Copy Config</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="doneCard">
+      <div class="step">Step 3: Restart your app</div>
+      <p class="ok">Done. Restart Claude/Cursor/VS Code and your Bookmark tools will appear.</p>
+    </div>
+  </div>
+
+  <script>
+    const baseUrl = window.location.origin;
+    const serverPath = "D:/Project2026/AI/website_bookmark_mcp/dist/mcp/index.js";
+    let currentToken = "";
+
+    const generateTokenBtn = document.getElementById("generateTokenBtn");
+    const copyTokenBtn = document.getElementById("copyTokenBtn");
+    const statusEl = document.getElementById("status");
+    const tokenBox = document.getElementById("tokenBox");
+    const configCard = document.getElementById("configCard");
+    const configOutput = document.getElementById("configOutput");
+    const doneCard = document.getElementById("doneCard");
+    const claudeBtn = document.getElementById("claudeBtn");
+    const cursorBtn = document.getElementById("cursorBtn");
+    const vscodeBtn = document.getElementById("vscodeBtn");
+    const copyConfigBtn = document.getElementById("copyConfigBtn");
+
+    function setStatus(text, isError = false) {
+      statusEl.className = isError ? "err" : "ok";
+      statusEl.textContent = text;
+    }
+
+    function buildConfig() {
+      return JSON.stringify({
+        mcpServers: {
+          bookmark: {
+            command: "node",
+            args: [serverPath],
+            env: {
+              BOOKMARK_API_BASE_URL: baseUrl,
+              BOOKMARK_API_TOKEN: currentToken
+            }
+          }
+        }
+      }, null, 2);
+    }
+
+    function setActive(button) {
+      [claudeBtn, cursorBtn, vscodeBtn].forEach((btn) => btn.className = "secondary");
+      button.className = "";
+    }
+
+    async function copyText(text) {
+      await navigator.clipboard.writeText(text);
+      doneCard.classList.remove("hidden");
+    }
+
+    generateTokenBtn.addEventListener("click", async () => {
+      try {
+        setStatus("Generating token...");
+        const response = await fetch("/api/mcp-token?expires_in_days=30", {
+          credentials: "include"
+        });
+        const json = await response.json();
+        if (!response.ok || !json.success || !json.data?.token) {
+          throw new Error(json.error || "Could not create token. Please login first.");
+        }
+        currentToken = json.data.token;
+        tokenBox.textContent = currentToken;
+        tokenBox.classList.remove("hidden");
+        copyTokenBtn.classList.remove("hidden");
+        configCard.classList.remove("hidden");
+        configOutput.value = buildConfig();
+        setStatus("Token ready.");
+      } catch (error) {
+        setStatus(error.message || "Failed to generate token", true);
+      }
+    });
+
+    copyTokenBtn.addEventListener("click", async () => {
+      if (!currentToken) return;
+      await copyText(currentToken);
+      setStatus("Token copied.");
+    });
+
+    claudeBtn.addEventListener("click", () => {
+      setActive(claudeBtn);
+      configOutput.value = buildConfig();
+    });
+    cursorBtn.addEventListener("click", () => {
+      setActive(cursorBtn);
+      configOutput.value = buildConfig();
+    });
+    vscodeBtn.addEventListener("click", () => {
+      setActive(vscodeBtn);
+      configOutput.value = buildConfig();
+    });
+
+    copyConfigBtn.addEventListener("click", async () => {
+      if (!configOutput.value) return;
+      await copyText(configOutput.value);
+      setStatus("Config copied.");
+    });
+  </script>
+</body>
+</html>

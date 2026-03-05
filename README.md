@@ -33,6 +33,7 @@ Client-specific MCP configs are now in `configs/mcp/`.
 Setup instructions are in `docs/mcp-clients.md`.
 MCP defaults to hosted API `http://66.179.137.126:3001` (no DB config needed in client settings).
 MCP requests should include `BOOKMARK_API_TOKEN` (generated via `POST /api/mcp-token` after login).
+Non-technical flow: open `http://66.179.137.126:3001/mcp-setup` after login and use the setup wizard.
 
 ## OAuth setup (API only)
 

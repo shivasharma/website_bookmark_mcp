@@ -308,6 +308,10 @@ app.get("/register", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "register.html"));
 });
 
+app.get("/mcp-setup", (_req, res) => {
+  res.sendFile(path.join(dashboardDir, "mcp-setup.html"));
+});
+
 app.get("/auth/google", authLimiter, (req, res, next) => {
   if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
     res.status(400).json({ success: false, error: "Google OAuth is not configured" });
@@ -385,6 +389,27 @@ app.post("/api/mcp-token", async (req, res) => {
       token,
       expires_in_days: Math.max(1, Math.min(expiresInDays, 365)),
     },
+  });
+});
+
+app.get("/api/mcp-token", async (req, res) => {
+  if (!req.isAuthenticated() || !req.user?.id) {
+    res.status(401).json({ success: false, error: "Login required" });
+    return;
+  }
+
+  const daysRaw = typeof req.query.expires_in_days === "string" ? Number(req.query.expires_in_days) : 30;
+  const expiresInDays = Number.isFinite(daysRaw) ? Math.trunc(daysRaw) : 30;
+  const safeDays = Math.max(1, Math.min(expiresInDays, 365));
+  const token = generateMcpToken(req.user.id, safeDays);
+
+  res.json({
+    success: true,
+    data: {
+      token,
+      expires_in_days: safeDays,
+    },
+    how_to_use: "Set this value as BOOKMARK_API_TOKEN in your MCP client config",
   });
 });
 

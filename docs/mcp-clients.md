@@ -30,21 +30,29 @@ If needed, set:
 BOOKMARK_API_BASE_URL=http://your-host:3001
 ```
 
+## Easiest Setup (No Technical Steps)
+
+1. Login at `http://66.179.137.126:3001/register`
+2. Open `http://66.179.137.126:3001/mcp-setup`
+3. Click `Generate Token`
+4. Click `Copy Config`
+5. Paste into Claude Desktop / Cursor / VS Code MCP settings
+6. Restart the app
+
+## Advanced / Manual Setup
+
 ## 4) Required auth token (per-user data isolation)
 
 MCP now uses Bearer token auth for user-specific data.
 
 1. Login in browser at `http://66.179.137.126:3001/register`
-2. Create your token:
+2. Open this URL in the same browser:
+`http://66.179.137.126:3001/api/mcp-token?expires_in_days=30`
+3. Copy `data.token` from the JSON response.
+4. Put it into `BOOKMARK_API_TOKEN` in your client config.
 
-```bash
-curl -X POST http://66.179.137.126:3001/api/mcp-token \
-  -H "Content-Type: application/json" \
-  -H "Cookie: connect.sid=YOUR_SESSION_COOKIE" \
-  -d "{\"expires_in_days\":30}"
-```
-
-3. Put returned `token` into `BOOKMARK_API_TOKEN` in your client config.
+Optional advanced method:
+- `POST /api/mcp-token` with JSON body `{ "expires_in_days": 30 }`
 
 ## 5) Where to paste
 
