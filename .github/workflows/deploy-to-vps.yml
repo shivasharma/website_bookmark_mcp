@@ -93,14 +93,15 @@ jobs:
             DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
             SESSION_COOKIE_SECURE=true
+            PUBLIC_BASE_URL=https://ai.shivaprogramming.com
             CORS_ORIGINS=https://ai.shivaprogramming.com,http://localhost:3001,http://127.0.0.1:3001
             ALLOW_LOCAL_FALLBACK=false
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            GOOGLE_CALLBACK_URL=https://ai.shivaprogramming.com/auth/google/callback
             CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}
             CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}
-            CALLBACK_URL_GITHUB=${{ secrets.CALLBACK_URL_GITHUB }}
+            CALLBACK_URL_GITHUB=https://ai.shivaprogramming.com/auth/github/callback
             ENVFILE
             chmod 600 .env
 

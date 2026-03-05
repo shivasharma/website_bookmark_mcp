@@ -35,6 +35,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3001
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://ai.shivaprogramming.com}
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD:-postgres}@postgres:5432/bookmark_mcp
       SESSION_SECRET: ${SESSION_SECRET:-change-me-in-prod}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}

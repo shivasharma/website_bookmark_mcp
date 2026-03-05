@@ -41,6 +41,7 @@ declare global {
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
+const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET ?? "change-me-in-prod";
 const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_FALLBACK !== "false";
 const SESSION_COOKIE_SECURE =
@@ -54,7 +55,7 @@ const CLIENT_SECRET_GITHUB = process.env.CLIENT_SECRET_GITHUB ?? process.env.GIT
 const CALLBACK_URL_GITHUB =
   process.env.CALLBACK_URL_GITHUB ??
   process.env.GITHUB_CALLBACK_URL ??
-  "http://localhost:3001/auth/github/callback";
+  `${PUBLIC_BASE_URL}/auth/github/callback`;
 const CORS_ORIGINS = (
   process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
@@ -137,7 +138,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL ?? "http://localhost:3001/auth/google/callback",
+        callbackURL: process.env.GOOGLE_CALLBACK_URL ?? `${PUBLIC_BASE_URL}/auth/google/callback`,
       },
       async (_accessToken, _refreshToken, profile, done) => {
         try {
@@ -564,6 +565,6 @@ app.listen(PORT, HOST, () => {
   console.log(`Bookmark API running at http://${HOST}:${PORT}`);
   console.log(`Register/Login page: http://${HOST}:${PORT}/register`);
   if (HOST === "0.0.0.0") {
-    console.log(`Public URL: http://66.179.137.126:${PORT}/register`);
+    console.log(`Public URL: ${PUBLIC_BASE_URL}/register`);
   }
 });
