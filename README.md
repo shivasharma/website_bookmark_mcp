@@ -1,34 +1,41 @@
-# Bookmark Vault (TypeScript + PostgreSQL + OAuth)
+﻿# Bookmark Vault (TypeScript + PostgreSQL + OAuth)
 
-## What changed
-- TypeScript backend (`server/*.ts`)
-- PostgreSQL persistence
-- Docker Compose for app + Postgres
-- OAuth login with Google or GitHub (no password storage)
+This repo now has a clean split:
+- `server/api.ts` -> HTTP API + dashboard + OAuth
+- `server/mcp/index.ts` -> MCP server (stdio transport)
 
-## Quick start with Docker Compose
+## Quick start
 
-1. Copy `.env.example` to `.env` and set OAuth variables if you want social login.
-2. Start stack:
+1. Copy `.env.example` to `.env`
+2. Start Postgres + API (optional dashboard/auth flow):
 
 ```bash
 docker compose up --build -d
 ```
 
-3. Open:
-- Dashboard: `http://localhost:3001/`
-- Login page: `http://localhost:3001/register`
-- Public server login page: `http://66.179.137.126:3001/register`
-
-To stop:
+3. Build MCP server:
 
 ```bash
-docker compose down
+npm install
+npm run build
 ```
 
-## OAuth setup
+## Run servers
 
-Set these in `.env` (or deployment env vars):
+- MCP server (stdio): `npm run start:mcp`
+- API server: `npm run start:api`
+- MCP dev mode: `npm run dev:mcp`
+- API dev mode: `npm run dev:api`
+
+## MCP client setup
+
+Client-specific MCP configs are now in `configs/mcp/`.
+Setup instructions are in `docs/mcp-clients.md`.
+MCP defaults to hosted API `http://66.179.137.126:3001` (no DB config needed in client settings).
+
+## OAuth setup (API only)
+
+Set these in `.env`:
 
 ```env
 GOOGLE_CLIENT_ID=
@@ -40,25 +47,7 @@ CLIENT_SECRET_GITHUB=
 CALLBACK_URL_GITHUB=http://localhost:3001/auth/github/callback
 ```
 
-For deployment at `http://66.179.137.126:3001`, callbacks should be:
-- `http://66.179.137.126:3001/auth/google/callback`
-- `http://66.179.137.126:3001/auth/github/callback`
+## Local fallback
 
-## Local non-OAuth fallback
-
-`ALLOW_LOCAL_FALLBACK=true` allows local testing even if OAuth keys are not set.
-Set `ALLOW_LOCAL_FALLBACK=false` in production to require login.
-
-## API auth endpoints
-
-- `GET /auth/google`
-- `GET /auth/google/callback`
-- `GET /auth/github`
-- `GET /auth/github/callback`
-- `GET /api/me`
-- `POST /api/logout`
-
-## Notes
-
-- The API binds to `0.0.0.0` by default.
-- Database schema is auto-created/migrated at startup.
+`ALLOW_LOCAL_FALLBACK=true` lets API work locally without OAuth.
+Set `ALLOW_LOCAL_FALLBACK=false` in production.

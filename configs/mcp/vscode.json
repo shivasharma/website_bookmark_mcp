@@ -1,0 +1,10 @@
+﻿{
+  "mcpServers": {
+    "bookmark": {
+      "command": "node",
+      "args": [
+        "D:/Project2026/AI/website_bookmark_mcp/dist/mcp/index.js"
+      ]
+    }
+  }
+}
