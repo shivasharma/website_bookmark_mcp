@@ -3,54 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bookmark Vault Dashboard</title>
+  <title>Project Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #060a14;
-      --bg2: #0d1322;
-      --panel: rgba(16, 24, 38, 0.88);
-      --panel-soft: rgba(20, 30, 46, 0.74);
-      --line: rgba(123, 153, 206, 0.26);
-      --text: #ebf1ff;
-      --muted: #9fafcc;
-      --accent: #5fd8ff;
-      --accent2: #77f1c0;
-      --danger: #ff7b9f;
+      --bg-0: #070b15;
+      --bg-1: #10182a;
+      --panel: rgba(17, 25, 40, 0.84);
+      --panel-soft: rgba(22, 31, 48, 0.7);
+      --line: rgba(134, 159, 204, 0.25);
+      --text: #edf3ff;
+      --muted: #9caecd;
+      --accent: #60d7ff;
+      --accent2: #75f0be;
       --radius: 16px;
+    }
+    body[data-theme="light"] {
+      --bg-0: #eef3fb;
+      --bg-1: #dde6f5;
+      --panel: rgba(255, 255, 255, 0.92);
+      --panel-soft: rgba(246, 250, 255, 0.9);
+      --line: rgba(89, 114, 156, 0.25);
+      --text: #111c2f;
+      --muted: #4b5f85;
+      --accent: #2da2d2;
+      --accent2: #2fb47f;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
       color: var(--text);
       font-family: "Manrope", sans-serif;
       background:
-        radial-gradient(900px 500px at 88% 8%, rgba(255, 103, 63, 0.28), transparent 64%),
-        radial-gradient(760px 460px at 18% 96%, rgba(57, 141, 255, 0.2), transparent 60%),
-        linear-gradient(150deg, #0a1020 0%, #070b15 50%, #050911 100%);
+        radial-gradient(900px 460px at 88% 10%, rgba(255, 115, 73, 0.28), transparent 62%),
+        radial-gradient(720px 460px at 10% 100%, rgba(71, 145, 255, 0.22), transparent 60%),
+        linear-gradient(160deg, #0a1121 0%, #070c16 50%, #060a12 100%);
+      min-height: 100vh;
+    }
+    body[data-theme="light"] {
+      background:
+        radial-gradient(820px 420px at 86% 10%, rgba(255, 160, 113, 0.34), transparent 62%),
+        radial-gradient(620px 380px at 10% 100%, rgba(124, 167, 255, 0.28), transparent 60%),
+        linear-gradient(160deg, #f5f9ff 0%, #eef4ff 55%, #eaf1ff 100%);
     }
 
-    .layout {
+    .app {
       display: grid;
-      grid-template-columns: 290px 1fr;
+      grid-template-columns: 280px 1fr;
       gap: 18px;
-      height: 100vh;
       padding: 18px;
+      min-height: 100vh;
     }
 
     .sidebar {
-      background: linear-gradient(180deg, rgba(30, 36, 54, 0.78), rgba(11, 16, 25, 0.86));
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(29, 38, 56, 0.75), rgba(11, 17, 28, 0.86));
+      backdrop-filter: blur(10px);
+      padding: 16px 12px;
       display: flex;
       flex-direction: column;
-      padding: 16px 12px;
       gap: 10px;
     }
 
@@ -58,41 +74,43 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 6px 10px 14px;
-      border-bottom: 1px solid rgba(136, 164, 218, 0.23);
+      padding: 4px 10px 14px;
+      border-bottom: 1px solid rgba(142, 170, 220, 0.22);
     }
 
     .logo {
       width: 34px;
       height: 34px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent), #8db8ff);
-      color: #08131f;
+      background: linear-gradient(135deg, var(--accent), #8baeff);
       display: grid;
       place-items: center;
-      font-weight: 800;
+      color: #07111f;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
       font-size: 12px;
     }
 
     .brand h1 {
       margin: 0;
+      font-family: "Space Grotesk", sans-serif;
       font-size: 15px;
-      font-weight: 800;
+      font-weight: 700;
+      letter-spacing: 0.2px;
     }
 
     .brand p {
-      margin: 1px 0 0;
+      margin: 2px 0 0;
       font-size: 11px;
       color: var(--muted);
-      font-family: "JetBrains Mono", monospace;
     }
 
-    .label {
+    .nav-title {
       margin: 8px 10px 2px;
       font-size: 11px;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 1.3px;
+      letter-spacing: 1.2px;
       font-weight: 700;
     }
 
@@ -101,375 +119,614 @@
       gap: 4px;
     }
 
-    .nav a {
+    .nav-btn {
       border: 1px solid transparent;
       border-radius: 10px;
-      padding: 10px 12px;
+      background: transparent;
       color: var(--text);
-      text-decoration: none;
+      font: inherit;
       font-size: 14px;
       font-weight: 600;
+      text-align: left;
+      padding: 10px 12px;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
       transition: all .2s ease;
     }
-
-    .nav a:hover {
-      border-color: rgba(125, 163, 231, 0.34);
-      background: rgba(76, 110, 183, 0.17);
+    .nav-btn .left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .nav-btn .icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      background: rgba(109, 147, 218, 0.18);
+      border: 1px solid rgba(133, 165, 222, 0.28);
+      flex-shrink: 0;
+    }
+    .drag {
+      color: var(--muted);
+      font-size: 13px;
+      margin-left: 6px;
+      cursor: grab;
+      user-select: none;
+    }
+    .nav-btn.dragging {
+      opacity: .45;
+      border-style: dashed;
+    }
+    .nav-btn.drop-target {
+      border-color: rgba(125, 226, 191, 0.7);
+      box-shadow: 0 0 0 1px rgba(125, 226, 191, 0.3) inset;
     }
 
-    .nav a.active {
-      border-color: rgba(137, 188, 255, 0.5);
-      background: linear-gradient(90deg, rgba(59, 105, 194, 0.35), rgba(35, 60, 115, 0.28));
-      box-shadow: 0 8px 20px rgba(15, 34, 74, 0.34);
+    .nav-btn:hover {
+      border-color: rgba(135, 166, 223, 0.35);
+      background: rgba(67, 101, 167, 0.16);
     }
 
-    .kbd {
-      font-family: "JetBrains Mono", monospace;
+    .nav-btn.active {
+      border-color: rgba(139, 195, 255, 0.5);
+      background: linear-gradient(90deg, rgba(58, 103, 190, 0.35), rgba(36, 65, 120, 0.3));
+      box-shadow: 0 8px 18px rgba(14, 33, 70, 0.35);
+    }
+
+    .tag {
       font-size: 11px;
       color: var(--muted);
-      border: 1px solid rgba(127, 156, 211, 0.3);
+      border: 1px solid rgba(126, 154, 209, 0.32);
       border-radius: 8px;
       padding: 1px 6px;
     }
 
-    .side-note {
+    .sidebar-note {
       margin-top: auto;
-      border-top: 1px solid rgba(136, 164, 218, 0.23);
+      border-top: 1px solid rgba(142, 170, 220, 0.22);
       padding: 12px 10px 4px;
       font-size: 12px;
       color: var(--muted);
+      line-height: 1.5;
     }
 
     .main {
-      min-width: 0;
       display: grid;
-      grid-template-rows: auto 1fr;
+      grid-template-rows: auto auto 1fr;
       gap: 12px;
+      min-width: 0;
     }
 
-    .topbar {
+    .hero {
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      background: var(--panel-soft);
-      backdrop-filter: blur(10px);
-      padding: 12px 16px;
+      background:
+        linear-gradient(140deg, rgba(27, 38, 58, 0.88), rgba(14, 22, 36, 0.8)),
+        radial-gradient(520px 200px at 80% 0%, rgba(95, 173, 255, 0.22), transparent 70%);
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .topbar h2 { margin: 0; font-size: 20px; font-weight: 800; }
-    .topbar p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .hero h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
 
-    .pill {
-      border-radius: 999px;
-      border: 1px solid rgba(125, 199, 255, 0.38);
-      background: rgba(44, 98, 175, 0.24);
-      color: #cde9ff;
-      font-family: "JetBrains Mono", monospace;
+    .hero p {
+      margin: 3px 0 0;
+      color: var(--muted);
       font-size: 12px;
-      padding: 6px 11px;
+    }
+
+    .chip {
+      border: 1px solid rgba(122, 200, 255, 0.45);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #c9e8ff;
+      background: rgba(48, 102, 180, 0.3);
+      font-size: 12px;
       font-weight: 700;
     }
+    .hero-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .clock {
+      border: 1px solid rgba(122, 200, 255, 0.45);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(48, 102, 180, 0.22);
+      min-width: 96px;
+      text-align: center;
+    }
+    .icon-btn {
+      border: 1px solid rgba(122, 200, 255, 0.45);
+      border-radius: 10px;
+      width: 34px;
+      height: 34px;
+      background: rgba(48, 102, 180, 0.22);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .2s ease;
+    }
+    .icon-btn:hover { border-color: rgba(136, 197, 255, 0.7); background: rgba(60, 98, 164, 0.34); }
+
+    .toolbar {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-soft);
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input {
+      width: 300px;
+      max-width: 100%;
+      border: 1px solid rgba(128, 157, 212, 0.35);
+      background: rgba(17, 27, 43, 0.8);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .toolbar input:focus { border-color: rgba(113, 200, 255, 0.65); }
+
+    .toolbar small { color: var(--muted); }
 
     .content {
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--panel);
+      padding: 14px;
       overflow: auto;
-      padding: 18px;
     }
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
-      margin-bottom: 14px;
     }
 
     .card {
-      border: 1px solid rgba(125, 158, 219, 0.24);
-      border-radius: 12px;
-      padding: 12px;
-      background: linear-gradient(145deg, rgba(29, 42, 64, 0.6), rgba(16, 24, 38, 0.78));
+      border: 1px solid rgba(126, 156, 210, 0.24);
+      border-radius: 14px;
+      background: linear-gradient(140deg, rgba(21, 31, 47, 0.95), rgba(13, 20, 33, 0.86));
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 12px;
+      align-items: center;
     }
 
-    .card .name {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-
-    .card .value {
-      font-size: 24px;
+    .card h3 {
+      margin: 0;
+      font-size: 17px;
       font-weight: 800;
-      line-height: 1;
     }
-
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      overflow: hidden;
-      border-radius: 12px;
-      border: 1px solid rgba(122, 152, 206, 0.22);
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-
-    .table th, .table td {
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(122, 152, 206, 0.15);
-      text-align: left;
+    .title-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
       font-size: 13px;
+      background: rgba(104, 143, 218, 0.18);
+      border: 1px solid rgba(129, 165, 226, 0.3);
+      flex-shrink: 0;
     }
 
-    .table th {
+    .card p {
+      margin: 4px 0 0;
       color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-weight: 700;
-      background: rgba(19, 28, 43, 0.8);
+      font-size: 12px;
+      line-height: 1.45;
     }
 
-    .table tr:last-child td { border-bottom: 0; }
+    .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-    .actions { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .meta b {
+      font-size: 20px;
+      line-height: 1;
+      color: #f3f8ff;
+    }
+
+    .meta span { color: var(--muted); font-size: 12px; }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
     .btn {
-      border: 1px solid rgba(120, 157, 221, 0.32);
-      background: rgba(40, 68, 118, 0.24);
-      color: var(--text);
+      border: 1px solid rgba(127, 160, 220, 0.35);
       border-radius: 10px;
-      padding: 9px 12px;
-      font-size: 13px;
-      font-weight: 700;
+      background: rgba(45, 72, 123, 0.26);
+      color: var(--text);
       text-decoration: none;
-      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 10px;
       transition: all .2s ease;
     }
 
-    .btn:hover { border-color: rgba(145, 196, 255, .55); background: rgba(57, 95, 166, 0.35); }
-    .btn.primary { border-color: rgba(110, 212, 255, 0.5); background: linear-gradient(135deg, rgba(66, 155, 215, 0.48), rgba(63, 114, 199, 0.34)); }
-
-    .muted { color: var(--muted); }
-    .mono { font-family: "JetBrains Mono", monospace; }
-    .good { color: var(--accent2); }
-    .bad { color: var(--danger); }
-
-    @media (max-width: 1024px) {
-      .layout { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
-      .main { min-height: 72vh; }
-      .cards { grid-template-columns: 1fr 1fr; }
+    .btn:hover {
+      border-color: rgba(136, 197, 255, 0.58);
+      background: rgba(60, 98, 164, 0.38);
     }
 
-    @media (max-width: 680px) {
-      .cards { grid-template-columns: 1fr; }
+    .btn.primary {
+      border-color: rgba(114, 212, 255, 0.58);
+      background: linear-gradient(135deg, rgba(66, 154, 214, 0.46), rgba(61, 109, 194, 0.34));
+    }
+
+    .empty { color: var(--muted); font-size: 13px; padding: 10px; }
+    .settings {
+      position: fixed;
+      right: 18px;
+      top: 76px;
+      width: 240px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: 0 18px 40px rgba(7, 15, 31, 0.35);
+      padding: 12px;
+      z-index: 20;
+      display: none;
+    }
+    .settings.open { display: block; }
+    .settings h4 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .theme-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .theme-btn {
+      border: 1px solid rgba(127, 160, 220, 0.35);
+      border-radius: 10px;
+      background: rgba(45, 72, 123, 0.2);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .theme-btn.active {
+      border-color: rgba(114, 212, 255, 0.62);
+      background: linear-gradient(135deg, rgba(66, 154, 214, 0.46), rgba(61, 109, 194, 0.34));
+    }
+    .settings .mini {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .card { grid-template-columns: 1fr; }
+      .actions { justify-content: flex-start; }
     }
   </style>
 </head>
 <body>
-  <div class="layout">
+  <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo">BV</div>
+        <div class="logo">HUB</div>
         <div>
-          <h1>Bookmark Vault</h1>
-          <p>Dashboard</p>
+          <h1>Project Hub</h1>
+          <p>Choose a project to open</p>
         </div>
       </div>
 
-      <div class="label">Workspace</div>
+      <div class="nav-title">Projects</div>
       <nav class="nav" id="nav"></nav>
 
-      <div class="side-note">Use the menu to switch sections. Each section has its own route URL.</div>
+      <div class="sidebar-note">
+        Add/edit links in <strong>PROJECTS</strong>. Drag project rows to reorder. Order is saved in your browser.
+      </div>
     </aside>
 
     <main class="main">
-      <header class="topbar">
+      <section class="hero">
         <div>
-          <h2 id="title">Dashboard</h2>
-          <p id="subtitle">Overview</p>
+          <h2 id="title">All Projects</h2>
+          <p id="subtitle">Overview of your project workspace</p>
         </div>
-        <span class="pill" id="routePill">/dashboard/bookmarks</span>
-      </header>
+        <div class="hero-right">
+          <span class="chip" id="countChip">0 projects</span>
+          <span class="clock" id="clock">--:--</span>
+          <button class="icon-btn" id="settingsBtn" aria-label="Open settings">⚙</button>
+        </div>
+      </section>
 
-      <section class="content" id="content"></section>
+      <section class="toolbar">
+        <input id="search" type="text" placeholder="Search projects..." />
+        <small>Click <strong>Bookmarks</strong> to open <span id="appLink">/app</span></small>
+      </section>
+
+      <section class="content">
+        <div class="cards" id="cards"></div>
+      </section>
     </main>
   </div>
+  <aside class="settings" id="settingsPanel">
+    <h4>Appearance</h4>
+    <div class="theme-row">
+      <button class="theme-btn" data-theme="dark">Dark</button>
+      <button class="theme-btn" data-theme="light">Light</button>
+    </div>
+    <button class="btn" id="resetOrderBtn" style="width:100%; text-align:center;">Reset Project Order</button>
+    <div class="mini">Theme and order are saved on this browser.</div>
+  </aside>
 
   <script>
-    const routes = {
-      bookmarks: {
-        label: 'Bookmarks',
-        subtitle: 'Recent bookmarks and quick actions',
-        key: 'A',
-        render: renderBookmarksView,
+    const PROJECTS = [
+      {
+        id: 'bookmarks',
+        icon: '★',
+        name: 'Bookmarks',
+        description: 'Bookmark manager with search, tags, notes, and favorites.',
+        metricA: 'Live',
+        metricB: 'Core App',
+        route: '/app',
+        openDirect: true,
+        links: [
+          { label: 'Open App', href: '/app', primary: true },
+          { label: 'API Health', href: '/api/health' },
+        ],
       },
-      mcp: {
-        label: 'MCP Setup',
-        subtitle: 'Generate token and client config',
-        key: 'B',
-        render: renderMcpView,
+      {
+        id: 'mcp',
+        icon: '⚙',
+        name: 'MCP Setup',
+        description: 'Generate token and copy client configs for Claude, Cursor, and VS Code.',
+        metricA: 'Token',
+        metricB: 'Config',
+        route: '/mcp-setup',
+        links: [
+          { label: 'Open Setup', href: '/mcp-setup', primary: true },
+        ],
       },
-      account: {
-        label: 'Account',
-        subtitle: 'Authentication and session',
-        key: 'C',
-        render: renderAccountView,
+      {
+        id: 'account',
+        icon: '👤',
+        name: 'Account',
+        description: 'Login and OAuth session management.',
+        metricA: 'OAuth',
+        metricB: 'Session',
+        route: '/register',
+        links: [
+          { label: 'Open Account', href: '/register', primary: true },
+        ],
       },
-      health: {
-        label: 'System Health',
-        subtitle: 'Service health and diagnostics',
-        key: 'D',
-        render: renderHealthView,
+      {
+        id: 'health',
+        icon: '✓',
+        name: 'System Health',
+        description: 'Quick diagnostics for service availability.',
+        metricA: 'Status',
+        metricB: 'API',
+        route: '/api/health',
+        links: [
+          { label: 'Open Health JSON', href: '/api/health', primary: true },
+        ],
       },
-    };
+    ];
 
-    function getSectionFromPath() {
-      const parts = window.location.pathname.split('/').filter(Boolean);
-      if (parts[0] !== 'dashboard') return 'bookmarks';
-      return parts[1] && routes[parts[1]] ? parts[1] : 'bookmarks';
+    const STORAGE_KEY = 'project_hub_order_v1';
+    const THEME_KEY = 'project_hub_theme_v1';
+    let selected = 'all';
+    let query = '';
+    let draggedId = null;
+    let projects = loadProjects();
+
+    const navEl = document.getElementById('nav');
+    const cardsEl = document.getElementById('cards');
+    const titleEl = document.getElementById('title');
+    const subtitleEl = document.getElementById('subtitle');
+    const countChipEl = document.getElementById('countChip');
+    const clockEl = document.getElementById('clock');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    function loadProjects() {
+      const source = PROJECTS.map((p) => ({ ...p }));
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (!Array.isArray(saved) || !saved.length) return source;
+        const byId = new Map(source.map((p) => [p.id, p]));
+        const ordered = [];
+        for (const id of saved) {
+          if (byId.has(id)) {
+            ordered.push(byId.get(id));
+            byId.delete(id);
+          }
+        }
+        return [...ordered, ...Array.from(byId.values())];
+      } catch {
+        return source;
+      }
     }
 
-    function buildNav(activeSection) {
-      const nav = document.getElementById('nav');
-      nav.innerHTML = Object.entries(routes).map(([section, cfg]) => {
-        const active = section === activeSection ? 'active' : '';
-        return `<a class="${active}" href="/dashboard/${section}" data-section="${section}"><span>${cfg.label}</span><span class="kbd">${cfg.key}</span></a>`;
+    function saveOrder() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects.map((p) => p.id)));
+    }
+    function applyTheme(theme) {
+      const next = theme === 'light' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem(THEME_KEY, next);
+      document.querySelectorAll('.theme-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.theme === next);
+      });
+    }
+    function initTheme() {
+      applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+    }
+    function startClock() {
+      const update = () => {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    function filteredProjects() {
+      const base = selected === 'all' ? projects : projects.filter((p) => p.id === selected);
+      if (!query.trim()) return base;
+      const q = query.trim().toLowerCase();
+      return base.filter((p) => p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+    }
+
+    function renderNav() {
+      const items = [{ id: 'all', name: 'All Projects', icon: '◉' }, ...projects.map((p) => ({ id: p.id, name: p.name, icon: p.icon || '•' }))];
+      navEl.innerHTML = items.map((item, idx) => {
+        const active = item.id === selected ? 'active' : '';
+        const badge = idx === 0 ? projects.length : idx;
+        const dragHandle = item.id === 'all' ? '' : '<span class="drag" title="Drag to reorder">⋮⋮</span>';
+        return `<button class="nav-btn ${active}" data-id="${item.id}" ${item.id === 'all' ? '' : 'draggable="true"'}><span class="left"><span class="icon">${item.icon}</span><span>${item.name}</span></span><span><span class="tag">${badge}</span>${dragHandle}</span></button>`;
       }).join('');
 
-      Array.from(nav.querySelectorAll('a')).forEach((a) => {
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          const section = a.dataset.section;
-          navigate(section);
+      navEl.querySelectorAll('.nav-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const project = projects.find((p) => p.id === id);
+
+          if (project && project.openDirect && project.route) {
+            window.location.href = project.route;
+            return;
+          }
+
+          selected = id;
+          if (id === 'all') {
+            titleEl.textContent = 'All Projects';
+            subtitleEl.textContent = 'Overview of your project workspace';
+          } else if (project) {
+            titleEl.textContent = project.name;
+            subtitleEl.textContent = project.description;
+          }
+          renderNav();
+          renderCards();
         });
+
+        if (btn.dataset.id !== 'all') {
+          btn.addEventListener('dragstart', (e) => {
+            draggedId = btn.dataset.id;
+            btn.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+          });
+          btn.addEventListener('dragend', () => {
+            draggedId = null;
+            btn.classList.remove('dragging');
+            navEl.querySelectorAll('.nav-btn').forEach((n) => n.classList.remove('drop-target'));
+          });
+          btn.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedId && draggedId !== btn.dataset.id) {
+              btn.classList.add('drop-target');
+            }
+          });
+          btn.addEventListener('dragleave', () => {
+            btn.classList.remove('drop-target');
+          });
+          btn.addEventListener('drop', (e) => {
+            e.preventDefault();
+            btn.classList.remove('drop-target');
+            const targetId = btn.dataset.id;
+            if (!draggedId || draggedId === targetId) return;
+            const from = projects.findIndex((p) => p.id === draggedId);
+            const to = projects.findIndex((p) => p.id === targetId);
+            if (from < 0 || to < 0) return;
+            const [moved] = projects.splice(from, 1);
+            projects.splice(to, 0, moved);
+            saveOrder();
+            renderNav();
+            renderCards();
+          });
+        }
       });
     }
 
-    async function navigate(section, push = true) {
-      const cfg = routes[section] || routes.bookmarks;
-      const path = `/dashboard/${section}`;
-      if (push && window.location.pathname !== path) history.pushState({}, '', path);
+    function renderCards() {
+      const projects = filteredProjects();
+      countChipEl.textContent = `${projects.length} project${projects.length === 1 ? '' : 's'}`;
 
-      document.getElementById('title').textContent = cfg.label;
-      document.getElementById('subtitle').textContent = cfg.subtitle;
-      document.getElementById('routePill').textContent = path;
-      buildNav(section);
-      document.getElementById('content').innerHTML = `<div class="muted">Loading...</div>`;
-      await cfg.render(document.getElementById('content'));
-    }
-
-    window.addEventListener('popstate', () => navigate(getSectionFromPath(), false));
-
-    async function safeJson(url, options = undefined) {
-      const res = await fetch(url, options);
-      const json = await res.json().catch(() => ({}));
-      return { ok: res.ok, status: res.status, json };
-    }
-
-    async function renderBookmarksView(root) {
-      const [bookmarksRes, statsRes] = await Promise.all([
-        safeJson('/api/bookmarks', { credentials: 'include' }),
-        safeJson('/api/stats', { credentials: 'include' }),
-      ]);
-
-      if (bookmarksRes.status === 401) {
-        root.innerHTML = `
-          <h3>Login required</h3>
-          <p class="muted">Please sign in to manage bookmarks.</p>
-          <div class="actions"><a class="btn primary" href="/register">Go to Login</a></div>
-        `;
+      if (!projects.length) {
+        cardsEl.innerHTML = '<div class="empty">No projects match your search.</div>';
         return;
       }
 
-      const bookmarks = Array.isArray(bookmarksRes.json.data) ? bookmarksRes.json.data.slice(0, 10) : [];
-      const stats = statsRes.json?.data || { total: 0, favorites: 0, recent: 0 };
-
-      root.innerHTML = `
-        <div class="cards">
-          <div class="card"><div class="name">Total</div><div class="value">${stats.total ?? 0}</div></div>
-          <div class="card"><div class="name">Favorites</div><div class="value">${stats.favorites ?? 0}</div></div>
-          <div class="card"><div class="name">This Week</div><div class="value">${stats.recent ?? 0}</div></div>
-        </div>
-
-        <table class="table">
-          <thead><tr><th>Title</th><th>URL</th><th>Tags</th></tr></thead>
-          <tbody>
-            ${bookmarks.length ? bookmarks.map((b) => `
-              <tr>
-                <td>${escapeHtml(b.title || '(untitled)')}</td>
-                <td class="mono">${escapeHtml(b.url || '')}</td>
-                <td>${Array.isArray(b.tags) ? b.tags.map(escapeHtml).join(', ') : ''}</td>
-              </tr>
-            `).join('') : '<tr><td colspan="3" class="muted">No bookmarks yet.</td></tr>'}
-          </tbody>
-        </table>
-
-        <div class="actions">
-          <a class="btn primary" href="/app">Open Full Bookmark App</a>
-          <a class="btn" href="/mcp-setup">Open MCP Setup</a>
-        </div>
-      `;
-    }
-
-    async function renderMcpView(root) {
-      root.innerHTML = `
-        <h3>MCP Setup</h3>
-        <p class="muted">Generate token and copy client configuration from the setup page.</p>
-        <div class="actions">
-          <a class="btn primary" href="/mcp-setup">Open MCP Setup Page</a>
-        </div>
-      `;
-    }
-
-    async function renderAccountView(root) {
-      const me = await safeJson('/api/me', { credentials: 'include' });
-      if (!me.ok) {
-        root.innerHTML = `
-          <h3>Account</h3>
-          <p class="muted">You are not signed in.</p>
-          <div class="actions"><a class="btn primary" href="/register">Sign In</a></div>
+      cardsEl.innerHTML = projects.map((p) => {
+        const links = (p.links || []).map((l) => `<a class="btn ${l.primary ? 'primary' : ''}" href="${l.href}">${l.label}</a>`).join('');
+        return `
+          <article class="card">
+            <div>
+              <div class="title-row">
+                <span class="title-icon">${escapeHtml(p.icon || '•')}</span>
+                <h3>${escapeHtml(p.name)}</h3>
+              </div>
+              <p>${escapeHtml(p.description)}</p>
+            </div>
+            <div class="meta">
+              <b>${escapeHtml(p.metricA || '-')}</b>
+              <span>Primary</span>
+            </div>
+            <div>
+              <div class="meta" style="margin-bottom:10px;">
+                <b>${escapeHtml(p.metricB || '-')}</b>
+                <span>Secondary</span>
+              </div>
+              <div class="actions">${links}</div>
+            </div>
+          </article>
         `;
-        return;
-      }
-
-      const user = me.json.data || {};
-      root.innerHTML = `
-        <h3>Account</h3>
-        <p><strong>Name:</strong> ${escapeHtml(user.name || '-')}</p>
-        <p><strong>Email:</strong> ${escapeHtml(user.email || '-')}</p>
-        <p><strong>Provider:</strong> ${escapeHtml(user.auth_provider || '-')}</p>
-        <div class="actions">
-          <button class="btn" id="logoutBtn">Logout</button>
-          <a class="btn" href="/register">Open Login Page</a>
-        </div>
-      `;
-      document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-        navigate('account', false);
-      });
+      }).join('');
     }
 
-    async function renderHealthView(root) {
-      const health = await safeJson('/api/health');
-      const ok = health.ok && health.json?.success;
-      root.innerHTML = `
-        <h3>System Health</h3>
-        <p>Status: <strong class="${ok ? 'good' : 'bad'}">${ok ? 'OK' : 'Unhealthy'}</strong></p>
-        <pre class="mono" style="white-space: pre-wrap; color: var(--muted);">${escapeHtml(JSON.stringify(health.json, null, 2))}</pre>
-      `;
-    }
-
-    function escapeHtml(input) {
-      return String(input)
+    function escapeHtml(value) {
+      return String(value)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -477,7 +734,33 @@
         .replace(/'/g, '&#039;');
     }
 
-    navigate(getSectionFromPath(), false);
+    document.getElementById('search').addEventListener('input', (e) => {
+      query = e.target.value || '';
+      renderCards();
+    });
+    document.querySelectorAll('.theme-btn').forEach((btn) => {
+      btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+    });
+    document.getElementById('resetOrderBtn').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      projects = loadProjects();
+      renderNav();
+      renderCards();
+    });
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      settingsPanel.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+        settingsPanel.classList.remove('open');
+      }
+    });
+
+    initTheme();
+    startClock();
+    renderNav();
+    renderCards();
   </script>
 </body>
 </html>
