@@ -956,3 +956,611 @@
       }
       state.editingId = null;
     }
+
+    function toast(message, isError = false) {
+      const item = document.createElement("div");
+      item.textContent = message;
+      item.style.position = "fixed";
+      item.style.bottom = "14px";
+      item.style.right = "14px";
+      item.style.padding = "9px 12px";
+      item.style.borderRadius = "10px";
+      item.style.border = "1px solid " + (isError ? "#8b3348" : "#2f5ea2");
+      item.style.background = isError ? "#3d1723" : "#12274b";
+      item.style.color = "#e9f0ff";
+      item.style.font = "700 12px JetBrains Mono, monospace";
+      item.style.zIndex = "120";
+      document.body.appendChild(item);
+      setTimeout(() => item.remove(), 2600);
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(API + path, {
+        ...options,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      let payload = null;
+      try { payload = await response.json(); } catch {}
+      return { response, payload };
+    }
+
+    async function loadCurrentUser() {
+      try {
+        const { response, payload } = await api("/me", { method: "GET" });
+        if (!response.ok || !payload?.success) {
+          state.currentUser = null;
+          return;
+        }
+        state.currentUser = payload.data;
+      } catch {
+        state.currentUser = null;
+      }
+    }
+
+    async function loadBookmarks() {
+      const search = state.search.trim();
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      if (state.showFavorites) params.set("favorite", "true");
+
+      try {
+        const { response, payload } = await api(`/bookmarks?${params.toString()}`, { method: "GET" });
+        if (!response.ok || !payload?.success) {
+          state.bookmarks = [];
+          return;
+        }
+        state.bookmarks = Array.isArray(payload.data) ? payload.data : [];
+      } catch {
+        state.bookmarks = [];
+      }
+    }
+
+    async function loadStatsIntoDom() {
+      const totalEl = document.getElementById("statTotal");
+      const favEl = document.getElementById("statFavorites");
+      const recentEl = document.getElementById("statRecent");
+      if (!totalEl || !favEl || !recentEl) return;
+
+      try {
+        const { response, payload } = await api("/stats", { method: "GET" });
+        if (!response.ok || !payload?.success) {
+          totalEl.textContent = String(state.bookmarks.length);
+          favEl.textContent = String(state.bookmarks.filter((item) => item.is_favorite).length);
+          recentEl.textContent = "0";
+          return;
+        }
+        const data = payload.data || {};
+        totalEl.textContent = String(data.total ?? state.bookmarks.length);
+        favEl.textContent = String(data.favorites ?? 0);
+        recentEl.textContent = String(data.recent ?? 0);
+      } catch {
+        totalEl.textContent = String(state.bookmarks.length);
+        favEl.textContent = String(state.bookmarks.filter((item) => item.is_favorite).length);
+        recentEl.textContent = "0";
+      }
+    }
+
+    async function loadHealthIntoDom() {
+      const node = document.getElementById("healthStatus");
+      if (!node) return;
+      try {
+        const { response, payload } = await api("/health", { method: "GET" });
+        if (response.ok && payload?.success) {
+          node.innerHTML = "API status: <strong>OK</strong>";
+          return;
+        }
+      } catch {}
+      node.innerHTML = "API status: <strong>Unavailable</strong>";
+    }
+
+    async function loadMcpTokenIntoDom() {
+      const target = document.getElementById("mcpTokenOutput");
+      if (!target) return;
+      if (!state.currentUser) {
+        target.textContent = "Login required before generating token.";
+        return;
+      }
+      try {
+        const { response, payload } = await api("/mcp-token?expires_in_days=30", { method: "GET" });
+        if (!response.ok || !payload?.success || !payload?.data?.token) {
+          target.textContent = "Could not generate token.";
+          return;
+        }
+        target.textContent = payload.data.token;
+      } catch {
+        target.textContent = "Could not generate token.";
+      }
+    }
+
+    function getDomain(url) {
+      try { return new URL(url).hostname; } catch { return ""; }
+    }
+
+    function formatDate(input) {
+      const d = new Date(input);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    function filteredProjects() {
+      const q = state.search.trim().toLowerCase();
+      if (!q) return PROJECTS;
+      return PROJECTS.filter((project) => {
+        const hay = [project.name, project.subtitle, (project.tech || []).join(" ")]
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function tileMarkup(project, index) {
+      return `
+        <article class="project-tile">
+          <div class="tile-head">
+            <div>
+              <span class="tile-id">${String(index + 1).padStart(2, "0")}</span>
+              <h3 class="tile-title">${escapeHtml(project.name)}</h3>
+            </div>
+            <span class="tile-status">${escapeHtml(project.badge || "Active")}</span>
+          </div>
+          <div class="tile-main">
+            <div class="tile-col">
+              <div class="tile-label">Problem</div>
+              <p>${escapeHtml(project.problem || "Add project problem statement.")}</p>
+            </div>
+            <div class="tile-col">
+              <div class="tile-label">Solution</div>
+              <p>${escapeHtml(project.solution || "Add project solution statement.")}</p>
+            </div>
+            <div class="tile-col">
+              <div class="tile-label">Architecture</div>
+              <div class="img-placeholder">${escapeHtml(project.architecture || "Image placeholder")}</div>
+            </div>
+          </div>
+          <div class="tile-tech">
+            ${(project.tech || []).map((tech) => `<span class="chip">${escapeHtml(tech)}</span>`).join("")}
+          </div>
+          <div class="tile-actions">
+            <button class="btn primary" data-open-route="${escapeHtml(project.route)}">Open Project</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function bookmarksMarkup() {
+      return `
+        <div class="bookmark-shell">
+          <div class="bookmark-subnav" id="bookmarkSubnav">
+            <button data-bm-tab="bookmarks" class="${state.activeBookmarkTab === "bookmarks" ? "active" : ""}">Bookmarks</button>
+            <button data-bm-tab="health" class="${state.activeBookmarkTab === "health" ? "active" : ""}">System Health</button>
+            <button data-bm-tab="account" class="${state.activeBookmarkTab === "account" ? "active" : ""}">Account</button>
+            <button data-bm-tab="mcp" class="${state.activeBookmarkTab === "mcp" ? "active" : ""}">MCP Setup</button>
+          </div>
+          <div id="bookmarkTabPanel"></div>
+        </div>
+      `;
+    }
+
+    function bookmarkListMarkup() {
+      const cards = state.bookmarks.length
+        ? state.bookmarks.map((bookmark) => `
+          <article class="bm-card">
+            <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
+            <div class="bm-url">${escapeHtml(bookmark.url)}</div>
+            <div class="bm-desc">${escapeHtml(bookmark.description || "No description")}</div>
+            <div class="tags">${(bookmark.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+            <div class="bm-meta">${escapeHtml(getDomain(bookmark.url))} | ${escapeHtml(formatDate(bookmark.created_at))}</div>
+            <div class="bm-actions">
+              <button class="btn" data-edit-bookmark="${bookmark.id}">Edit</button>
+              <button class="btn" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</button>
+              <button class="btn" data-del-bookmark="${bookmark.id}">Delete</button>
+            </div>
+          </article>
+        `).join("")
+        : `<div class="empty">No bookmarks yet. Click Add Bookmark to save your first item.</div>`;
+
+      return `
+        <div class="bookmark-stats">
+          <div class="stat"><div class="k">Total</div><div class="v" id="statTotal">0</div></div>
+          <div class="stat"><div class="k">Favorites</div><div class="v" id="statFavorites">0</div></div>
+          <div class="stat"><div class="k">Recent</div><div class="v" id="statRecent">0</div></div>
+        </div>
+
+        <div class="bm-toolbar">
+          <div class="bm-left">
+            <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.search)}" placeholder="Search bookmarks" />
+            <button class="btn" id="toggleFavoritesBtn">${state.showFavorites ? "Showing Favorites" : "Show Favorites"}</button>
+          </div>
+          <div class="bm-right">
+            <button class="btn primary" id="addBookmarkBtn">Add Bookmark</button>
+          </div>
+        </div>
+
+        <div class="bm-grid" id="bookmarkGrid">${cards}</div>
+      `;
+    }
+
+    function healthMarkup() {
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>Service Health</h3>
+            <p id="healthStatus">API status: checking...</p>
+          </article>
+          <article class="block">
+            <h3>Deployment Notes</h3>
+            <p>All requests run behind Docker Nginx and route into the app service. Keep callbacks and base URL on your domain only.</p>
+          </article>
+        </div>
+      `;
+    }
+
+    function accountMarkup() {
+      const user = state.currentUser;
+      if (!user) {
+        return `<article class="block"><h3>Account</h3><p>You are not logged in. Use <a href="/register" style="color:inherit;">/register</a> to sign in with Google or GitHub.</p></article>`;
+      }
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>Profile</h3>
+            <p>Name: ${escapeHtml(user.name || "-")}</p>
+            <p>Email: ${escapeHtml(user.email || "-")}</p>
+            <p>Provider: ${escapeHtml(user.auth_provider || "oauth")}</p>
+          </article>
+          <article class="block">
+            <h3>Session</h3>
+            <p>Use this account for bookmarks and MCP token generation.</p>
+            <button class="btn" id="logoutBtn">Logout</button>
+          </article>
+        </div>
+      `;
+    }
+
+    function mcpMarkup() {
+      const base = `${location.origin}`;
+      const callback = `${location.origin}/auth/github/callback`;
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>MCP Setup</h3>
+            <p>Generate a token and paste this config in Claude Desktop, Cursor, or VS Code MCP settings.</p>
+            <button class="btn primary" id="refreshMcpTokenBtn">Generate Token</button>
+            <div class="code" id="mcpTokenOutput">Click Generate Token</div>
+          </article>
+          <article class="block">
+            <h3>Config Template</h3>
+            <div class="code">{
+  "mcpServers": {
+    "bookmark": {
+      "command": "node",
+      "args": ["dist/mcp/index.js"],
+      "env": {
+        "BOOKMARK_API_BASE_URL": "${base}",
+        "BOOKMARK_API_TOKEN": "paste-token-here"
+      }
+    }
+  }
+}</div>
+          </article>
+          <article class="block">
+            <h3>OAuth Callback</h3>
+            <p>GitHub callback should be set to this URL only:</p>
+            <div class="code">${callback}</div>
+          </article>
+        </div>
+      `;
+    }
+
+    function renderBookmarkTab() {
+      const panel = document.getElementById("bookmarkTabPanel");
+      if (!panel) return;
+
+      if (state.activeBookmarkTab === "bookmarks") {
+        panel.innerHTML = bookmarkListMarkup();
+        loadStatsIntoDom();
+        bindBookmarkInteractions();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "health") {
+        panel.innerHTML = healthMarkup();
+        loadHealthIntoDom();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "account") {
+        panel.innerHTML = accountMarkup();
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            try { await api("/logout", { method: "POST" }); } catch {}
+            state.currentUser = null;
+            toast("Logged out");
+            renderBookmarkTab();
+          });
+        }
+        return;
+      }
+
+      panel.innerHTML = mcpMarkup();
+      const refreshBtn = document.getElementById("refreshMcpTokenBtn");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+          loadMcpTokenIntoDom();
+        });
+      }
+    }
+
+    function bindBookmarkInteractions() {
+      const searchInput = document.getElementById("bookmarkSearch");
+      const addBtn = document.getElementById("addBookmarkBtn");
+      const favBtn = document.getElementById("toggleFavoritesBtn");
+
+      if (searchInput) {
+        searchInput.addEventListener("input", async (event) => {
+          state.search = event.target.value;
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      }
+
+      if (favBtn) {
+        favBtn.addEventListener("click", async () => {
+          state.showFavorites = !state.showFavorites;
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      }
+
+      if (addBtn) {
+        addBtn.addEventListener("click", () => openModal(false));
+      }
+
+      document.querySelectorAll("[data-edit-bookmark]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = Number(button.getAttribute("data-edit-bookmark"));
+          const bookmark = state.bookmarks.find((item) => item.id === id);
+          if (!bookmark) return;
+          openModal(true, bookmark);
+        });
+      });
+
+      document.querySelectorAll("[data-del-bookmark]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const id = Number(button.getAttribute("data-del-bookmark"));
+          if (!id) return;
+          const { response, payload } = await api(`/bookmarks/${id}`, { method: "DELETE" });
+          if (!response.ok || !payload?.success) {
+            toast(payload?.error || "Delete failed", true);
+            return;
+          }
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      });
+
+      document.querySelectorAll("[data-fav-bookmark]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const id = Number(button.getAttribute("data-fav-bookmark"));
+          const current = button.getAttribute("data-fav-current") === "1";
+          const { response, payload } = await api(`/bookmarks/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_favorite: !current })
+          });
+          if (!response.ok || !payload?.success) {
+            toast(payload?.error || "Update failed", true);
+            return;
+          }
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      });
+    }
+
+    function renderAllProjects() {
+      const items = filteredProjects();
+      const tiles = items
+        .filter((project) => project.type === "tile" || project.type === "bookmark")
+        .map((project, index) => {
+          const tileData = project.type === "bookmark"
+            ? {
+                ...project,
+                problem: "Bookmarks, account, system health, and MCP setup are now in one workspace.",
+                solution: "Single route dashboard with integrated tabs and fast API-driven rendering.",
+                architecture: "Bookmark app panel"
+              }
+            : project;
+          return tileMarkup(tileData, index);
+        })
+        .join("");
+
+      els.panel.innerHTML = `<div class="tiles">${tiles || "<div class='empty'>No projects match your search.</div>"}</div>`;
+
+      els.panel.querySelectorAll("[data-open-route]").forEach((button) => {
+        button.addEventListener("click", () => navigate(button.getAttribute("data-open-route")));
+      });
+    }
+
+    async function renderBookmarksWorkspace() {
+      await loadBookmarks();
+      els.panel.innerHTML = bookmarksMarkup();
+
+      const subnav = document.getElementById("bookmarkSubnav");
+      if (subnav) {
+        subnav.querySelectorAll("button[data-bm-tab]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.activeBookmarkTab = button.getAttribute("data-bm-tab");
+            subnav.querySelectorAll("button").forEach((item) => item.classList.remove("active"));
+            button.classList.add("active");
+            renderBookmarkTab();
+          });
+        });
+      }
+
+      renderBookmarkTab();
+    }
+
+    function renderProjectDetails(project) {
+      els.panel.innerHTML = `<div class="tiles">${tileMarkup(project, 0)}</div>`;
+      els.panel.querySelector("[data-open-route]")?.addEventListener("click", () => navigate(project.route));
+    }
+
+    async function render() {
+      const route = state.activeRoute;
+      const active = byRoute(route) || PROJECTS.find((project) => route.startsWith(project.route + "/"));
+
+      const navItems = PROJECTS.filter((project) => {
+        const q = state.search.trim().toLowerCase();
+        if (!q) return true;
+        return `${project.name} ${project.subtitle}`.toLowerCase().includes(q);
+      });
+
+      els.projectNav.innerHTML = navItems.map((project) => `
+        <button data-route="${escapeHtml(project.route)}" class="${route === project.route ? "active" : ""}">
+          <span class="nav-left"><span class="nav-dot"></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
+          <span class="nav-badge">${escapeHtml(project.badge || "Open")}</span>
+        </button>
+      `).join("");
+
+      els.projectNav.querySelectorAll("button[data-route]").forEach((button) => {
+        button.addEventListener("click", () => navigate(button.getAttribute("data-route")));
+      });
+
+      els.projectCount.textContent = `${PROJECTS.length} projects`;
+
+      if (route === "/") {
+        els.pageTitle.textContent = "All Projects";
+        els.pageSubtitle.textContent = "Choose a project from left navigation";
+        els.toolbarHint.textContent = "Tiles are optimized for desktop and mobile.";
+        renderAllProjects();
+        return;
+      }
+
+      if (route === "/bookmarks") {
+        els.pageTitle.textContent = "Bookmarks";
+        els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
+        els.toolbarHint.textContent = "All bookmark operations stay in this panel.";
+        await renderBookmarksWorkspace();
+        return;
+      }
+
+      if (active) {
+        els.pageTitle.textContent = active.name;
+        els.pageSubtitle.textContent = active.subtitle;
+        els.toolbarHint.textContent = "Project view route: " + active.route;
+        renderProjectDetails(active);
+        return;
+      }
+
+      els.pageTitle.textContent = "All Projects";
+      els.pageSubtitle.textContent = "Unknown route, showing dashboard";
+      els.toolbarHint.textContent = "Route not found in project list.";
+      renderAllProjects();
+    }
+
+    async function saveBookmark() {
+      const payload = {
+        url: els.bmUrl.value.trim(),
+        title: els.bmTitle.value.trim(),
+        description: els.bmDescription.value.trim(),
+        tags: els.bmTags.value.split(",").map((item) => item.trim()).filter(Boolean),
+        notes: els.bmNotes.value.trim()
+      };
+
+      if (!payload.url) {
+        toast("URL is required", true);
+        return;
+      }
+
+      const endpoint = state.editingId ? `/bookmarks/${state.editingId}` : "/bookmarks";
+      const method = state.editingId ? "PATCH" : "POST";
+
+      const { response, payload: result } = await api(endpoint, {
+        method,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok || !result?.success) {
+        toast(result?.error || "Save failed", true);
+        return;
+      }
+
+      closeModal();
+      await loadBookmarks();
+      renderBookmarkTab();
+      toast(state.editingId ? "Bookmark updated" : "Bookmark saved");
+    }
+
+    function bindGlobalEvents() {
+      window.addEventListener("popstate", () => {
+        state.activeRoute = nowRoute();
+        render();
+      });
+
+      els.projectSearch.addEventListener("input", async (event) => {
+        state.search = event.target.value;
+        await render();
+      });
+
+      els.mobileMenu.addEventListener("click", openSidebar);
+
+      els.overlay.addEventListener("click", () => {
+        closeSidebar();
+        closeModal();
+        toggleSettings(false);
+      });
+
+      els.settingsButton.addEventListener("click", () => {
+        const isOpen = els.settingsPanel.classList.contains("open");
+        toggleSettings(!isOpen);
+      });
+
+      document.querySelectorAll("[data-theme-btn]").forEach((button) => {
+        button.addEventListener("click", () => setTheme(button.getAttribute("data-theme-btn")));
+      });
+
+      els.cancelBookmarkBtn.addEventListener("click", closeModal);
+      els.saveBookmarkBtn.addEventListener("click", saveBookmark);
+
+      els.bookmarkModal.addEventListener("click", (event) => {
+        if (event.target === els.bookmarkModal) closeModal();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeSidebar();
+          closeModal();
+          toggleSettings(false);
+        }
+      });
+    }
+
+    async function init() {
+      setClock();
+      setInterval(setClock, 30000);
+      themeInit();
+      bindGlobalEvents();
+      await loadCurrentUser();
+
+      const startRoute = nowRoute();
+      if (startRoute === "/dashboard") {
+        navigate("/", true);
+      } else {
+        state.activeRoute = startRoute;
+        if (!["/", "/bookmarks"].includes(startRoute) && !startRoute.startsWith("/projects/")) {
+          navigate("/", true);
+        } else {
+          render();
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

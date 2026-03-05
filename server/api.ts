@@ -360,8 +360,16 @@ app.get("/dashboard/:section", (_req, res) => {
   res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
+app.get("/bookmarks", (_req, res) => {
+  res.sendFile(path.join(dashboardDir, "index.html"));
+});
+
+app.get("/projects/:slug", (_req, res) => {
+  res.sendFile(path.join(dashboardDir, "index.html"));
+});
+
 app.get("/app", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "app.html"));
+  res.redirect("/bookmarks");
 });
 
 app.get("/register", (_req, res) => {
