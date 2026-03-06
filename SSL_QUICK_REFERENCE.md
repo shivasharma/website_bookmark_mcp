@@ -34,7 +34,7 @@ Your application is now configured for **production-grade HTTPS** with:
 | `nginx.conf` | Full SSL/TLS config with security headers |
 | `.env.example` | Updated with production settings |
 | `DEPLOYMENT_GUIDE.md` | Complete deployment instructions |
-| `deploy.sh` | Automated deployment script |
+| `.github/workflows/deploy-to-vps.yml` | Automated deployment pipeline |
 | `SSL_QUICK_REFERENCE.md` | This file |
 
 ## 🚀 Quick Start (On Your VPS)
@@ -48,9 +48,10 @@ cd /path/to/website_bookmark_mcp
 cp .env.example .env
 nano .env  # Edit with your values
 
-# 3. Run deployment script
-chmod +x deploy.sh
-./deploy.sh
+# 3. Push to `main` to trigger automated deployment
+git add .
+git commit -m "chore: deploy updates"
+git push origin main
 
 # 4. Verify
 curl https://ai.shivaprogramming.com
