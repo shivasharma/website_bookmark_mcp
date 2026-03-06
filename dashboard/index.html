@@ -3,26 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Steam-Style Project Demo Portal</title>
+  <title>AI Project Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
-  <!-- Add Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
-      --bg: #0b1321;
-      --bg-grad-1: #14233b;
-      --bg-grad-2: #08101d;
-      --surface: #101926;
-      --surface-2: #162334;
-      --surface-3: #1a2d42;
-      --line: #2a3d57;
-      --line-soft: #233348;
-      --text: #e8f0fb;
-      --muted: #9bb0cb;
-      --accent: #7cc8ff;
-      --accent-soft: #a4dcff;
+      --bg: #0f0f10;
+      --bg-grad-1: #17181a;
+      --bg-grad-2: #09090a;
+      --surface: #161719;
+      --surface-2: #1e2023;
+      --surface-3: #25272b;
+      --line: #34383f;
+      --line-soft: #2a2e35;
+      --text: #f2f2f3;
+      --muted: #b4b7bd;
+      --accent: #f3f3f3;
+      --accent-soft: #d1d3d8;
       --radius: 16px;
       --shadow: 0 16px 44px rgba(2, 8, 21, 0.5);
       --top-clearance: 72px;
@@ -39,8 +37,8 @@
       --line-soft: #e4ecf9;
       --text: #152746;
       --muted: #5f7499;
-      --accent: #2f6fa6;
-      --accent-soft: #8fc8f1;
+      --accent: #dc9e15;
+      --accent-soft: #f2c456;
       --shadow: 0 14px 34px rgba(40, 74, 127, 0.16);
     }
 
@@ -78,7 +76,7 @@
       justify-content: space-between;
       gap: 10px;
       border-bottom: 1px solid var(--line);
-      background: rgba(8, 15, 25, 0.92);
+      background: rgba(18, 19, 21, 0.92);
       backdrop-filter: blur(8px);
     }
 
@@ -133,6 +131,18 @@
       text-transform: uppercase;
     }
 
+    .sidebar-search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 500 12px "Manrope", sans-serif;
+      padding: 8px 10px;
+      outline: none;
+      margin: 4px 0 8px;
+    }
+
     .nav {
       display: grid;
       gap: 5px;
@@ -177,22 +187,15 @@
       min-width: 0;
     }
 
-    .nav-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 7px;
-      border: 1px solid var(--line);
-      background: rgba(124, 200, 255, 0.12);
-      display: inline-grid;
-      place-items: center;
-      font-size: 12px;
+    .nav-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #496ba0;
       flex: 0 0 auto;
     }
 
-    .nav button.active .nav-icon {
-      background: rgba(124, 200, 255, 0.25);
-      border-color: rgba(124, 200, 255, 0.5);
-    }
+    .nav button.active .nav-dot { background: var(--accent); }
     .nav-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .nav-badge {
@@ -310,34 +313,20 @@
     .toolbar {
       padding: 10px;
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      justify-content: space-between;
       align-items: center;
       gap: 8px;
-    }
-
-    .search-shell {
-      width: 100%;
-      position: relative;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
+      flex-wrap: wrap;
     }
 
     .search {
-      width: 100%;
+      width: min(330px, 100%);
       border: 1px solid var(--line);
       border-radius: 10px;
       background: var(--surface-2);
       color: var(--text);
       font: 500 13px "Manrope", sans-serif;
-      padding: 9px 10px 9px 34px;
+      padding: 9px 10px;
       outline: none;
     }
 
@@ -873,7 +862,6 @@
       .user-chip-text { max-width: 92px; }
       .tile-title { font-size: 19px; }
       .toolbar { padding: 9px; }
-      .search-shell { width: 100%; }
       .search { width: 100%; }
       .btn { width: 100%; text-align: center; }
       .bm-actions { width: 100%; }
@@ -882,7 +870,7 @@
     }
   </style>
 </head>
-<body data-theme="light">
+<body>
   <div class="global-status">
     <div class="global-left">
       <span class="user-chip" id="userChip" aria-live="polite">
@@ -907,7 +895,7 @@
       </div>
 
       <div class="section-label">Projects</div>
-      <!-- Removed sidebar project search -->
+      <input class="sidebar-search" id="projectNavSearch" type="text" placeholder="Search projects..." />
       <nav class="nav" id="projectNav"></nav>
 
       <div class="sidebar-note">Use this page as your launcher. Add new projects in the data list and each one gets its own route.</div>
@@ -928,29 +916,46 @@
       </header>
 
       <section class="toolbar">
-        <!-- Removed project search -->
+        <input class="search" id="projectSearch" type="text" placeholder="Search projects..." />
         <input class="search" id="bookmarkSearchTop" type="text" placeholder="Search bookmarks..." />
-        <small id="toolbarHint">Use bookmark search for saved links.</small>
+        <small id="toolbarHint">Use project search for navigation and bookmark search for saved links.</small>
       </section>
 
       <section class="panel" id="panel"></section>
     </main>
   </div>
 
-  <!-- Register Modal -->
-  <div class="modal register-modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle" style="display:none;">
-    <form class="register-card" id="registerForm" autocomplete="off">
-      <h2 id="registerTitle">Register / Login</h2>
-      <label for="regEmail">Email</label>
-      <input id="regEmail" type="email" placeholder="you@email.com" required />
-      <label for="regName">Name</label>
-      <input id="regName" type="text" placeholder="Your Name" required />
-      <div class="register-actions">
-        <button class="btn" type="button" id="cancelRegisterBtn">Cancel</button>
-        <button class="btn primary" type="submit">Register</button>
+  <div class="modal" id="bookmarkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h3 id="modalTitle" style="margin:0;font-size:16px;">Add Bookmark</h3>
+      <div class="modal-grid">
+        <input id="bmUrl" type="url" placeholder="https://example.com" />
+        <input id="bmTitle" type="text" placeholder="Title" />
+        <input id="bmDescription" type="text" placeholder="Description" />
+        <input id="bmTags" type="text" placeholder="Tags (comma separated)" />
+        <textarea id="bmNotes" placeholder="Notes"></textarea>
       </div>
-      <div style="font-size:12px;color:#888;text-align:center;">Or sign in with <a href="/auth/github" style="color:#2f6fa6;">GitHub</a> / <a href="/auth/google" style="color:#2f6fa6;">Google</a></div>
-    </form>
+      <div class="modal-actions">
+        <button class="btn" id="cancelBookmarkBtn" type="button">Cancel</button>
+        <button class="btn primary" id="saveBookmarkBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal-card">
+      <h3 id="guideTitle" style="margin:0;font-size:16px;">Quick Setup Guide</h3>
+      <ol class="guide-list" style="margin-top:10px;">
+        <li>Use the form on the left to add URL, title, and optional tags/notes.</li>
+        <li>Sign in from the login panel if you are not authenticated yet.</li>
+        <li>Click save after login. Your bookmark will appear in results below.</li>
+        <li>Use search in Results to quickly find saved links.</li>
+        <li>Use Favorite, Edit, and Delete buttons on each card as needed.</li>
+      </ol>
+      <div class="modal-actions">
+        <button class="btn" id="closeGuideBtn" type="button">Close</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1740,10 +1745,7 @@
 
       els.projectNav.innerHTML = navItems.map((project) => `
         <button data-route="${escapeHtml(project.route)}" class="${route === project.route ? "active" : ""}">
-          <span class="nav-left">
-            <span class="nav-icon"><i class="fa fa-folder${project.type === "bookmark" ? '-open' : ''}"></i></span>
-            <span class="nav-name">${escapeHtml(project.name)}</span>
-          </span>
+          <span class="nav-left"><span class="nav-dot"></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
           <span class="nav-badge">${escapeHtml(project.badge || "Open")}</span>
         </button>
       `).join("");
@@ -1757,8 +1759,8 @@
       if (route === "/") {
         els.pageTitle.textContent = "All Projects";
         els.pageSubtitle.textContent = "Choose a project from left navigation";
-        els.toolbarHint.textContent = "Bookmark search is available at the top.";
-        renderAllProjectsGrid();
+        els.toolbarHint.textContent = "Project and bookmark search are available at the top.";
+        renderAllProjects();
         return;
       }
 
@@ -1766,7 +1768,7 @@
         els.pageTitle.textContent = "Bookmarks";
         els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
         els.toolbarHint.textContent = "Use top bookmark search or results search to find links quickly.";
-        renderBookmarksWorkspace();
+        await renderBookmarksWorkspace();
         return;
       }
 
@@ -1781,7 +1783,7 @@
       els.pageTitle.textContent = "All Projects";
       els.pageSubtitle.textContent = "Unknown route, showing dashboard";
       els.toolbarHint.textContent = "Route not found in project list.";
-      renderAllProjectsGrid();
+      renderAllProjects();
     }
 
     async function saveBookmark() {
