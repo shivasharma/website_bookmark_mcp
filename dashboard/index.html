@@ -263,6 +263,25 @@
       letter-spacing: 0.2px;
     }
 
+    .sidebar-footer {
+      padding: 6px 8px 10px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .sidebar-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.2px;
+      word-break: break-word;
+    }
+
+    .sidebar-footer a:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
     .main {
       min-width: 0;
       display: grid;
@@ -1169,6 +1188,28 @@
 
     body[data-theme="light"] .code { background: #f5f9ff; color: #2b4a7d; }
 
+    .mcp-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .icon-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .token-copy-btn {
+      display: none;
+    }
+
+    .token-copy-btn.show {
+      display: inline-flex;
+      align-items: center;
+    }
+
     .muted { color: var(--muted); }
 
     .empty {
@@ -1291,6 +1332,7 @@
         <span class="user-avatar" id="userAvatar">U</span>
         <span class="user-chip-text" id="userChipText">Logged in</span>
       </span>
+      <button class="logout-btn" id="userLogoutBtn" type="button">Logout</button>
       <a class="sign-in-btn" id="signInBtn" href="/register">Sign In</a>
     </div>
   </div>
@@ -1310,6 +1352,10 @@
       <nav class="nav" id="projectNav"></nav>
 
       <div class="sidebar-note sidebar-clock" id="sidebarClock" aria-live="polite">--</div>
+      <div class="sidebar-footer" aria-label="Footer links">
+        <a href="https://shivaprogramming.com" target="_blank" rel="noopener">shivaprogramming.com</a>
+        <a href="https://blog.shivaprogramming.com" target="_blank" rel="noopener">blog.shivaprogramming.com</a>
+      </div>
     </aside>
 
     <main class="main">
@@ -1330,7 +1376,6 @@
             <i class="fa-brands fa-github" aria-hidden="true"></i>
             <span>GitHub</span>
           </a>
-          <button class="logout-btn" id="topLogoutBtn" type="button">Logout</button>
           <span class="pill" id="projectCount">0 projects</span>
         </div>
       </header>
@@ -1467,7 +1512,7 @@
       themeToggleText: document.getElementById("themeToggleText"),
       sidebarClock: document.getElementById("sidebarClock"),
       signInBtn: document.getElementById("signInBtn"),
-      topLogoutBtn: document.getElementById("topLogoutBtn"),
+      userLogoutBtn: document.getElementById("userLogoutBtn"),
       userChip: document.getElementById("userChip"),
       userAvatar: document.getElementById("userAvatar"),
       userChipText: document.getElementById("userChipText"),
@@ -1527,8 +1572,8 @@
         if (els.signInBtn) {
           els.signInBtn.classList.add("show");
         }
-        if (els.topLogoutBtn) {
-          els.topLogoutBtn.classList.remove("show");
+        if (els.userLogoutBtn) {
+          els.userLogoutBtn.classList.remove("show");
         }
         return;
       }
@@ -1542,8 +1587,8 @@
       if (els.signInBtn) {
         els.signInBtn.classList.remove("show");
       }
-      if (els.topLogoutBtn) {
-        els.topLogoutBtn.classList.add("show");
+      if (els.userLogoutBtn) {
+        els.userLogoutBtn.classList.add("show");
       }
     }
 
@@ -1761,20 +1806,47 @@
 
     async function loadMcpTokenIntoDom() {
       const target = document.getElementById("mcpTokenOutput");
+      const copyBtn = document.getElementById("copyMcpTokenBtn");
       if (!target) return;
       if (!state.currentUser) {
         target.textContent = "Login required before generating token.";
+        if (copyBtn) copyBtn.classList.remove("show");
         return;
       }
       try {
         const { response, payload } = await api("/mcp-token?expires_in_days=30", { method: "GET" });
         if (!response.ok || !payload?.success || !payload?.data?.token) {
           target.textContent = "Could not generate token.";
+          if (copyBtn) copyBtn.classList.remove("show");
           return;
         }
         target.textContent = payload.data.token;
+        if (copyBtn) copyBtn.classList.add("show");
       } catch {
         target.textContent = "Could not generate token.";
+        if (copyBtn) copyBtn.classList.remove("show");
+      }
+    }
+
+    async function copyTextToClipboard(text) {
+      const content = String(text || "").trim();
+      if (!content) return false;
+      try {
+        await navigator.clipboard.writeText(content);
+        return true;
+      } catch {
+        const area = document.createElement("textarea");
+        area.value = content;
+        area.setAttribute("readonly", "true");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch { ok = false; }
+        area.remove();
+        return ok;
       }
     }
 
@@ -2078,12 +2150,24 @@
           <article class="block">
             <h3>MCP Setup</h3>
             <p>Generate a token and paste this config in Claude Desktop, Cursor, or VS Code MCP settings.</p>
-            <button class="btn primary" id="refreshMcpTokenBtn">Generate Token</button>
+            <div class="mcp-actions">
+              <button class="btn primary" id="refreshMcpTokenBtn">Generate Token</button>
+              <button class="btn icon-copy-btn token-copy-btn" id="copyMcpTokenBtn" type="button" aria-label="Copy generated token">
+                <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                <span>Copy Token</span>
+              </button>
+            </div>
             <div class="code" id="mcpTokenOutput">Click Generate Token</div>
           </article>
           <article class="block">
-            <h3>Config Template</h3>
-            <div class="code">{
+            <div class="mcp-actions" style="justify-content:space-between;">
+              <h3 style="margin:0;">Config Template</h3>
+              <button class="btn icon-copy-btn" id="copyMcpConfigBtn" type="button" aria-label="Copy config template">
+                <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                <span>Copy Config</span>
+              </button>
+            </div>
+            <div class="code" id="mcpConfigTemplate">{
   "mcpServers": {
     "bookmark": {
       "command": "node",
@@ -2141,9 +2225,25 @@
 
       panel.innerHTML = mcpMarkup();
       const refreshBtn = document.getElementById("refreshMcpTokenBtn");
+      const copyTokenBtn = document.getElementById("copyMcpTokenBtn");
+      const copyConfigBtn = document.getElementById("copyMcpConfigBtn");
       if (refreshBtn) {
         refreshBtn.addEventListener("click", () => {
           loadMcpTokenIntoDom();
+        });
+      }
+      if (copyTokenBtn) {
+        copyTokenBtn.addEventListener("click", async () => {
+          const token = document.getElementById("mcpTokenOutput")?.textContent || "";
+          const ok = await copyTextToClipboard(token);
+          toast(ok ? "Token copied" : "Unable to copy token", !ok);
+        });
+      }
+      if (copyConfigBtn) {
+        copyConfigBtn.addEventListener("click", async () => {
+          const config = document.getElementById("mcpConfigTemplate")?.textContent || "";
+          const ok = await copyTextToClipboard(config);
+          toast(ok ? "Config copied" : "Unable to copy config", !ok);
         });
       }
     }
@@ -2408,8 +2508,8 @@
         });
       }
 
-      if (els.topLogoutBtn) {
-        els.topLogoutBtn.addEventListener("click", async () => {
+      if (els.userLogoutBtn) {
+        els.userLogoutBtn.addEventListener("click", async () => {
           await performLogout();
         });
       }
