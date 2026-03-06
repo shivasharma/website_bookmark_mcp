@@ -7,39 +7,44 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <style>
     :root {
-      --bg: #0f0f10;
-      --bg-grad-1: #17181a;
-      --bg-grad-2: #09090a;
-      --surface: #161719;
-      --surface-2: #1e2023;
-      --surface-3: #25272b;
-      --line: #34383f;
-      --line-soft: #2a2e35;
-      --text: #f2f2f3;
-      --muted: #b4b7bd;
-      --accent: #f3f3f3;
-      --accent-soft: #d1d3d8;
+      --bg: #edf1f4;
+      --bg-grad-1: #ffffff;
+      --bg-grad-2: #e3e8ee;
+      --surface: #ffffff;
+      --surface-2: #f6f8fa;
+      --surface-3: #eef2f6;
+      --line: #d0d7de;
+      --line-soft: #d8dee4;
+      --text: #111111;
+      --muted: #57606a;
+      --accent: #111111;
+      --accent-soft: #6e7781;
       --radius: 16px;
-      --shadow: 0 16px 44px rgba(2, 8, 21, 0.5);
-      --top-clearance: 72px;
+      --shadow: 0 10px 28px rgba(80, 91, 104, 0.14);
+      --shadow-soft: 0 4px 12px rgba(80, 91, 104, 0.08);
+      --focus: 0 0 0 3px rgba(17, 17, 17, 0.12);
+      --top-clearance: 56px;
     }
 
     body[data-theme="light"] {
-      --bg: #eef4ff;
-      --bg-grad-1: #f7fbff;
-      --bg-grad-2: #dfe9fa;
+      --bg: #edf1f4;
+      --bg-grad-1: #ffffff;
+      --bg-grad-2: #e3e8ee;
       --surface: #ffffff;
-      --surface-2: #f8fbff;
-      --surface-3: #f2f7ff;
-      --line: #d5e2f7;
-      --line-soft: #e4ecf9;
-      --text: #152746;
-      --muted: #5f7499;
-      --accent: #dc9e15;
-      --accent-soft: #f2c456;
-      --shadow: 0 14px 34px rgba(40, 74, 127, 0.16);
+      --surface-2: #f6f8fa;
+      --surface-3: #eef2f6;
+      --line: #d0d7de;
+      --line-soft: #d8dee4;
+      --text: #111111;
+      --muted: #57606a;
+      --accent: #111111;
+      --accent-soft: #6e7781;
+      --shadow: 0 10px 28px rgba(80, 91, 104, 0.14);
+      --shadow-soft: 0 4px 12px rgba(80, 91, 104, 0.08);
+      --focus: 0 0 0 3px rgba(17, 17, 17, 0.12);
     }
 
     * { box-sizing: border-box; }
@@ -60,7 +65,7 @@
       display: grid;
       grid-template-columns: 286px 1fr;
       gap: 14px;
-      padding: calc(var(--top-clearance) + 8px) 14px 14px;
+      padding: calc(var(--top-clearance) + 4px) 14px 14px;
     }
 
     .global-status {
@@ -70,13 +75,13 @@
       right: 0;
       z-index: 95;
       height: var(--top-clearance);
-      padding: 12px 14px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       border-bottom: 1px solid var(--line);
-      background: rgba(18, 19, 21, 0.92);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(8px);
     }
 
@@ -98,6 +103,7 @@
       flex-direction: column;
       gap: 10px;
       min-height: 0;
+      transition: box-shadow .2s ease, border-color .2s ease;
     }
 
     .brand {
@@ -164,21 +170,20 @@
       justify-content: space-between;
       gap: 8px;
       cursor: pointer;
-      transition: .18s;
+      min-height: 42px;
+      transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
     }
 
     .nav button:hover {
-      border-color: #3c629a;
+      border-color: #b6c3d1;
       background: var(--surface-2);
+      transform: translateY(-1px);
     }
 
-    .nav button.active {
-      border-color: #4d78b4;
-      background: var(--surface-3);
-    }
+    .nav button.active { border-color: #9aaab9; background: var(--surface-3); }
 
-    body[data-theme="light"] .nav button:hover { border-color: #cedcf4; }
-    body[data-theme="light"] .nav button.active { border-color: #bccfeb; }
+    body[data-theme="light"] .nav button:hover { border-color: #b6c3d1; }
+    body[data-theme="light"] .nav button.active { border-color: #9aaab9; }
 
     .nav-left {
       display: inline-flex;
@@ -195,7 +200,17 @@
       flex: 0 0 auto;
     }
 
+    .nav-icon {
+      width: 16px;
+      color: var(--muted);
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      font-size: 12px;
+    }
+
     .nav button.active .nav-dot { background: var(--accent); }
+    .nav button.active .nav-icon { color: var(--text); }
     .nav-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .nav-badge {
@@ -214,6 +229,11 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.45;
+    }
+
+    .sidebar-clock {
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.2px;
     }
 
     .main {
@@ -238,6 +258,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
     }
 
     .title-wrap {
@@ -261,9 +282,33 @@
       font-size: 16px;
       cursor: pointer;
       flex: 0 0 auto;
+      transition: background-color .2s ease, border-color .2s ease;
     }
 
+    .mobile-menu:hover { background: var(--surface-3); border-color: #b6c3d1; }
+
     .top-actions { display: inline-flex; gap: 8px; align-items: center; }
+
+    .github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.3px;
+      padding: 7px 12px;
+      transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .github-btn:hover {
+      background: #111111;
+      border-color: #111111;
+      color: #ffffff;
+    }
 
     .user-chip {
       display: none;
@@ -281,6 +326,24 @@
 
     .user-chip.show {
       display: inline-flex;
+    }
+
+    .sign-in-btn {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.3px;
+      padding: 7px 12px;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .sign-in-btn.show {
+      display: inline-flex;
+      align-items: center;
     }
 
     .user-avatar {
@@ -312,11 +375,7 @@
 
     .toolbar {
       padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+      display: block;
     }
 
     .search {
@@ -326,11 +385,26 @@
       background: var(--surface-2);
       color: var(--text);
       font: 500 13px "Manrope", sans-serif;
-      padding: 9px 10px;
+      padding: 11px 12px;
       outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
     }
 
-    .toolbar small { color: var(--muted); min-width: 100%; }
+    .search:focus,
+    .input:focus,
+    .select:focus,
+    .modal input:focus,
+    .modal textarea:focus {
+      border-color: #9aaab9;
+      box-shadow: var(--focus);
+      background: #fff;
+    }
+
+    #bookmarkSearchTop {
+      width: 100%;
+    }
+
+    .toolbar small { display: none; }
 
     .panel {
       padding: 12px;
@@ -346,26 +420,21 @@
     .project-tile {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: linear-gradient(180deg, #0b1a34 0%, #09152b 100%);
+      background: #ffffff;
       overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
-    body[data-theme="light"] .project-tile {
-      background: #ffffff;
-    }
+    .project-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); border-color: #b6c3d1; }
 
     .tile-head {
       padding: 12px 14px;
       border-bottom: 1px solid var(--line-soft);
-      background: linear-gradient(90deg, #0d1f3d, #12305f);
+      background: linear-gradient(90deg, #fafbfc, #f2f5f8);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 8px;
-    }
-
-    body[data-theme="light"] .tile-head {
-      background: linear-gradient(90deg, #f6fbff, #f0f6ff);
     }
 
     .tile-id {
@@ -419,19 +488,17 @@
     }
 
     .img-placeholder {
-      border: 1px dashed #375c93;
+      border: 1px dashed #c4cfdb;
       border-radius: 12px;
       min-height: 160px;
       display: grid;
       place-items: center;
       text-align: center;
       color: var(--muted);
-      background: rgba(19, 39, 71, 0.6);
+      background: #f8fafc;
       padding: 14px;
       font-size: 13px;
     }
-
-    body[data-theme="light"] .img-placeholder { background: #f7fbff; border-color: #c8d9f4; }
 
     .tile-tech,
     .tile-actions {
@@ -445,37 +512,41 @@
     .tile-tech { border-bottom: 1px solid var(--line-soft); }
 
     .chip {
-      border: 1px solid #3d629b;
+      border: 1px solid #c7d1db;
       border-radius: 8px;
       padding: 4px 8px;
       font: 700 10px "JetBrains Mono", monospace;
       letter-spacing: 1px;
       text-transform: uppercase;
       color: var(--text);
+      background: #f8fafc;
     }
 
-    body[data-theme="light"] .chip { border-color: #c9d9f3; color: #29497e; background: #f6faff; }
-
     .btn {
-      border: 1px solid #454a52;
+      border: 1px solid #c7d1db;
       border-radius: 10px;
-      background: #282b30;
+      background: #f8fafc;
       color: var(--text);
       text-decoration: none;
-      padding: 8px 12px;
+      padding: 9px 12px;
       font: 700 11px "JetBrains Mono", monospace;
       letter-spacing: .6px;
       text-transform: uppercase;
       cursor: pointer;
+      transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
     }
+
+    .btn:hover { border-color: #9aaab9; background: #eef2f6; transform: translateY(-1px); }
 
     .btn.primary {
-      border-color: #f2f2f3;
-      background: linear-gradient(135deg, #f0f0f1, #d8dade);
-      color: #141518;
+      border-color: #111111;
+      background: #111111;
+      color: #ffffff;
     }
 
-    body[data-theme="light"] .btn { border-color: #cad9f2; background: #f5f9ff; color: #29497e; }
+    .btn.primary:hover { background: #222222; border-color: #222222; }
+
+    body[data-theme="light"] .btn { border-color: #c7d1db; background: #f8fafc; color: #111111; }
 
     .bookmark-shell {
       display: grid;
@@ -502,6 +573,12 @@
 
     .bookmark-subnav button.active {
       border-color: #6a6f77;
+      color: var(--text);
+      background: var(--surface-3);
+    }
+
+    .bookmark-subnav button:hover {
+      border-color: #9aaab9;
       color: var(--text);
       background: var(--surface-3);
     }
@@ -537,6 +614,44 @@
       grid-template-columns: 1.3fr 1fr;
       gap: 12px;
       align-items: start;
+    }
+
+    .readme-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .readme-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .readme-panel-head h3 {
+      margin: 0;
+      font: 800 14px "JetBrains Mono", monospace;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .readme-content {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text);
+      font: 500 12px "JetBrains Mono", monospace;
+      line-height: 1.6;
+      padding: 10px;
+      max-height: 260px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .bm-panel {
@@ -681,13 +796,16 @@
     .bm-card {
       border: 1px solid var(--line);
       border-radius: 12px;
-      background: #1b1d20;
+      background: #ffffff;
       padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
       min-height: 170px;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
     }
+
+    .bm-card:hover { border-color: #b6c3d1; box-shadow: var(--shadow-soft); transform: translateY(-2px); }
 
     .bm-title {
       margin: 0;
@@ -749,6 +867,116 @@
 
     .block p,
     .block li { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    .health-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .health-kpi {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 10px;
+    }
+
+    .health-kpi .k {
+      font: 700 10px "JetBrains Mono", monospace;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .health-kpi .v {
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .health-services {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .health-service {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .health-service:hover { border-color: #b6c3d1; box-shadow: var(--shadow-soft); transform: translateY(-1px); }
+
+    .health-service-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .health-service h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font: 700 10px "JetBrains Mono", monospace;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface-2);
+      flex: 0 0 auto;
+    }
+
+    .status-pill.healthy {
+      border-color: #84cc16;
+      color: #3f6212;
+      background: #f7fee7;
+    }
+
+    .status-pill.running {
+      border-color: #22c55e;
+      color: #166534;
+      background: #f0fdf4;
+    }
+
+    .status-pill.restarting {
+      border-color: #f59e0b;
+      color: #92400e;
+      background: #fffbeb;
+    }
+
+    .health-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .health-note {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 8px 10px;
+    }
 
     .code {
       margin-top: 8px;
@@ -819,10 +1047,10 @@
 
     @media (max-width: 1024px) {
       .layout {
-        --top-clearance: 56px;
+        --top-clearance: 48px;
         grid-template-columns: 1fr;
         gap: 10px;
-        padding: calc(var(--top-clearance) + 8px) 10px 10px;
+        padding: calc(var(--top-clearance) + 4px) 10px 10px;
       }
 
       .sidebar {
@@ -830,7 +1058,7 @@
         top: var(--top-clearance);
         left: 10px;
         bottom: 10px;
-        width: 282px;
+        width: min(320px, calc(100vw - 20px));
         z-index: 85;
         transform: translateX(-110%);
         transition: transform .2s;
@@ -857,16 +1085,22 @@
     }
 
     @media (max-width: 640px) {
+      .layout { gap: 8px; padding: calc(var(--top-clearance) + 4px) 8px 8px; }
+      .topbar { padding: 10px; }
       .topbar h2 { font-size: 17px; }
       .topbar p { font-size: 11px; }
       .user-chip-text { max-width: 92px; }
       .tile-title { font-size: 19px; }
       .toolbar { padding: 9px; }
       .search { width: 100%; }
+      .bookmark-subnav { gap: 6px; }
+      .bookmark-subnav button { min-height: 38px; }
       .btn { width: 100%; text-align: center; }
       .bm-actions { width: 100%; }
       .bm-results-head .input { width: 100%; }
-      .global-status { height: auto; min-height: 56px; }
+      .global-status { height: auto; min-height: 48px; }
+      .health-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .health-services { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -879,7 +1113,7 @@
       </span>
     </div>
     <div class="global-right">
-      <span class="pill" id="clock">--:--</span>
+      <a class="sign-in-btn" id="signInBtn" href="/register">Sign In</a>
     </div>
   </div>
   <div class="overlay" id="overlay"></div>
@@ -895,10 +1129,9 @@
       </div>
 
       <div class="section-label">Projects</div>
-      <input class="sidebar-search" id="projectNavSearch" type="text" placeholder="Search projects..." />
       <nav class="nav" id="projectNav"></nav>
 
-      <div class="sidebar-note">Use this page as your launcher. Add new projects in the data list and each one gets its own route.</div>
+      <div class="sidebar-note sidebar-clock" id="sidebarClock" aria-live="polite">--</div>
     </aside>
 
     <main class="main">
@@ -911,14 +1144,16 @@
           </div>
         </div>
         <div class="top-actions">
+          <a class="github-btn" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">
+            <i class="fa-brands fa-github" aria-hidden="true"></i>
+            <span>GitHub</span>
+          </a>
           <span class="pill" id="projectCount">0 projects</span>
         </div>
       </header>
 
       <section class="toolbar">
-        <input class="search" id="projectSearch" type="text" placeholder="Search projects..." />
         <input class="search" id="bookmarkSearchTop" type="text" placeholder="Search bookmarks..." />
-        <small id="toolbarHint">Use project search for navigation and bookmark search for saved links.</small>
       </section>
 
       <section class="panel" id="panel"></section>
@@ -995,10 +1230,45 @@
       }
     ];
 
+    const DOCKER_SERVICES = [
+      {
+        id: "5f1e810ed89f",
+        name: "bookmark_certbot",
+        image: "certbot/certbot:latest",
+        status: "restarting",
+        health: "degraded",
+        uptime: "Restarting (2), recent restart"
+      },
+      {
+        id: "4c635d674cae",
+        name: "bookmark_app",
+        image: "ghcr.io/shivasharma/website_bookmark_mcp:latest",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 10 minutes (healthy)"
+      },
+      {
+        id: "c4ace7c43db3",
+        name: "bookmark_nginx",
+        image: "nginx:alpine",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 10 minutes"
+      },
+      {
+        id: "0ecd54eda46f",
+        name: "bookmark_postgres",
+        image: "postgres:16-alpine",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 21 hours (healthy)"
+      }
+    ];
+
     const state = {
       activeRoute: normalizePath(location.pathname),
-      projectSearch: "",
       bookmarkSearch: "",
+      bookmarkReadme: "",
       bookmarks: [],
       authRequired: false,
       currentUser: null,
@@ -1010,15 +1280,13 @@
       sidebar: document.getElementById("sidebar"),
       overlay: document.getElementById("overlay"),
       projectNav: document.getElementById("projectNav"),
-      projectNavSearch: document.getElementById("projectNavSearch"),
-      projectSearch: document.getElementById("projectSearch"),
       bookmarkSearchTop: document.getElementById("bookmarkSearchTop"),
       panel: document.getElementById("panel"),
       pageTitle: document.getElementById("pageTitle"),
       pageSubtitle: document.getElementById("pageSubtitle"),
       projectCount: document.getElementById("projectCount"),
-      toolbarHint: document.getElementById("toolbarHint"),
-      clock: document.getElementById("clock"),
+      sidebarClock: document.getElementById("sidebarClock"),
+      signInBtn: document.getElementById("signInBtn"),
       userChip: document.getElementById("userChip"),
       userAvatar: document.getElementById("userAvatar"),
       userChipText: document.getElementById("userChipText"),
@@ -1071,19 +1339,13 @@
       closeSidebar();
     }
 
-    function setClock() {
-      const fmt = new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true
-      });
-      els.clock.textContent = fmt.format(new Date());
-    }
-
     function renderUserChip() {
       if (!els.userChip || !els.userAvatar || !els.userChipText) return;
       if (!state.currentUser) {
         els.userChip.classList.remove("show");
+        if (els.signInBtn) {
+          els.signInBtn.classList.add("show");
+        }
         return;
       }
 
@@ -1093,10 +1355,30 @@
       els.userChipText.textContent = `Logged in: ${label}`;
       els.userChip.title = `Logged in as ${label}`;
       els.userChip.classList.add("show");
+      if (els.signInBtn) {
+        els.signInBtn.classList.remove("show");
+      }
     }
 
     function themeInit() {
-      document.body.setAttribute("data-theme", "dark");
+      document.body.setAttribute("data-theme", "light");
+    }
+
+    function setSidebarClock() {
+      if (!els.sidebarClock) return;
+      const now = new Date();
+      const dateText = new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(now);
+      const timeText = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).format(now);
+      els.sidebarClock.textContent = `${dateText} | ${timeText}`;
     }
 
     function openSidebar() {
@@ -1271,6 +1553,35 @@
       }
     }
 
+    async function loadBookmarkReadmeIntoDom() {
+      const target = document.getElementById("bookmarkReadmeContent");
+      if (!target) return;
+
+      if (state.bookmarkReadme) {
+        target.textContent = state.bookmarkReadme;
+        return;
+      }
+
+      target.textContent = "Loading README...";
+
+      const candidates = ["/README.md", "/readme.md", "README.md", "readme.md"];
+      for (const path of candidates) {
+        try {
+          const response = await fetch(path, { credentials: "include" });
+          if (!response.ok) continue;
+          const text = await response.text();
+          if (!text || !text.trim()) continue;
+          state.bookmarkReadme = text;
+          target.textContent = text;
+          return;
+        } catch {
+          // Try next path.
+        }
+      }
+
+      target.textContent = "README not available right now.";
+    }
+
     function getDomain(url) {
       try { return new URL(url).hostname; } catch { return ""; }
     }
@@ -1282,14 +1593,14 @@
     }
 
     function filteredProjects() {
-      const q = state.projectSearch.trim().toLowerCase();
-      if (!q) return PROJECTS;
-      return PROJECTS.filter((project) => {
-        const hay = [project.name, project.subtitle, (project.tech || []).join(" ")]
-          .join(" ")
-          .toLowerCase();
-        return hay.includes(q);
-      });
+      return PROJECTS;
+    }
+
+    function navIconByProject(project) {
+      if (project.id === "bookmarks") return "fa-regular fa-bookmark";
+      if (project.id === "mcp-server") return "fa-solid fa-server";
+      if (project.id === "agents-lab") return "fa-solid fa-robot";
+      return "fa-regular fa-folder";
     }
 
     function tileMarkup(project, index) {
@@ -1332,11 +1643,31 @@
           <div class="bookmark-subnav" id="bookmarkSubnav">
             <button data-bm-tab="bookmarks" class="${state.activeBookmarkTab === "bookmarks" ? "active" : ""}">Bookmarks</button>
             <button data-bm-tab="health" class="${state.activeBookmarkTab === "health" ? "active" : ""}">System Health</button>
+            <button data-bm-tab="about" class="${state.activeBookmarkTab === "about" ? "active" : ""}">About Project</button>
             <button data-bm-tab="account" class="${state.activeBookmarkTab === "account" ? "active" : ""}">Account</button>
             <button data-bm-tab="mcp" class="${state.activeBookmarkTab === "mcp" ? "active" : ""}">MCP Setup</button>
           </div>
           <div id="bookmarkTabPanel"></div>
         </div>
+      `;
+    }
+
+    function aboutProjectMarkup() {
+      return `
+        <section class="readme-panel">
+          <div class="readme-panel-head">
+            <h3>About Bookmarks Project</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a class="github-btn" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
+                <span>GitHub Repo</span>
+              </a>
+              <a class="btn" href="/README.md" target="_blank" rel="noopener">Open README</a>
+            </div>
+          </div>
+          <p class="muted">Project details from <code>README.md</code>. Repository: <a href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">https://github.com/shivasharma/website_bookmark_mcp</a></p>
+          <pre class="readme-content" id="bookmarkReadmeContent">Loading README...</pre>
+        </section>
       `;
     }
 
@@ -1442,15 +1773,49 @@
     }
 
     function healthMarkup() {
+      const total = DOCKER_SERVICES.length;
+      const running = DOCKER_SERVICES.filter((service) => service.status === "running").length;
+      const healthy = DOCKER_SERVICES.filter((service) => service.health === "healthy").length;
+      const restarting = DOCKER_SERVICES.filter((service) => service.status === "restarting").length;
+
+      const serviceCards = DOCKER_SERVICES.map((service) => {
+        const badgeClass = service.status === "restarting" ? "restarting" : service.status;
+        const healthLabel = service.health === "healthy" ? "Healthy" : "Needs attention";
+
+        return `
+          <article class="health-service">
+            <div class="health-service-head">
+              <h4 title="${escapeHtml(service.name)}">${escapeHtml(service.name)}</h4>
+              <span class="status-pill ${escapeHtml(badgeClass)}">${escapeHtml(service.status)}</span>
+            </div>
+            <div class="health-meta">Container: <code>${escapeHtml(service.id.slice(0, 12))}</code></div>
+            <div class="health-meta">Image: ${escapeHtml(service.image)}</div>
+            <div class="health-meta">State: ${escapeHtml(service.uptime)}</div>
+            <div class="health-meta">Health: ${escapeHtml(healthLabel)}</div>
+          </article>
+        `;
+      }).join("");
+
       return `
         <div class="stack">
+          <article class="block">
+            <h3>Docker Overview</h3>
+            <div class="health-kpis">
+              <div class="health-kpi"><div class="k">Containers</div><div class="v">${total}</div></div>
+              <div class="health-kpi"><div class="k">Running</div><div class="v">${running}</div></div>
+              <div class="health-kpi"><div class="k">Healthy</div><div class="v">${healthy}</div></div>
+              <div class="health-kpi"><div class="k">Restarting</div><div class="v">${restarting}</div></div>
+            </div>
+            <div class="health-note">Clean view enabled: port mappings and startup commands are intentionally hidden.</div>
+            <div class="health-services">${serviceCards}</div>
+          </article>
           <article class="block">
             <h3>Service Health</h3>
             <p id="healthStatus">API status: checking...</p>
           </article>
           <article class="block">
             <h3>Deployment Notes</h3>
-            <p>All requests run behind Docker Nginx and route into the app service. Keep callbacks and base URL on your domain only.</p>
+            <p>Stack includes Nginx, app service, Postgres, and certbot. This dashboard is read-only and designed for quick status checks.</p>
           </article>
         </div>
       `;
@@ -1527,6 +1892,12 @@
       if (state.activeBookmarkTab === "health") {
         panel.innerHTML = healthMarkup();
         loadHealthIntoDom();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "about") {
+        panel.innerHTML = aboutProjectMarkup();
+        loadBookmarkReadmeIntoDom();
         return;
       }
 
@@ -1724,12 +2095,6 @@
 
     async function render() {
       renderUserChip();
-      if (els.projectSearch) {
-        els.projectSearch.value = state.projectSearch;
-      }
-      if (els.projectNavSearch) {
-        els.projectNavSearch.value = state.projectSearch;
-      }
       if (els.bookmarkSearchTop) {
         els.bookmarkSearchTop.value = state.bookmarkSearch;
       }
@@ -1737,15 +2102,11 @@
       const route = state.activeRoute;
       const active = byRoute(route) || PROJECTS.find((project) => route.startsWith(project.route + "/"));
 
-      const navItems = PROJECTS.filter((project) => {
-        const q = state.projectSearch.trim().toLowerCase();
-        if (!q) return true;
-        return `${project.name} ${project.subtitle}`.toLowerCase().includes(q);
-      });
+      const navItems = PROJECTS;
 
       els.projectNav.innerHTML = navItems.map((project) => `
         <button data-route="${escapeHtml(project.route)}" class="${route === project.route ? "active" : ""}">
-          <span class="nav-left"><span class="nav-dot"></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
+          <span class="nav-left"><span class="nav-icon"><i class="${navIconByProject(project)}"></i></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
           <span class="nav-badge">${escapeHtml(project.badge || "Open")}</span>
         </button>
       `).join("");
@@ -1758,8 +2119,8 @@
 
       if (route === "/") {
         els.pageTitle.textContent = "All Projects";
-        els.pageSubtitle.textContent = "Choose a project from left navigation";
-        els.toolbarHint.textContent = "Project and bookmark search are available at the top.";
+        els.pageSubtitle.textContent = "Project overview";
+       
         renderAllProjects();
         return;
       }
@@ -1767,7 +2128,7 @@
       if (route === "/bookmarks") {
         els.pageTitle.textContent = "Bookmarks";
         els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
-        els.toolbarHint.textContent = "Use top bookmark search or results search to find links quickly.";
+       
         await renderBookmarksWorkspace();
         return;
       }
@@ -1775,14 +2136,12 @@
       if (active) {
         els.pageTitle.textContent = active.name;
         els.pageSubtitle.textContent = active.subtitle;
-        els.toolbarHint.textContent = "Project view route: " + active.route;
         renderProjectDetails(active);
         return;
       }
 
       els.pageTitle.textContent = "All Projects";
       els.pageSubtitle.textContent = "Unknown route, showing dashboard";
-      els.toolbarHint.textContent = "Route not found in project list.";
       renderAllProjects();
     }
 
@@ -1824,26 +2183,6 @@
         state.activeRoute = nowRoute();
         render();
       });
-
-      const onProjectSearch = async (value) => {
-        state.projectSearch = value;
-        if (els.projectSearch && els.projectSearch.value !== value) {
-          els.projectSearch.value = value;
-        }
-        if (els.projectNavSearch && els.projectNavSearch.value !== value) {
-          els.projectNavSearch.value = value;
-        }
-        await render();
-      };
-
-      els.projectSearch.addEventListener("input", async (event) => {
-        await onProjectSearch(event.target.value);
-      });
-      if (els.projectNavSearch) {
-        els.projectNavSearch.addEventListener("input", async (event) => {
-          await onProjectSearch(event.target.value);
-        });
-      }
 
       if (els.bookmarkSearchTop) {
         els.bookmarkSearchTop.addEventListener("input", async (event) => {
@@ -1888,8 +2227,8 @@
     }
 
     async function init() {
-      setClock();
-      setInterval(setClock, 30000);
+      setSidebarClock();
+      setInterval(setSidebarClock, 30000);
       themeInit();
       bindGlobalEvents();
       await loadCurrentUser();
