@@ -905,7 +905,7 @@
     .bookmark-results {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 12px;
       align-items: start;
     }
 
@@ -932,9 +932,9 @@
 
     .bm-section {
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
-      padding: 12px;
+      padding: 14px;
       display: grid;
       gap: 12px;
       box-shadow: var(--shadow-soft);
@@ -967,13 +967,13 @@
 
     .bm-card {
       border: 1px solid var(--line);
-      border-radius: 14px;
+      border-radius: 16px;
       background: linear-gradient(180deg, #ffffff 0%, var(--surface-2) 100%);
-      padding: 11px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      min-height: 170px;
+      gap: 9px;
+      min-height: 184px;
       transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
     }
 
@@ -981,26 +981,95 @@
       background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
     }
 
-    .bm-card:hover { border-color: #b6c3d1; box-shadow: var(--shadow-soft); transform: translateY(-2px); }
+    .bm-card:hover {
+      border-color: #a7b4c3;
+      box-shadow: 0 8px 20px rgba(65, 77, 92, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .bm-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bm-card-title-wrap {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
 
     .bm-title {
       margin: 0;
-      font-size: 14px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+    }
+
+    .bm-domain-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font: 700 10px "JetBrains Mono", monospace;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      background: var(--surface);
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: lowercase;
+    }
+
+    .fav-chip {
+      border: 1px solid #f0c36b;
+      border-radius: 999px;
+      color: #8a5a00;
+      background: #fff7df;
+      font: 800 10px "JetBrains Mono", monospace;
+      letter-spacing: 0.4px;
+      padding: 3px 8px;
+      flex: 0 0 auto;
+      text-transform: uppercase;
+    }
+
+    body[data-theme="dark"] .fav-chip {
+      border-color: #8f6a2e;
+      color: #f5daa2;
+      background: #3a2f1d;
     }
 
     .bm-url,
     .bm-desc,
     .bm-meta {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.45;
     }
 
-    .bm-desc { font-size: 12px; min-height: 32px; }
+    .bm-url {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3f5d8a;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bm-url:hover {
+      text-decoration: underline;
+    }
+
+    body[data-theme="dark"] .bm-url {
+      color: #9eb9e6;
+    }
+
+    .bm-desc { min-height: 34px; }
 
     .tags { display: flex; gap: 5px; flex-wrap: wrap; }
 
@@ -1016,23 +1085,62 @@
     .bm-actions {
       margin-top: auto;
       display: flex;
-      gap: 6px;
+      gap: 7px;
       flex-wrap: wrap;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: flex-start;
     }
 
-    .bm-actions .btn {
-      padding: 6px 10px;
-      min-height: 30px;
-      border-radius: 8px;
+    .bm-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      min-height: 32px;
+      border-radius: 9px;
       font-size: 10px;
-      letter-spacing: 0.35px;
+      letter-spacing: 0.45px;
       transform: none;
     }
 
-    .bm-actions .btn:hover {
+    .bm-action-btn i {
+      font-size: 11px;
+      width: 12px;
+      text-align: center;
+    }
+
+    .bm-action-btn:hover {
       transform: none;
+    }
+
+    .bm-action-btn.edit:hover {
+      border-color: #7aa2d4;
+      background: #eaf3ff;
+    }
+
+    .bm-action-btn.favorite:hover {
+      border-color: #d3a64f;
+      background: #fff6dd;
+    }
+
+    .bm-action-btn.delete:hover {
+      border-color: #d18f98;
+      background: #fff0f2;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.edit:hover {
+      border-color: #5f86bb;
+      background: #1c2c3f;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.favorite:hover {
+      border-color: #af8a45;
+      background: #3a2f1d;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.delete:hover {
+      border-color: #9f6472;
+      background: #3a242c;
     }
 
     .guide-list {
@@ -1315,7 +1423,7 @@
       .bookmark-subnav button { min-height: 38px; }
       .btn { width: 100%; text-align: center; }
       .bm-actions { width: 100%; justify-content: stretch; }
-      .bm-actions .btn { width: auto; flex: 1 1 96px; }
+      .bm-actions .bm-action-btn { width: auto; flex: 1 1 96px; justify-content: center; }
       .bm-results-head .input { width: 100%; }
       .global-status { height: auto; min-height: 48px; }
       .health-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1970,38 +2078,49 @@
 
     function bookmarkListMarkup() {
       const favorites = state.bookmarks.filter((item) => item.is_favorite);
-      const favoriteCards = favorites.length
-        ? favorites.map((bookmark) => `
+
+      const renderBookmarkCard = (bookmark) => {
+        const domain = getDomain(bookmark.url) || "link";
+        return `
           <article class="bm-card">
-            <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
-            <div class="bm-url">${escapeHtml(bookmark.url)}</div>
+            <div class="bm-card-head">
+              <div class="bm-card-title-wrap">
+                <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
+                <span class="bm-domain-chip">${escapeHtml(domain)}</span>
+              </div>
+              ${bookmark.is_favorite ? `<span class="fav-chip" aria-label="Favorite bookmark"><i class="fa-solid fa-star" aria-hidden="true"></i> Fav</span>` : ""}
+            </div>
+            <a class="bm-url" href="${escapeHtml(bookmark.url)}" target="_blank" rel="noopener">
+              <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+              <span>${escapeHtml(bookmark.url)}</span>
+            </a>
             <div class="bm-desc">${escapeHtml(bookmark.description || "No description")}</div>
             <div class="tags">${(bookmark.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
-            <div class="bm-meta">${escapeHtml(getDomain(bookmark.url))} | ${escapeHtml(formatDate(bookmark.created_at))}</div>
+            <div class="bm-meta"><i class="fa-regular fa-calendar" aria-hidden="true"></i> ${escapeHtml(formatDate(bookmark.created_at))}</div>
             <div class="bm-actions">
-              <button class="btn" data-edit-bookmark="${bookmark.id}">Edit</button>
-              <button class="btn" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</button>
-              <button class="btn" data-del-bookmark="${bookmark.id}">Delete</button>
+              <button class="btn bm-action-btn edit" data-edit-bookmark="${bookmark.id}">
+                <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                <span>Edit</span>
+              </button>
+              <button class="btn bm-action-btn favorite" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">
+                <i class="${bookmark.is_favorite ? "fa-solid fa-star" : "fa-regular fa-star"}" aria-hidden="true"></i>
+                <span>${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</span>
+              </button>
+              <button class="btn bm-action-btn delete" data-del-bookmark="${bookmark.id}">
+                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                <span>Delete</span>
+              </button>
             </div>
           </article>
-        `).join("")
+        `;
+      };
+
+      const favoriteCards = favorites.length
+        ? favorites.map((bookmark) => renderBookmarkCard(bookmark)).join("")
         : `<div class="empty">No favorites yet. Mark bookmarks as favorite to pin them here.</div>`;
 
       const allCards = state.bookmarks.length
-        ? state.bookmarks.map((bookmark) => `
-          <article class="bm-card">
-            <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
-            <div class="bm-url">${escapeHtml(bookmark.url)}</div>
-            <div class="bm-desc">${escapeHtml(bookmark.description || "No description")}</div>
-            <div class="tags">${(bookmark.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
-            <div class="bm-meta">${escapeHtml(getDomain(bookmark.url))} | ${escapeHtml(formatDate(bookmark.created_at))}</div>
-            <div class="bm-actions">
-              <button class="btn" data-edit-bookmark="${bookmark.id}">Edit</button>
-              <button class="btn" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</button>
-              <button class="btn" data-del-bookmark="${bookmark.id}">Delete</button>
-            </div>
-          </article>
-        `).join("")
+        ? state.bookmarks.map((bookmark) => renderBookmarkCard(bookmark)).join("")
         : `<div class="empty">No bookmarks yet. Use the form above to save your first item.</div>`;
 
       return `
@@ -2170,7 +2289,7 @@
             <div class="code" id="mcpConfigTemplate">{
   "mcpServers": {
     "bookmark": {
-      "command": "node",
+      "command": "npx",
       "args": [ "-y", "github:shivasharma/website_bookmark_mcp"],
       "env": {
         "BOOKMARK_API_BASE_URL": "${base}",

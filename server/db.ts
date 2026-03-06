@@ -350,14 +350,7 @@ export async function getBookmarkById(id: number, userId?: number): Promise<Book
   if (!rows.length) {
     return null;
   }
-  const updated = rowToBookmark(rows[0]);
-  await emitBookmarkEvent({
-    action: "updated",
-    user_id: effectiveUserId,
-    bookmark_id: updated.id,
-    at: new Date().toISOString(),
-  });
-  return updated;
+  return rowToBookmark(rows[0]);
 }
 
 export async function listBookmarks(input: ListBookmarksInput = {}): Promise<Bookmark[]> {
@@ -445,14 +438,14 @@ export async function updateBookmark(id: number, fields: UpdateBookmarkInput, us
   if (!rows.length) {
     return null;
   }
-  const deleted = rowToBookmark(rows[0]);
+  const updated = rowToBookmark(rows[0]);
   await emitBookmarkEvent({
-    action: "deleted",
+    action: "updated",
     user_id: effectiveUserId,
-    bookmark_id: deleted.id,
+    bookmark_id: updated.id,
     at: new Date().toISOString(),
   });
-  return deleted;
+  return updated;
 }
 
 export async function deleteBookmark(id: number, userId?: number): Promise<Bookmark | null> {
@@ -468,7 +461,14 @@ export async function deleteBookmark(id: number, userId?: number): Promise<Bookm
   if (!rows.length) {
     return null;
   }
-  return rowToBookmark(rows[0]);
+  const deleted = rowToBookmark(rows[0]);
+  await emitBookmarkEvent({
+    action: "deleted",
+    user_id: effectiveUserId,
+    bookmark_id: deleted.id,
+    at: new Date().toISOString(),
+  });
+  return deleted;
 }
 
 export async function getStats(userId?: number): Promise<BookmarkStats> {
