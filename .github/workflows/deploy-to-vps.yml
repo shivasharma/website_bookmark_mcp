@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm' # This will now work because package-lock is at the root
+         # cache: 'npm' # This will now work because package-lock is at the root
 
       - name: Build MCP Server
         run: |
