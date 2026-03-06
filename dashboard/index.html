@@ -406,6 +406,32 @@
       color: var(--text);
     }
 
+    .logout-btn {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .logout-btn.show {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .logout-btn:hover {
+      background: var(--surface-3);
+      border-color: #9aaab9;
+      color: var(--text);
+    }
+
     .user-avatar {
       width: 22px;
       height: 22px;
@@ -1304,6 +1330,7 @@
             <i class="fa-brands fa-github" aria-hidden="true"></i>
             <span>GitHub</span>
           </a>
+          <button class="logout-btn" id="topLogoutBtn" type="button">Logout</button>
           <span class="pill" id="projectCount">0 projects</span>
         </div>
       </header>
@@ -1440,6 +1467,7 @@
       themeToggleText: document.getElementById("themeToggleText"),
       sidebarClock: document.getElementById("sidebarClock"),
       signInBtn: document.getElementById("signInBtn"),
+      topLogoutBtn: document.getElementById("topLogoutBtn"),
       userChip: document.getElementById("userChip"),
       userAvatar: document.getElementById("userAvatar"),
       userChipText: document.getElementById("userChipText"),
@@ -1499,6 +1527,9 @@
         if (els.signInBtn) {
           els.signInBtn.classList.add("show");
         }
+        if (els.topLogoutBtn) {
+          els.topLogoutBtn.classList.remove("show");
+        }
         return;
       }
 
@@ -1511,6 +1542,22 @@
       if (els.signInBtn) {
         els.signInBtn.classList.remove("show");
       }
+      if (els.topLogoutBtn) {
+        els.topLogoutBtn.classList.add("show");
+      }
+    }
+
+    async function performLogout() {
+      try { await api("/logout", { method: "POST" }); } catch {}
+      state.currentUser = null;
+      state.authRequired = true;
+      renderUserChip();
+      toast("Logged out");
+
+      if (state.activeRoute === "/bookmarks") {
+        await loadBookmarks();
+      }
+      render();
     }
 
     function updateThemeToggleUi(theme) {
@@ -2086,11 +2133,7 @@
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) {
           logoutBtn.addEventListener("click", async () => {
-            try { await api("/logout", { method: "POST" }); } catch {}
-            state.currentUser = null;
-            renderUserChip();
-            toast("Logged out");
-            renderBookmarkTab();
+            await performLogout();
           });
         }
         return;
@@ -2362,6 +2405,12 @@
         els.themeToggle.addEventListener("click", () => {
           const current = document.body.getAttribute("data-theme") === "light" ? "light" : "dark";
           applyTheme(current === "light" ? "dark" : "light");
+        });
+      }
+
+      if (els.topLogoutBtn) {
+        els.topLogoutBtn.addEventListener("click", async () => {
+          await performLogout();
         });
       }
 
