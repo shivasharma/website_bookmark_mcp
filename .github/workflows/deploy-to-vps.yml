@@ -26,6 +26,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          # Point this to your actual lock file location
+          cache-dependency-path: './server/package-lock.json'
 
       - name: Install Dependencies
         run: npm install
