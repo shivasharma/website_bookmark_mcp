@@ -1,93 +1,90 @@
-# Bookmark Vault (TypeScript + PostgreSQL + OAuth)
+# website_bookmark_mcp
 
-This repo now has a clean split:
-- `server/api.ts` -> HTTP API + dashboard + OAuth
-- `server/mcp/index.ts` -> MCP server (stdio transport)
+Bookmark manager + MCP bridge that lets AI clients work with your saved links using natural language.
 
-## Quick start
+## What Problem This Solves
 
-1. Copy `.env.example` to `.env`
-2. Start Postgres + API (optional dashboard/auth flow):
+Most bookmark tools are built for manual use in the browser. AI clients (Cursor, Claude Desktop, VS Code MCP, etc.) cannot easily access those bookmarks in a structured way.
 
-```bash
-docker compose up --build -d
-```
+This project solves that by providing:
+- A web dashboard to manage bookmarks (create, edit, favorite, search)
+- A backend API for bookmark operations
+- An MCP server so AI clients can read and use bookmark data through MCP tools
 
-Production note: public traffic should use `https://ai.shivaprogramming.com` on port `443`. Port `3001` is internal app HTTP behind Nginx.
+## Technology Used
 
-## Docker-only HTTPS on VPS
+- `TypeScript` for API and MCP server code
+- `Node.js + Express` for HTTP routes and dashboard serving
+- `PostgreSQL` for bookmark persistence
+- `OAuth login` for user sessions in the dashboard
+- `Model Context Protocol (MCP)` with stdio transport for client integrations
+- `HTML/CSS/Vanilla JS` for a lightweight dashboard UI
+- `Docker Compose` for local or server containerized runtime
 
-Use only Docker containers (including Nginx). Do not use host Nginx.
+## Project Structure
 
-1. Set DNS A record for `ai.shivaprogramming.com` to your VPS.
-2. On VPS, in this repo:
+- `server/api.ts` - REST API, dashboard routes, session user endpoints
+- `server/mcp/index.ts` - MCP server entry point (stdio)
+- `dashboard/index.html` - Main dashboard UI (Bookmarks, Health, Account, MCP Setup)
+- `dashboard/mcp-setup.html` - Guided MCP setup screen
+- `configs/mcp/` - MCP client configuration examples
+- `docs/mcp-clients.md` - Additional client setup notes
 
-```bash
-cp .env.example .env
-```
-
-3. Run deployment script with email for Let's Encrypt:
-
-```bash
-CERTBOT_EMAIL=you@example.com ./deploy-vps.sh
-```
-
-This script:
-- Stops/disables host `nginx` service
-- Creates TLS cert with Docker Certbot (first run)
-- Starts `postgres`, `app`, `nginx`, and `certbot` via Docker Compose
-
-## Fully automatic deployment (no manual `.sh`)
-
-After initial server setup, deployment is automatic from GitHub Actions on every push to `main`.
-You do not need to run `deploy.sh` or `deploy-vps.sh` manually.
-
-Required one-time GitHub secrets:
-- `VPS_HOST`
-- `VPS_USER`
-- `VPS_SSH_KEY`
-- `POSTGRES_PASSWORD`
-- `SESSION_SECRET`
-- `CERTBOT_EMAIL`
-
-4. Build MCP server:
+## Run Locally
 
 ```bash
 npm install
 npm run build
 ```
 
-## Run servers
+Start servers:
 
-- MCP server (stdio): `npm run start:mcp`
 - API server: `npm run start:api`
-- MCP dev mode: `npm run dev:mcp`
+- MCP server: `npm run start:mcp`
 - API dev mode: `npm run dev:api`
+- MCP dev mode: `npm run dev:mcp`
 
-## MCP client setup
+## MCP Client Integration
 
-Client-specific MCP configs are now in `configs/mcp/`.
-Setup instructions are in `docs/mcp-clients.md`.
-MCP defaults to hosted API `https://ai.shivaprogramming.com` (no DB config needed in client settings).
-MCP requests should include `BOOKMARK_API_TOKEN` (generated via `POST /api/mcp-token` after login).
-Non-technical flow: open `https://ai.shivaprogramming.com/mcp-setup` after login and use the setup wizard.
+### Recommended flow (UI based)
 
-## OAuth setup (API only)
+1. Open the dashboard and log in.
+2. Go to the `MCP Setup` tab (or `/mcp-setup`).
+3. Click `Generate Token`.
+4. Use `Copy Token` and `Copy Config` buttons.
+5. Paste the config into your MCP client settings.
 
-Set these in `.env`:
+### MCP config template
 
-```env
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CALLBACK_URL=http://localhost:3001/auth/google/callback
+Use this as the base template in your MCP client:
 
-CLIENT_ID_GITHUB=
-CLIENT_SECRET_GITHUB=
-CALLBACK_URL_GITHUB=http://localhost:3001/auth/github/callback
+```json
+{
+	"mcpServers": {
+		"bookmark": {
+			"command": "node",
+			"args": ["-y", "github:shivasharma/website_bookmark_mcp"],
+			"env": {
+				"BOOKMARK_API_BASE_URL": "https://ai.shivaprogramming.com",
+				"BOOKMARK_API_TOKEN": "paste-token-here"
+			}
+		}
+	}
+}
 ```
 
-## Local fallback
+## MCP Usage Examples
 
-`ALLOW_LOCAL_FALLBACK=true` lets API work locally without OAuth.
-Set `ALLOW_LOCAL_FALLBACK=false` in production.
+After client setup, you can ask your AI assistant things like:
+- "Find my bookmarks about Docker health checks"
+- "Show my favorite MCP resources"
+- "List recent links tagged with TypeScript"
+
+## Dashboard Features
+
+- `Bookmarks` tab with favorites and full list views
+- `System Health` mini dashboard
+- `About Project` with README view
+- `Account` tab with session state
+- `MCP Setup` tab with token generation and one-click copy actions
 
