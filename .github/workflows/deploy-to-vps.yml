@@ -25,31 +25,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm' # This will now work because package-lock is at the root
 
       - name: Build MCP Server
         run: |
-          cd server
           npm install
           npm run build
           echo "Verifying build output..."
-          ls -R dist/
+          ls -R dist/mcp/index.js
 
       - name: Commit and Push Dist
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Force add the dist folder in case it's in a sub-gitignore
-          git add -f server/dist/
+          # Add the dist folder from the root
+          git add -f dist/
           
-          # Only commit and push if there are actual changes to the compiled JS
-          if [ -n "$(git status --porcelain server/dist/)" ]; then
+          if [ -n "$(git status --porcelain dist/)" ]; then
             git commit -m "chore: update mcp dist [skip ci]"
             git push
           else
             echo "No changes detected in dist. Skipping commit."
           fi
-
   # --- JOB 2: Build Docker Image ---
   build_image:
     runs-on: ubuntu-latest
