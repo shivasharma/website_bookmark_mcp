@@ -78,3 +78,18 @@ npm run start:mcp
 If MCP starts correctly, it stays connected over stdio and logs:
 - `Bookmark MCP Server running on stdio`
 
+{
+  "mcpServers": {
+    "bookmark": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "github:shivasharma/website_bookmark_mcp"
+      ],
+      "env": {
+        "BOOKMARK_API_BASE_URL": "http://127.0.0.1:5500",
+        "BOOKMARK_API_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
