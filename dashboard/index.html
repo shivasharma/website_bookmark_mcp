@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     :root {
       --bg: #0b1321;
@@ -880,7 +882,7 @@
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
   <div class="global-status">
     <div class="global-left">
       <span class="user-chip" id="userChip" aria-live="polite">
@@ -905,7 +907,7 @@
       </div>
 
       <div class="section-label">Projects</div>
-      <input class="sidebar-search" id="projectNavSearch" type="text" placeholder="Search projects..." />
+      <!-- Removed sidebar project search -->
       <nav class="nav" id="projectNav"></nav>
 
       <div class="sidebar-note">Use this page as your launcher. Add new projects in the data list and each one gets its own route.</div>
@@ -926,46 +928,29 @@
       </header>
 
       <section class="toolbar">
-        <input class="search" id="projectSearch" type="text" placeholder="Search projects..." />
+        <!-- Removed project search -->
         <input class="search" id="bookmarkSearchTop" type="text" placeholder="Search bookmarks..." />
-        <small id="toolbarHint">Use project search for navigation and bookmark search for saved links.</small>
+        <small id="toolbarHint">Use bookmark search for saved links.</small>
       </section>
 
       <section class="panel" id="panel"></section>
     </main>
   </div>
 
-  <div class="modal" id="bookmarkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-card">
-      <h3 id="modalTitle" style="margin:0;font-size:16px;">Add Bookmark</h3>
-      <div class="modal-grid">
-        <input id="bmUrl" type="url" placeholder="https://example.com" />
-        <input id="bmTitle" type="text" placeholder="Title" />
-        <input id="bmDescription" type="text" placeholder="Description" />
-        <input id="bmTags" type="text" placeholder="Tags (comma separated)" />
-        <textarea id="bmNotes" placeholder="Notes"></textarea>
+  <!-- Register Modal -->
+  <div class="modal register-modal" id="registerModal" role="dialog" aria-modal="true" aria-labelledby="registerTitle" style="display:none;">
+    <form class="register-card" id="registerForm" autocomplete="off">
+      <h2 id="registerTitle">Register / Login</h2>
+      <label for="regEmail">Email</label>
+      <input id="regEmail" type="email" placeholder="you@email.com" required />
+      <label for="regName">Name</label>
+      <input id="regName" type="text" placeholder="Your Name" required />
+      <div class="register-actions">
+        <button class="btn" type="button" id="cancelRegisterBtn">Cancel</button>
+        <button class="btn primary" type="submit">Register</button>
       </div>
-      <div class="modal-actions">
-        <button class="btn" id="cancelBookmarkBtn" type="button">Cancel</button>
-        <button class="btn primary" id="saveBookmarkBtn" type="button">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
-    <div class="modal-card">
-      <h3 id="guideTitle" style="margin:0;font-size:16px;">Quick Setup Guide</h3>
-      <ol class="guide-list" style="margin-top:10px;">
-        <li>Use the form on the left to add URL, title, and optional tags/notes.</li>
-        <li>Sign in from the login panel if you are not authenticated yet.</li>
-        <li>Click save after login. Your bookmark will appear in results below.</li>
-        <li>Use search in Results to quickly find saved links.</li>
-        <li>Use Favorite, Edit, and Delete buttons on each card as needed.</li>
-      </ol>
-      <div class="modal-actions">
-        <button class="btn" id="closeGuideBtn" type="button">Close</button>
-      </div>
-    </div>
+      <div style="font-size:12px;color:#888;text-align:center;">Or sign in with <a href="/auth/github" style="color:#2f6fa6;">GitHub</a> / <a href="/auth/google" style="color:#2f6fa6;">Google</a></div>
+    </form>
   </div>
 
   <script>
@@ -1755,7 +1740,10 @@
 
       els.projectNav.innerHTML = navItems.map((project) => `
         <button data-route="${escapeHtml(project.route)}" class="${route === project.route ? "active" : ""}">
-          <span class="nav-left"><span class="nav-dot"></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
+          <span class="nav-left">
+            <span class="nav-icon"><i class="fa fa-folder${project.type === "bookmark" ? '-open' : ''}"></i></span>
+            <span class="nav-name">${escapeHtml(project.name)}</span>
+          </span>
           <span class="nav-badge">${escapeHtml(project.badge || "Open")}</span>
         </button>
       `).join("");
@@ -1769,8 +1757,8 @@
       if (route === "/") {
         els.pageTitle.textContent = "All Projects";
         els.pageSubtitle.textContent = "Choose a project from left navigation";
-        els.toolbarHint.textContent = "Project and bookmark search are available at the top.";
-        renderAllProjects();
+        els.toolbarHint.textContent = "Bookmark search is available at the top.";
+        renderAllProjectsGrid();
         return;
       }
 
@@ -1778,7 +1766,7 @@
         els.pageTitle.textContent = "Bookmarks";
         els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
         els.toolbarHint.textContent = "Use top bookmark search or results search to find links quickly.";
-        await renderBookmarksWorkspace();
+        renderBookmarksWorkspace();
         return;
       }
 
@@ -1793,7 +1781,7 @@
       els.pageTitle.textContent = "All Projects";
       els.pageSubtitle.textContent = "Unknown route, showing dashboard";
       els.toolbarHint.textContent = "Route not found in project list.";
-      renderAllProjects();
+      renderAllProjectsGrid();
     }
 
     async function saveBookmark() {
