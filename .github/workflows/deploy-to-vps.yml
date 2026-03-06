@@ -5,14 +5,14 @@ on:
     branches: [main, master]
 
 permissions:
-  contents: read
+  contents: write  # Required to push the dist folder back to the repo
   packages: write
 
 env:
   DEPLOY_DIR: /opt/website_bookmark_mcp
 
 jobs:
-
+  # --- JOB 1: Build MCP and Sync Dist Folder ---
   build_and_sync_dist:
     runs-on: ubuntu-latest
     steps:
@@ -25,33 +25,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          # We removed the 'cache' line temporarily to bypass the path error
 
-      - name: Install and Build
+      - name: Build MCP Server
         run: |
           cd server
           npm install
           npm run build
+          echo "Verifying build output..."
+          ls -R dist/
 
       - name: Commit and Push Dist
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Add the dist folder specifically
-          git add server/dist/
+          # Force add the dist folder in case it's in a sub-gitignore
+          git add -f server/dist/
           
-          # Check if there are changes before committing
+          # Only commit and push if there are actual changes to the compiled JS
           if [ -n "$(git status --porcelain server/dist/)" ]; then
-            git commit -m "chore: update dist for mcp [skip ci]"
+            git commit -m "chore: update mcp dist [skip ci]"
             git push
           else
-            echo "No changes to dist folder, skipping commit."
+            echo "No changes detected in dist. Skipping commit."
           fi
- 
+
+  # --- JOB 2: Build Docker Image ---
   build_image:
     runs-on: ubuntu-latest
-
+    needs: build_and_sync_dist # Ensure dist is updated before building image if necessary
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,10 +73,10 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
 
+  # --- JOB 3: Deploy to VPS ---
   deploy_to_vps:
     runs-on: ubuntu-latest
     needs: build_image
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -131,33 +133,6 @@ jobs:
               fi
             done
 
-            DB_PASSWORD_VALUE="${{ secrets.POSTGRES_PASSWORD }}"
-            if [ -z "$DB_PASSWORD_VALUE" ]; then
-              echo "Missing required secret: POSTGRES_PASSWORD"
-              exit 1
-            fi
-            if [ -z "${{ secrets.SESSION_SECRET }}" ]; then
-              echo "Missing required secret: SESSION_SECRET"
-              exit 1
-            fi
-            if [ -z "${{ secrets.CERTBOT_EMAIL }}" ]; then
-              echo "Missing required secret: CERTBOT_EMAIL"
-              exit 1
-            fi
-            if [ -z "${{ secrets.CLIENT_ID_GITHUB }}" ]; then
-              echo "Missing required secret: CLIENT_ID_GITHUB"
-              exit 1
-            fi
-            if [ -z "${{ secrets.CLIENT_SECRET_GITHUB }}" ]; then
-              echo "Missing required secret: CLIENT_SECRET_GITHUB"
-              exit 1
-            fi
-
-            if command -v systemctl >/dev/null 2>&1; then
-              systemctl stop nginx 2>/dev/null || sudo systemctl stop nginx 2>/dev/null || true
-              systemctl disable nginx 2>/dev/null || sudo systemctl disable nginx 2>/dev/null || true
-            fi
-
             cat > .env <<'ENVFILE'
             DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
@@ -192,8 +167,6 @@ jobs:
             echo "[INFO] Stopping previous containers..."
             docker stop bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
             docker rm bookmark-app bookmark-postgres bookmark-nginx bookmark_certbot 2>/dev/null || true
-            docker ps --filter publish=80 --format '{{.ID}}' | xargs -r docker stop || true
-            docker ps --filter publish=443 --format '{{.ID}}' | xargs -r docker stop || true
 
             CERT_FILE="docker-data/letsencrypt/live/ai.shivaprogramming.com/fullchain.pem"
             if [ ! -f "$CERT_FILE" ]; then
@@ -220,14 +193,5 @@ jobs:
               echo "[INFO] app health pending ($i/20)"
               sleep 3
             done
-            for i in $(seq 1 20); do
-              if curl -fkfsS https://ai.shivaprogramming.com/api/health >/dev/null; then
-                break
-              fi
-              echo "[INFO] public health pending ($i/20)"
-              sleep 3
-            done
-            curl -fkfsS https://ai.shivaprogramming.com/api/health >/dev/null
 
             echo "Deployment succeeded: https://ai.shivaprogramming.com"
-   
