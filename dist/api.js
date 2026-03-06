@@ -37,15 +37,28 @@ const CORS_ORIGINS = (process.env.CORS_ORIGINS
         "https://127.0.0.1:3001",
         "https://ai.shivaprogramming.com",
     ]).filter(Boolean);
+const MAX_JSON_BODY = process.env.MAX_JSON_BODY ?? "64kb";
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(cors({
-    origin: CORS_ORIGINS,
+    origin: (origin, callback) => {
+        if (!origin) {
+            callback(null, true);
+            return;
+        }
+        if (CORS_ORIGINS.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+        callback(new Error("CORS origin not allowed"));
+    },
     credentials: true,
 }));
 app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    hsts: process.env.NODE_ENV === "production",
+    referrerPolicy: { policy: "no-referrer" },
 }));
 app.use(rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -53,7 +66,7 @@ app.use(rateLimit({
     standardHeaders: "draft-7",
     legacyHeaders: false,
 }));
-app.use(express.json());
+app.use(express.json({ limit: MAX_JSON_BODY, strict: true }));
 app.use(session({
     secret: SESSION_SECRET,
     resave: false,
@@ -70,6 +83,18 @@ app.use(passport.session());
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 40,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+});
+const writeLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 120,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+});
+const tokenLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 30,
     standardHeaders: "draft-7",
     legacyHeaders: false,
 });
@@ -243,6 +268,13 @@ const updateBookmarkSchema = z.object({
     favicon: z.string().trim().url().max(2048).optional(),
     is_favorite: z.boolean().optional(),
 });
+const idParamSchema = z.coerce.number().int().positive();
+const listBookmarksQuerySchema = z.object({
+    search: z.string().trim().max(200).optional(),
+    tag: z.string().trim().min(1).max(50).optional(),
+    favorite: z.enum(["true", "false"]).optional(),
+});
+const tokenDaysSchema = z.coerce.number().int().min(1).max(365);
 function ensureUrlProtocol(input) {
     const value = input.trim();
     return /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(value) ? value : `https://${value}`;
@@ -346,36 +378,42 @@ app.get("/api/me", async (req, res) => {
         res.status(401).json({ success: false, error: "Not authenticated" });
     }
 });
-app.post("/api/mcp-token", async (req, res) => {
+app.post("/api/mcp-token", tokenLimiter, async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.id) {
         res.status(401).json({ success: false, error: "Login required" });
         return;
     }
-    const daysRaw = typeof req.body?.expires_in_days === "number" ? req.body.expires_in_days : 30;
-    const expiresInDays = Number.isFinite(daysRaw) ? Math.trunc(daysRaw) : 30;
+    const parsedDays = tokenDaysSchema.safeParse(req.body?.expires_in_days ?? 30);
+    if (!parsedDays.success) {
+        res.status(400).json({ success: false, error: "Invalid expires_in_days (must be 1-365)" });
+        return;
+    }
+    const expiresInDays = parsedDays.data;
     const token = generateMcpToken(req.user.id, expiresInDays);
     res.json({
         success: true,
         data: {
             token,
-            expires_in_days: Math.max(1, Math.min(expiresInDays, 365)),
+            expires_in_days: expiresInDays,
         },
     });
 });
-app.get("/api/mcp-token", async (req, res) => {
+app.get("/api/mcp-token", tokenLimiter, async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.id) {
         res.status(401).json({ success: false, error: "Login required" });
         return;
     }
-    const daysRaw = typeof req.query.expires_in_days === "string" ? Number(req.query.expires_in_days) : 30;
-    const expiresInDays = Number.isFinite(daysRaw) ? Math.trunc(daysRaw) : 30;
-    const safeDays = Math.max(1, Math.min(expiresInDays, 365));
-    const token = generateMcpToken(req.user.id, safeDays);
+    const parsedDays = tokenDaysSchema.safeParse(req.query.expires_in_days ?? 30);
+    if (!parsedDays.success) {
+        res.status(400).json({ success: false, error: "Invalid expires_in_days (must be 1-365)" });
+        return;
+    }
+    const token = generateMcpToken(req.user.id, parsedDays.data);
     res.json({
         success: true,
         data: {
             token,
-            expires_in_days: safeDays,
+            expires_in_days: parsedDays.data,
         },
         how_to_use: "Set this value as BOOKMARK_API_TOKEN in your MCP client config",
     });
@@ -424,9 +462,14 @@ app.get("/api/events", (req, res) => {
 });
 app.get("/api/bookmarks", async (req, res) => {
     try {
-        const search = typeof req.query.search === "string" ? req.query.search : undefined;
-        const tag = typeof req.query.tag === "string" ? req.query.tag : undefined;
-        const favorite = req.query.favorite === "true";
+        const parsedQuery = listBookmarksQuerySchema.safeParse(req.query);
+        if (!parsedQuery.success) {
+            res.status(400).json({ success: false, error: "Invalid bookmarks query" });
+            return;
+        }
+        const search = parsedQuery.data.search;
+        const tag = parsedQuery.data.tag;
+        const favorite = parsedQuery.data.favorite === "true";
         const user_id = getUserId(req);
         const bookmarks = await listBookmarks({ search, tag, favorite, user_id });
         res.json({ success: true, data: bookmarks, total: bookmarks.length });
@@ -438,7 +481,11 @@ app.get("/api/bookmarks", async (req, res) => {
 });
 app.get("/api/bookmarks/:id", async (req, res) => {
     try {
-        const id = Number(req.params.id);
+        const parsedId = idParamSchema.safeParse(req.params.id);
+        if (!parsedId.success) {
+            return res.status(400).json({ success: false, error: "Invalid bookmark id" });
+        }
+        const id = parsedId.data;
         const userId = getUserId(req);
         const bookmark = await getBookmarkById(id, userId);
         if (!bookmark) {
@@ -451,7 +498,7 @@ app.get("/api/bookmarks/:id", async (req, res) => {
         return res.status(401).json({ success: false, error: message });
     }
 });
-app.post("/api/bookmarks", async (req, res) => {
+app.post("/api/bookmarks", writeLimiter, async (req, res) => {
     try {
         const parsed = saveBookmarkSchema.safeParse(normalizeBookmarkPayload(req.body));
         if (!parsed.success) {
@@ -469,9 +516,13 @@ app.post("/api/bookmarks", async (req, res) => {
         return res.status(getHttpStatusForError(message, 400)).json({ success: false, error: message });
     }
 });
-app.patch("/api/bookmarks/:id", async (req, res) => {
+app.patch("/api/bookmarks/:id", writeLimiter, async (req, res) => {
     try {
-        const id = Number(req.params.id);
+        const parsedId = idParamSchema.safeParse(req.params.id);
+        if (!parsedId.success) {
+            return res.status(400).json({ success: false, error: "Invalid bookmark id" });
+        }
+        const id = parsedId.data;
         const userId = getUserId(req);
         const existing = await getBookmarkById(id, userId);
         if (!existing) {
@@ -495,9 +546,14 @@ app.patch("/api/bookmarks/:id", async (req, res) => {
         return res.status(getHttpStatusForError(message, 400)).json({ success: false, error: message });
     }
 });
-app.delete("/api/bookmarks/:id", async (req, res) => {
+app.delete("/api/bookmarks/:id", writeLimiter, async (req, res) => {
     try {
-        const deleted = await deleteBookmark(Number(req.params.id), getUserId(req));
+        const parsedId = idParamSchema.safeParse(req.params.id);
+        if (!parsedId.success) {
+            res.status(400).json({ success: false, error: "Invalid bookmark id" });
+            return;
+        }
+        const deleted = await deleteBookmark(parsedId.data, getUserId(req));
         if (!deleted) {
             return res.status(404).json({ success: false, error: "Not found" });
         }
