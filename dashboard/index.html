@@ -712,6 +712,52 @@
       gap: 14px;
     }
 
+    .bookmark-intro {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background:
+        radial-gradient(700px 180px at 100% 0%, rgba(96, 131, 183, 0.15), transparent 62%),
+        linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bookmark-intro h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .bookmark-intro p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 620px;
+    }
+
+    .bookmark-intro-kpis {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bookmark-intro-kpi {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.4px;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
     .bookmark-subnav {
       display: flex;
       gap: 8px;
@@ -723,11 +769,12 @@
       border-radius: 999px;
       background: var(--surface-2);
       color: var(--muted);
-      padding: 8px 11px;
+      padding: 9px 12px;
       font: 700 11px "JetBrains Mono", monospace;
       letter-spacing: .8px;
       text-transform: uppercase;
       cursor: pointer;
+      transition: border-color .2s ease, background-color .2s ease, color .2s ease;
     }
 
     .bookmark-subnav button.active {
@@ -770,9 +817,20 @@
 
     .bm-workspace {
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
       gap: 12px;
       align-items: start;
+    }
+
+    .bm-top-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.85fr) minmax(0, 2fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .bm-add-panel {
+      position: sticky;
+      top: 12px;
     }
 
     .readme-panel {
@@ -821,16 +879,17 @@
 
     .bm-panel {
       border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--surface-2);
-      padding: 12px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+      padding: 14px;
       display: grid;
       gap: 10px;
+      box-shadow: var(--shadow-soft);
     }
 
     .bm-panel h3 {
       margin: 0;
-      font: 800 14px "JetBrains Mono", monospace;
+      font: 800 15px "JetBrains Mono", monospace;
       letter-spacing: .4px;
       text-transform: uppercase;
     }
@@ -857,14 +916,27 @@
       background: var(--surface-2);
       color: var(--text);
       font: 500 13px "Manrope", sans-serif;
-      padding: 8px 10px;
+      padding: 10px 11px;
       outline: none;
+    }
+
+    .bm-add-panel .bookmark-form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bm-add-panel .bookmark-form-footer {
+      justify-content: stretch;
+    }
+
+    .bm-add-panel .bookmark-form-footer .btn {
+      flex: 1 1 120px;
+      text-align: center;
     }
 
     .bm-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 11px;
     }
 
     .bookmark-form {
@@ -890,11 +962,11 @@
 
     .login-note {
       border: 1px solid #4c5159;
-      border-radius: 10px;
+      border-radius: 12px;
       background: rgba(255, 255, 255, 0.03);
       color: var(--muted);
       font-size: 12px;
-      padding: 9px 10px;
+      padding: 10px 11px;
     }
 
     .login-note a {
@@ -904,16 +976,17 @@
 
     .bookmark-results {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 12px;
       align-items: start;
+      min-width: 0;
     }
 
     .bm-results-head {
       border: 1px solid var(--line);
       border-radius: 12px;
       background: var(--surface-2);
-      padding: 10px;
+      padding: 12px;
       display: grid;
       gap: 8px;
       grid-column: 1 / -1;
@@ -1405,7 +1478,9 @@
 
       .bookmark-stats { grid-template-columns: 1fr; }
       .bookmark-form-grid { grid-template-columns: 1fr; }
-      .bm-workspace { grid-template-columns: 1fr; }
+      .bm-top-layout { grid-template-columns: 1fr; }
+      .bm-add-panel { position: static; }
+      .bookmark-intro { padding: 12px; }
 
       .overlay.sidebar-open { display: block; }
     }
@@ -1419,11 +1494,24 @@
       .tile-title { font-size: 19px; }
       .toolbar { padding: 9px; }
       .search { width: 100%; }
-      .bookmark-subnav { gap: 6px; }
-      .bookmark-subnav button { min-height: 38px; }
+      .bookmark-subnav {
+        gap: 6px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .bookmark-subnav button {
+        min-height: 40px;
+        flex: 0 0 auto;
+      }
+      .bookmark-intro h3 { font-size: 15px; }
+      .bookmark-intro p { font-size: 12px; }
+      .bookmark-intro-kpis { width: 100%; }
+      .bookmark-intro-kpi { font-size: 10px; }
       .btn { width: 100%; text-align: center; }
       .bm-actions { width: 100%; justify-content: stretch; }
       .bm-actions .bm-action-btn { width: auto; flex: 1 1 96px; justify-content: center; }
+      .bm-add-panel .bookmark-form-footer .btn { flex: 1 1 100%; }
       .bm-results-head .input { width: 100%; }
       .global-status { height: auto; min-height: 48px; }
       .health-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2077,7 +2165,7 @@
     }
 
     function bookmarkListMarkup() {
-      const favorites = state.bookmarks.filter((item) => item.is_favorite);
+      const favoritesCount = state.bookmarks.filter((item) => item.is_favorite).length;
 
       const renderBookmarkCard = (bookmark) => {
         const domain = getDomain(bookmark.url) || "link";
@@ -2115,77 +2203,80 @@
         `;
       };
 
-      const favoriteCards = favorites.length
-        ? favorites.map((bookmark) => renderBookmarkCard(bookmark)).join("")
-        : `<div class="empty">No favorites yet. Mark bookmarks as favorite to pin them here.</div>`;
-
       const allCards = state.bookmarks.length
         ? state.bookmarks.map((bookmark) => renderBookmarkCard(bookmark)).join("")
-        : `<div class="empty">No bookmarks yet. Use the form above to save your first item.</div>`;
+        : `<div class="empty">No bookmarks yet. Use the form to save your first item.</div>`;
 
       return `
         <div class="bookmark-content">
-        <div class="bm-workspace">
-          <section class="bm-panel">
-            <h3>Add Bookmark</h3>
-            <p>Paste your link, add a short title, and save after login.</p>
-            <form class="bookmark-form" id="quickBookmarkForm">
-              <div class="bookmark-form-grid">
-                <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
-                <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
-                <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
-                <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
-                <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
-              </div>
-              <div class="bookmark-form-footer">
-                <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
-                <button class="btn" type="button" id="openGuideBtn">How It Works</button>
-              </div>
-            </form>
-          </section>
-
-          <section class="bm-panel">
-            <h3>Login & Setup</h3>
-            <div class="login-note">
-              ${state.currentUser && !state.authRequired
-                ? `You are logged in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>. You can save bookmarks now.`
-                : `You need to <a href="/register">login</a> before bookmarks can be saved.`}
+          <section class="bookmark-intro">
+            <div>
+              <h3>Manage your bookmarks in one place</h3>
+              <p>Add new links quickly, search instantly, and keep your collection organized across desktop and mobile.</p>
             </div>
-            <div class="bookmark-stats">
-              <div class="stat"><div class="k">Total</div><div class="v" id="statTotal">0</div></div>
-              <div class="stat"><div class="k">Favorites</div><div class="v" id="statFavorites">0</div></div>
-              <div class="stat"><div class="k">Recent</div><div class="v" id="statRecent">0</div></div>
-            </div>
-            <p>Use the inline form to add bookmarks and manage favorites by section.</p>
-            <p>Use the guide for a quick 5-step overview of adding, finding, and managing links.</p>
-            <div class="bm-inline-actions">
-              ${state.currentUser && !state.authRequired
-                ? `<button class="btn" type="button" id="openGuideBtnSecondary">Open Guide</button>`
-                : `<a class="btn primary" href="/register">Login / Register</a>`}
+            <div class="bookmark-intro-kpis" aria-label="Bookmark quick stats">
+              <span class="bookmark-intro-kpi">Total: ${state.bookmarks.length}</span>
+              <span class="bookmark-intro-kpi">Favorites: ${favoritesCount}</span>
+              <span class="bookmark-intro-kpi">View: Card Grid</span>
             </div>
           </section>
-        </div>
 
-        <div class="bookmark-results" id="bookmarkGrid">
-          <div class="bm-results-head">
-            <h3>Results</h3>
-            <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.bookmarkSearch)}" placeholder="Search bookmarks" />
+          <div class="bm-workspace">
+            <div class="bm-top-layout">
+              <section class="bm-panel bm-add-panel">
+                <h3>Add Bookmark</h3>
+                <p>Quick add form. Save links in seconds.</p>
+                <form class="bookmark-form" id="quickBookmarkForm">
+                  <div class="bookmark-form-grid">
+                    <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
+                    <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
+                    <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
+                    <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
+                    <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
+                  </div>
+                  <div class="bookmark-form-footer">
+                    <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
+                    <button class="btn" type="button" id="openGuideBtn">How It Works</button>
+                  </div>
+                </form>
+              </section>
+
+              <div class="bookmark-results" id="bookmarkGrid">
+                <div class="bm-results-head">
+                  <h3>All Bookmarks</h3>
+                  <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.bookmarkSearch)}" placeholder="Search bookmarks" />
+                </div>
+                <section class="bm-section">
+                  <div class="bm-section-head">
+                    <h3>All Bookmarks</h3>
+                    <span class="bm-count">${state.bookmarks.length}</span>
+                  </div>
+                  <div class="bm-grid">${allCards}</div>
+                </section>
+              </div>
+            </div>
+
+            <section class="bm-panel">
+              <h3>Login & Setup</h3>
+              <div class="login-note">
+                ${state.currentUser && !state.authRequired
+                  ? `You are logged in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>. You can save bookmarks now.`
+                  : `You need to <a href="/register">login</a> before bookmarks can be saved.`}
+              </div>
+              <div class="bookmark-stats">
+                <div class="stat"><div class="k">Total</div><div class="v" id="statTotal">0</div></div>
+                <div class="stat"><div class="k">Favorites</div><div class="v" id="statFavorites">0</div></div>
+                <div class="stat"><div class="k">Recent</div><div class="v" id="statRecent">0</div></div>
+              </div>
+              <p>Use the inline form to add bookmarks and search links instantly.</p>
+              <p>Use the guide for a quick 5-step overview of adding and managing links.</p>
+              <div class="bm-inline-actions">
+                ${state.currentUser && !state.authRequired
+                  ? `<button class="btn" type="button" id="openGuideBtnSecondary">Open Guide</button>`
+                  : `<a class="btn primary" href="/register">Login / Register</a>`}
+              </div>
+            </section>
           </div>
-          <section class="bm-section">
-            <div class="bm-section-head">
-              <h3>Favorites</h3>
-              <span class="bm-count">${favorites.length}</span>
-            </div>
-            <div class="bm-grid">${favoriteCards}</div>
-          </section>
-          <section class="bm-section">
-            <div class="bm-section-head">
-              <h3>All Bookmarks</h3>
-              <span class="bm-count">${state.bookmarks.length}</span>
-            </div>
-            <div class="bm-grid">${allCards}</div>
-          </section>
-        </div>
         </div>
       `;
     }
