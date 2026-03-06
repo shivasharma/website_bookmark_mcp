@@ -47,6 +47,24 @@
       --focus: 0 0 0 3px rgba(17, 17, 17, 0.12);
     }
 
+    body[data-theme="dark"] {
+      --bg: #11161c;
+      --bg-grad-1: #1a212a;
+      --bg-grad-2: #0e141b;
+      --surface: #171e27;
+      --surface-2: #1d2530;
+      --surface-3: #26303d;
+      --line: #33404f;
+      --line-soft: #2a3441;
+      --text: #e7ecf3;
+      --muted: #9ca9bb;
+      --accent: #f3f4f6;
+      --accent-soft: #b3bfce;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --focus: 0 0 0 3px rgba(140, 180, 255, 0.25);
+    }
+
     * { box-sizing: border-box; }
 
     html, body {
@@ -85,12 +103,21 @@
       backdrop-filter: blur(8px);
     }
 
+    body[data-theme="dark"] .global-status {
+      background: rgba(17, 22, 28, 0.92);
+    }
+
     .global-left,
     .global-right {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .global-right {
+      margin-left: auto;
+      justify-content: flex-end;
     }
 
     .sidebar {
@@ -239,7 +266,7 @@
     .main {
       min-width: 0;
       display: grid;
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto 1fr;
       gap: 10px;
     }
 
@@ -259,6 +286,10 @@
       justify-content: space-between;
       gap: 10px;
       background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+    }
+
+    body[data-theme="dark"] .topbar {
+      background: linear-gradient(180deg, #19212b 0%, #151c25 100%);
     }
 
     .title-wrap {
@@ -289,25 +320,47 @@
 
     .top-actions { display: inline-flex; gap: 8px; align-items: center; }
 
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 700 11px "JetBrains Mono", monospace;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface-3);
+      border-color: #9aaab9;
+    }
+
     .github-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: 10px;
       background: var(--surface-2);
       color: var(--text);
       text-decoration: none;
       font: 700 11px "JetBrains Mono", monospace;
       letter-spacing: 0.3px;
-      padding: 7px 12px;
+      padding: 9px 12px;
+      min-height: 38px;
       transition: background-color .2s ease, border-color .2s ease, color .2s ease;
     }
 
     .github-btn:hover {
-      background: #111111;
-      border-color: #111111;
-      color: #ffffff;
+      background: var(--surface-3);
+      border-color: #9aaab9;
+      color: var(--text);
     }
 
     .user-chip {
@@ -331,19 +384,26 @@
     .sign-in-btn {
       display: none;
       border: 1px solid var(--line);
-      border-radius: 999px;
+      border-radius: 10px;
       background: var(--surface-2);
       color: var(--text);
       text-decoration: none;
       font: 700 11px "JetBrains Mono", monospace;
       letter-spacing: 0.3px;
-      padding: 7px 12px;
+      padding: 9px 12px;
+      min-height: 38px;
       transition: background-color .2s ease, border-color .2s ease;
     }
 
     .sign-in-btn.show {
       display: inline-flex;
       align-items: center;
+    }
+
+    .sign-in-btn:hover {
+      background: var(--surface-3);
+      border-color: #9aaab9;
+      color: var(--text);
     }
 
     .user-avatar {
@@ -400,6 +460,14 @@
       background: #fff;
     }
 
+    body[data-theme="dark"] .search:focus,
+    body[data-theme="dark"] .input:focus,
+    body[data-theme="dark"] .select:focus,
+    body[data-theme="dark"] .modal input:focus,
+    body[data-theme="dark"] .modal textarea:focus {
+      background: var(--surface-2);
+    }
+
     #bookmarkSearchTop {
       width: 100%;
     }
@@ -425,6 +493,10 @@
       transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
+    body[data-theme="dark"] .project-tile {
+      background: var(--surface);
+    }
+
     .project-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); border-color: #b6c3d1; }
 
     .tile-head {
@@ -435,6 +507,10 @@
       justify-content: space-between;
       align-items: center;
       gap: 8px;
+    }
+
+    body[data-theme="dark"] .tile-head {
+      background: linear-gradient(90deg, #1d2631, #1a222d);
     }
 
     .tile-id {
@@ -500,6 +576,11 @@
       font-size: 13px;
     }
 
+    body[data-theme="dark"] .img-placeholder {
+      border-color: #3c4a5b;
+      background: #1c2430;
+    }
+
     .tile-tech,
     .tile-actions {
       padding: 10px 14px;
@@ -520,6 +601,12 @@
       text-transform: uppercase;
       color: var(--text);
       background: #f8fafc;
+    }
+
+    body[data-theme="dark"] .chip {
+      border-color: #445366;
+      color: var(--text);
+      background: #1f2834;
     }
 
     .btn {
@@ -548,7 +635,34 @@
 
     body[data-theme="light"] .btn { border-color: #c7d1db; background: #f8fafc; color: #111111; }
 
+    body[data-theme="dark"] .btn {
+      border-color: #445366;
+      background: #1e2733;
+      color: var(--text);
+    }
+
+    body[data-theme="dark"] .btn:hover {
+      border-color: #5a6b80;
+      background: #253142;
+    }
+
+    body[data-theme="dark"] .btn.primary {
+      border-color: #e7ecf3;
+      background: #e7ecf3;
+      color: #11161c;
+    }
+
+    body[data-theme="dark"] .btn.primary:hover {
+      background: #d6dee8;
+      border-color: #d6dee8;
+    }
+
     .bookmark-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bookmark-content {
       display: grid;
       gap: 14px;
     }
@@ -654,6 +768,12 @@
       word-break: break-word;
     }
 
+    body[data-theme="dark"] .readme-content {
+      background: #1a212b;
+      color: var(--text);
+      border-color: #3a4758;
+    }
+
     .bm-panel {
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -739,7 +859,9 @@
 
     .bookmark-results {
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
+      align-items: start;
     }
 
     .bm-results-head {
@@ -747,11 +869,9 @@
       border-radius: 12px;
       background: var(--surface-2);
       padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: grid;
+      gap: 8px;
+      grid-column: 1 / -1;
     }
 
     .bm-results-head h3 {
@@ -759,6 +879,10 @@
       font: 800 13px "JetBrains Mono", monospace;
       letter-spacing: .4px;
       text-transform: uppercase;
+    }
+
+    .bm-results-head .input {
+      width: 100%;
     }
 
     .bm-section {
@@ -1101,18 +1225,18 @@
       .global-status { height: auto; min-height: 48px; }
       .health-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .health-services { grid-template-columns: 1fr; }
+      .bookmark-results { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="global-status">
-    <div class="global-left">
+    <div class="global-left"></div>
+    <div class="global-right">
       <span class="user-chip" id="userChip" aria-live="polite">
         <span class="user-avatar" id="userAvatar">U</span>
         <span class="user-chip-text" id="userChipText">Logged in</span>
       </span>
-    </div>
-    <div class="global-right">
       <a class="sign-in-btn" id="signInBtn" href="/register">Sign In</a>
     </div>
   </div>
@@ -1144,6 +1268,10 @@
           </div>
         </div>
         <div class="top-actions">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+            <i class="fa-regular fa-moon" aria-hidden="true"></i>
+            <span id="themeToggleText">Dark</span>
+          </button>
           <a class="github-btn" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">
             <i class="fa-brands fa-github" aria-hidden="true"></i>
             <span>GitHub</span>
@@ -1151,10 +1279,6 @@
           <span class="pill" id="projectCount">0 projects</span>
         </div>
       </header>
-
-      <section class="toolbar">
-        <input class="search" id="bookmarkSearchTop" type="text" placeholder="Search bookmarks..." />
-      </section>
 
       <section class="panel" id="panel"></section>
     </main>
@@ -1280,11 +1404,12 @@
       sidebar: document.getElementById("sidebar"),
       overlay: document.getElementById("overlay"),
       projectNav: document.getElementById("projectNav"),
-      bookmarkSearchTop: document.getElementById("bookmarkSearchTop"),
       panel: document.getElementById("panel"),
       pageTitle: document.getElementById("pageTitle"),
       pageSubtitle: document.getElementById("pageSubtitle"),
       projectCount: document.getElementById("projectCount"),
+      themeToggle: document.getElementById("themeToggle"),
+      themeToggleText: document.getElementById("themeToggleText"),
       sidebarClock: document.getElementById("sidebarClock"),
       signInBtn: document.getElementById("signInBtn"),
       userChip: document.getElementById("userChip"),
@@ -1360,8 +1485,33 @@
       }
     }
 
+    function updateThemeToggleUi(theme) {
+      if (!els.themeToggle || !els.themeToggleText) return;
+      const icon = els.themeToggle.querySelector("i");
+      if (theme === "dark") {
+        els.themeToggleText.textContent = "Dark";
+        if (icon) icon.className = "fa-regular fa-moon";
+      } else {
+        els.themeToggleText.textContent = "Light";
+        if (icon) icon.className = "fa-regular fa-sun";
+      }
+    }
+
+    function applyTheme(theme) {
+      const nextTheme = theme === "light" ? "light" : "dark";
+      document.body.setAttribute("data-theme", nextTheme);
+      try { localStorage.setItem("dashboard-theme", nextTheme); } catch {}
+      updateThemeToggleUi(nextTheme);
+    }
+
     function themeInit() {
-      document.body.setAttribute("data-theme", "light");
+      let saved = null;
+      try { saved = localStorage.getItem("dashboard-theme"); } catch {}
+      if (saved === "light" || saved === "dark") {
+        applyTheme(saved);
+        return;
+      }
+      applyTheme("dark");
     }
 
     function setSidebarClock() {
@@ -1708,6 +1858,7 @@
         : `<div class="empty">No bookmarks yet. Use the form above to save your first item.</div>`;
 
       return `
+        <div class="bookmark-content">
         <div class="bm-workspace">
           <section class="bm-panel">
             <h3>Add Bookmark</h3>
@@ -1751,7 +1902,7 @@
 
         <div class="bookmark-results" id="bookmarkGrid">
           <div class="bm-results-head">
-            <h3>Results</h3>
+           
             <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.bookmarkSearch)}" placeholder="Search bookmarks" />
           </div>
           <section class="bm-section">
@@ -1768,6 +1919,7 @@
             </div>
             <div class="bm-grid">${allCards}</div>
           </section>
+        </div>
         </div>
       `;
     }
@@ -1934,9 +2086,6 @@
       if (searchInput) {
         searchInput.addEventListener("input", async (event) => {
           state.bookmarkSearch = event.target.value;
-          if (els.bookmarkSearchTop) {
-            els.bookmarkSearchTop.value = state.bookmarkSearch;
-          }
           await loadBookmarks();
           renderBookmarkTab();
         });
@@ -2095,9 +2244,6 @@
 
     async function render() {
       renderUserChip();
-      if (els.bookmarkSearchTop) {
-        els.bookmarkSearchTop.value = state.bookmarkSearch;
-      }
 
       const route = state.activeRoute;
       const active = byRoute(route) || PROJECTS.find((project) => route.startsWith(project.route + "/"));
@@ -2184,13 +2330,10 @@
         render();
       });
 
-      if (els.bookmarkSearchTop) {
-        els.bookmarkSearchTop.addEventListener("input", async (event) => {
-          state.bookmarkSearch = event.target.value;
-          if (state.activeRoute === "/bookmarks") {
-            await loadBookmarks();
-            renderBookmarkTab();
-          }
+      if (els.themeToggle) {
+        els.themeToggle.addEventListener("click", () => {
+          const current = document.body.getAttribute("data-theme") === "light" ? "light" : "dark";
+          applyTheme(current === "light" ? "dark" : "light");
         });
       }
 
