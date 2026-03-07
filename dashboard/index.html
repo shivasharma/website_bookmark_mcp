@@ -203,6 +203,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .modal-btns{display:flex;gap:10px;padding-top:6px}
 .modal-btns .btn-primary{flex:1;justify-content:center;height:42px;font-size:14px}
 
+
 /* ═══════════════════════════════════════════
    IMPORT MODAL — FULL SYSTEM
 ═══════════════════════════════════════════ */
@@ -474,29 +475,9 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
         <a class="nav-link" href="#" data-view="starred"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Starred<span class="nav-count" id="snStar">1</span></a>
         <a class="nav-link" href="#" data-view="recent"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent</a>
         <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Read Later<span class="nav-count">0</span></a>
+        <a class="nav-link" href="/syshealth"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>System Health</a>
+        <a class="nav-link" href="/mcp"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>MCP Setup</a>
       </div>
-  
-     
-      <div class="sidebar-divider"></div>
-      <div>
-        <div class="section-label">AI Features</div>
-        <a class="nav-link" href="#" onclick="showToast('AI Summary — MCP powered','info')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>AI Summarizer<span class="nav-count" style="background:var(--ag);color:var(--accent)">MCP</span></a>
-        <a class="nav-link" href="#" onclick="showToast('Smart tagging active','info')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/></svg>Smart Tags</a>
-        <a class="nav-link" href="#" onclick="showToast('Exporting…','info')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share & Export</a>
-      </div>
-      <div class="sidebar-divider"></div>
-      
-    
-    
-    </div>
-    <div class="storage-bar">
-      <div class="storage-label">Storage — Free Plan</div>
-      <div class="storage-track"><div class="storage-fill" id="storageFill"></div></div>
-      <div class="storage-info"><span id="storageText">3 / 250 bookmarks</span><span id="storagePct">1% used</span></div>
-      <button class="storage-upgrade" onclick="showToast('Pro — unlimited bookmarks + AI + import history','info')">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        Upgrade to Pro — Free
-      </button>
     </div>
   </nav>
 
@@ -578,43 +559,6 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
             <div class="fl"><label class="fl-label">Tags</label><input class="fi" type="text" id="quickTagsInput" placeholder="ai, dev, tools"/></div>
             <div class="fl"><label class="fl-label">Notes</label><textarea class="fi" id="quickNotes" placeholder="Optional notes"></textarea></div>
             <div class="form-btns"><button class="btn-outline" onclick="clearForm()">Clear</button><button class="btn-primary" onclick="saveQuick()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save</button></div>
-          </div>
-        </div>
-
-        <!-- Import Hub shortcut -->
-        <div class="mini-panel">
-          <div class="mp-head"><span class="mp-title"><svg width="13" height="13" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Import Hub</span></div>
-          <div style="padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="ai-feat" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px" onclick="openImport('browser')">
-              <div class="ai-feat-ico" style="background:rgba(6,192,224,.1);width:30px;height:30px;font-size:14px">🌐</div>
-              <div class="ai-feat-name" style="font-size:11.5px">Browser HTML</div>
-              <div class="ai-feat-desc" style="font-size:10px">Chrome/Firefox export</div>
-            </div>
-            <div class="ai-feat" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px" onclick="openImport('apps')">
-              <div class="ai-feat-ico" style="background:rgba(47,128,237,.1);width:30px;height:30px;font-size:14px">📦</div>
-              <div class="ai-feat-name" style="font-size:11.5px">Apps / CSV</div>
-              <div class="ai-feat-desc" style="font-size:10px">Pocket, Raindrop…</div>
-            </div>
-            <div class="ai-feat" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px" onclick="openImport('bookmarklet')">
-              <div class="ai-feat-ico" style="background:rgba(0,212,160,.1);width:30px;height:30px;font-size:14px">🔗</div>
-              <div class="ai-feat-name" style="font-size:11.5px">Bookmarklet</div>
-              <div class="ai-feat-desc" style="font-size:10px">1-click save</div>
-            </div>
-            <div class="ai-feat" style="flex-direction:column;align-items:flex-start;gap:4px;padding:12px" onclick="openImport('api')">
-              <div class="ai-feat-ico" style="background:rgba(245,166,35,.1);width:30px;height:30px;font-size:14px">⚡</div>
-              <div class="ai-feat-name" style="font-size:11.5px">API / Zapier</div>
-              <div class="ai-feat-desc" style="font-size:10px">Automate saves</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Features -->
-        <div class="mini-panel">
-          <div class="mp-head"><span class="mp-title"><svg width="13" height="13" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/></svg>AI Features — MCP</span><span class="ai-badge">✦ Live</span></div>
-          <div class="ai-panel">
-            <div class="ai-feat" onclick="showToast('Generating AI summary…','info')"><div class="ai-feat-ico" style="background:var(--ag)">🧠</div><div class="ai-feat-text"><div class="ai-feat-name">Smart Summary</div><div class="ai-feat-desc">Auto-summarize any saved page</div></div><span class="ai-feat-badge">New</span></div>
-            <div class="ai-feat" onclick="showToast('Auto-tagging…','info')"><div class="ai-feat-ico" style="background:var(--a2g)">🏷</div><div class="ai-feat-text"><div class="ai-feat-name">Auto Tagging</div><div class="ai-feat-desc">AI assigns tags automatically</div></div></div>
-            <div class="ai-feat" onclick="showToast('Finding duplicates…','info')"><div class="ai-feat-ico" style="background:var(--wg)">🔍</div><div class="ai-feat-text"><div class="ai-feat-name">Duplicate Finder</div><div class="ai-feat-desc">Clean up after bulk import</div></div></div>
           </div>
         </div>
       </div>
@@ -962,6 +906,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
   </div>
 </div>
 
+
 <!-- CMD PALETTE -->
 <div class="cmd-overlay" id="cmdPalette" onclick="if(event.target===this)closeCmd()">
   <div class="cmd-box">
@@ -1000,6 +945,7 @@ const authEls={
 // ══════════════════════════════════════════════
 const TAG_COLORS = {ai:'mt1',dev:'mt2',design:'mt3','read later':'mt4',tools:'mt5',favourite:'mt6',rss:'mt1',feeds:'mt1'};
 function tagClass(t){return TAG_COLORS[t.toLowerCase()]||'mt2'}
+
 
 function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function safeDomain(url){try{return new URL(url).hostname.replace('www.','')}catch(e){return ''}}
@@ -1109,10 +1055,6 @@ function render(){
   document.getElementById('importCount').textContent=totalImported;
   document.getElementById('snAll').textContent=bookmarks.length;
   document.getElementById('snStar').textContent=bookmarks.filter(b=>b.starred).length;
-  const pct=Math.min(100,Math.round(bookmarks.length/250*100));
-  document.getElementById('storageFill').style.width=pct+'%';
-  document.getElementById('storageText').textContent=`${bookmarks.length} / 250 bookmarks`;
-  document.getElementById('storagePct').textContent=`${pct}% used`;
   container.className=currentView==='grid'?'bk-grid':'bk-list';
   if(!list.length){
     if(authBlocked){

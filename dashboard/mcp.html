@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markd MCP Setup</title>
+  <style>
+    :root {
+      --bg: #080e17;
+      --surface: #111e2d;
+      --surface-2: #162539;
+      --border: #1a3048;
+      --text: #eef5ff;
+      --muted: #7aa3c4;
+      --accent: #06c0e0;
+      --ok: #00d4a0;
+      --warn: #f5a623;
+      --danger: #f05252;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 20% 20%, rgba(6, 192, 224, 0.08), transparent 40%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      font-family: "Sora", "Segoe UI", sans-serif;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-family: "Sora", "Segoe UI", sans-serif;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn.primary {
+      background: #06c0e0;
+      border-color: #06c0e0;
+      color: #04111b;
+      font-weight: 700;
+    }
+
+    .btn:hover { border-color: #224060; }
+
+    .btn.primary:hover { background: #1bd4f2; border-color: #1bd4f2; }
+
+    .hidden { display: none; }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #060b12;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      color: #8fd8ff;
+      line-height: 1.5;
+    }
+
+    .status {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .ok { color: var(--ok); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      color: #8fd8ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1 class="title">MCP Setup</h1>
+        <p class="sub">Generate token and copy config for Claude Desktop, Cursor, or VS Code.</p>
+      </div>
+      <a class="btn" href="/bookmarks">Back to Bookmarks</a>
+    </div>
+
+    <section class="card">
+      <h2>Session</h2>
+      <p class="sub" id="sessionText">Checking login status...</p>
+      <a class="btn" id="registerBtn" href="/register">Login / Register</a>
+    </section>
+
+    <section class="card">
+      <h2>Token</h2>
+      <p class="sub">Generate a token and use it in MCP config.</p>
+      <button class="btn primary" id="genBtn" type="button">Generate Token</button>
+      <button class="btn hidden" id="copyTokenBtn" type="button">Copy Token</button>
+      <div class="status" id="tokenStatus">Token not generated yet.</div>
+      <pre id="tokenOut">Click Generate Token</pre>
+    </section>
+
+    <section class="card">
+      <h2>Config Template</h2>
+      <button class="btn" id="copyConfigBtn" type="button">Copy Config</button>
+      <pre id="cfgOut"></pre>
+    </section>
+
+    <section class="card">
+      <h2>OAuth Callback</h2>
+      <p class="sub">GitHub callback should be set to this URL only:</p>
+      <pre id="cbOut"></pre>
+    </section>
+  </div>
+
+  <script>
+    const tokenOut = document.getElementById("tokenOut");
+    const tokenStatus = document.getElementById("tokenStatus");
+    const copyTokenBtn = document.getElementById("copyTokenBtn");
+    const registerBtn = document.getElementById("registerBtn");
+    const sessionText = document.getElementById("sessionText");
+    const cfgOut = document.getElementById("cfgOut");
+    const cbOut = document.getElementById("cbOut");
+
+    let token = "";
+    let currentUser = null;
+
+    function configText() {
+      return JSON.stringify({
+        mcpServers: {
+          bookmark: {
+            command: "npx",
+            args: ["-y", "github:shivasharma/website_bookmark_mcp"],
+            env: {
+              BOOKMARK_API_BASE_URL: window.location.origin,
+              BOOKMARK_API_TOKEN: token || "paste-token-here"
+            }
+          }
+        }
+      }, null, 2);
+    }
+
+    async function copyText(value) {
+      const text = String(value || "").trim();
+      if (!text) return false;
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        const el = document.createElement("textarea");
+        el.value = text;
+        el.style.position = "fixed";
+        el.style.opacity = "0";
+        document.body.appendChild(el);
+        el.focus();
+        el.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch {}
+        el.remove();
+        return ok;
+      }
+    }
+
+    async function loadMe() {
+      try {
+        const response = await fetch("/api/me", { credentials: "include" });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload || !payload.success) {
+          sessionText.innerHTML = "You are not logged in. Login first to generate MCP token.";
+          registerBtn.classList.remove("hidden");
+          currentUser = null;
+          return;
+        }
+        currentUser = payload.data;
+        const name = currentUser.name || currentUser.email || "User";
+        sessionText.innerHTML = `Logged in as <strong>${name}</strong>.`;
+        registerBtn.classList.add("hidden");
+      } catch {
+        sessionText.textContent = "Unable to verify session. Please refresh.";
+      }
+    }
+
+    async function generateToken() {
+      if (!currentUser) {
+        tokenStatus.className = "status warn";
+        tokenStatus.textContent = "Login required before generating token.";
+        return;
+      }
+
+      tokenStatus.className = "status";
+      tokenStatus.textContent = "Generating token...";
+
+      try {
+        const response = await fetch("/api/mcp-token?expires_in_days=30", { credentials: "include" });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || !payload || !payload.success || !payload.data || !payload.data.token) {
+          throw new Error(payload && payload.error ? payload.error : "Could not generate token.");
+        }
+
+        token = payload.data.token;
+        tokenOut.textContent = token;
+        cfgOut.textContent = configText();
+        copyTokenBtn.classList.remove("hidden");
+        tokenStatus.className = "status ok";
+        tokenStatus.textContent = "Token generated.";
+      } catch (error) {
+        tokenStatus.className = "status danger";
+        tokenStatus.textContent = error instanceof Error ? error.message : "Could not generate token.";
+      }
+    }
+
+    document.getElementById("genBtn").addEventListener("click", generateToken);
+
+    copyTokenBtn.addEventListener("click", async () => {
+      const ok = await copyText(token);
+      tokenStatus.className = ok ? "status ok" : "status danger";
+      tokenStatus.textContent = ok ? "Token copied." : "Unable to copy token.";
+    });
+
+    document.getElementById("copyConfigBtn").addEventListener("click", async () => {
+      const ok = await copyText(cfgOut.textContent || "");
+      tokenStatus.className = ok ? "status ok" : "status danger";
+      tokenStatus.textContent = ok ? "Config copied." : "Unable to copy config.";
+    });
+
+    cfgOut.textContent = configText();
+    cbOut.textContent = `${window.location.origin}/auth/github/callback`;
+    loadMe();
+  </script>
+</body>
+</html>
