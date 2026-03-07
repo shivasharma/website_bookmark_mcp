@@ -76,6 +76,8 @@ export function BookmarksPage() {
     return "bookmarks";
   }, [pathname]);
 
+  const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
+
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
     const sorted = [...bookmarks].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
@@ -201,6 +203,7 @@ export function BookmarksPage() {
       React.createElement(
         "main",
         { className: "bm-content" },
+        React.createElement("h1", { className: "bm-section-title" }, sectionTitle),
         !!message && React.createElement("div", { className: "bm-message" }, message),
         section === "bookmarks" &&
           React.createElement(
@@ -235,7 +238,9 @@ export function BookmarksPage() {
             )
           ),
         section === "syshealth" && React.createElement(SystemHealthPanel),
-        section === "mcp" && React.createElement(McpSetupPanel, { currentUser, onMessage: setMessage })
+        section === "mcp" && React.createElement(McpSetupPanel, { currentUser, onMessage: setMessage }),
+        section !== "bookmarks" && section !== "syshealth" && section !== "mcp" &&
+          React.createElement("div", { className: "bm-message" }, "Unknown section. Returning to bookmarks...")
       )
     ),
     React.createElement(AddBookmarkModal, {

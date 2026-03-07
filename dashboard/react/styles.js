@@ -285,6 +285,12 @@ pre {
   background: var(--border);
 }
 .bm-content { padding: 16px; }
+.bm-section-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 800;
+  font-family: "Sora", "Segoe UI", sans-serif;
+}
 .bm-content-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
