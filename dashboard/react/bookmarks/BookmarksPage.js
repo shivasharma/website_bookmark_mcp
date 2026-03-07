@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { api, toUiBookmark } from "./api.js";
 import { TopBar } from "./components/TopBar.js";
 import { Sidebar } from "./components/Sidebar.js";
@@ -15,8 +14,7 @@ function openExternal(url) {
 }
 
 export function BookmarksPage() {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [pathname, setPathname] = useState(window.location.pathname || "/bookmarks");
   const [bookmarks, setBookmarks] = useState([]);
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
@@ -63,11 +61,20 @@ export function BookmarksPage() {
     refreshAll();
   }, []);
 
+  useEffect(() => {
+    function onPopState() {
+      setPathname(window.location.pathname || "/bookmarks");
+    }
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const section = useMemo(() => {
-    if (location.pathname.startsWith("/syshealth")) return "syshealth";
-    if (location.pathname.startsWith("/mcp")) return "mcp";
+    if (pathname.startsWith("/syshealth")) return "syshealth";
+    if (pathname.startsWith("/mcp")) return "mcp";
     return "bookmarks";
-  }, [location.pathname]);
+  }, [pathname]);
 
   const filteredItems = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -152,15 +159,18 @@ export function BookmarksPage() {
   }
 
   function handleSectionChange(next) {
+    const target = next === "syshealth" ? "/syshealth" : next === "mcp" ? "/mcp" : "/bookmarks";
+    if (window.location.pathname !== target) {
+      window.history.pushState({}, "", target);
+    }
+    setPathname(target);
+
     if (next === "syshealth") {
-      navigate("/syshealth");
       return;
     }
     if (next === "mcp") {
-      navigate("/mcp");
       return;
     }
-    navigate("/bookmarks");
   }
 
   return React.createElement(
