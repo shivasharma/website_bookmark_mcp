@@ -62,7 +62,6 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .btn-primary:hover{background:#19d0f0;box-shadow:0 4px 20px rgba(6,192,224,.35);transform:translateY(-1px)}.btn-primary:active{transform:translateY(0)}
 .btn-outline{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--r8);padding:0 14px;height:36px;font-family:var(--font-b);font-size:13px;font-weight:500;cursor:pointer;transition:var(--t);white-space:nowrap;flex-shrink:0;}
 .btn-outline:hover{background:var(--s3);color:var(--text1);border-color:var(--border2)}
-.hidden{display:none !important}
 
 /* SIDEBAR */
 .sidebar{background:rgba(11,18,28,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
@@ -459,9 +458,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Bookmark
       </button>
-      <a class="btn-outline" id="signInBtn" href="/register">GitHub Login</a>
-      <button class="btn-outline hidden" id="userLogoutBtn" type="button">Logout</button>
-      <div class="avatar-btn hidden" id="userAvatarBtn" onclick="showToast('Signed in session','info')">U</div>
+      <div class="avatar-btn" onclick="showToast('Profile settings coming soon!','info')">U</div>
     </div>
   </header>
 
@@ -475,8 +472,16 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
         <a class="nav-link" href="#" data-view="recent"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent</a>
         <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Read Later<span class="nav-count">0</span></a>
       </div>
-  
-     
+      <div class="sidebar-divider"></div>
+      <div>
+        <div class="section-label">Import Sources</div>
+        <a class="nav-link" href="#" onclick="openImport('browser')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>From Browser</a>
+        <a class="nav-link" href="#" onclick="openImport('apps')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>From Apps</a>
+        <a class="nav-link" href="#" onclick="openImport('bookmarklet')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>Bookmarklet</a>
+        <a class="nav-link" href="#" onclick="openImport('email')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Email to Save</a>
+        <a class="nav-link" href="#" onclick="openImport('api')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>API & Webhooks</a>
+        <a class="nav-link" href="#" onclick="openImport('pwa')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>Mobile / PWA</a>
+      </div>
       <div class="sidebar-divider"></div>
       <div>
         <div class="section-label">AI Features</div>
@@ -485,9 +490,21 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
         <a class="nav-link" href="#" onclick="showToast('Exporting…','info')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share & Export</a>
       </div>
       <div class="sidebar-divider"></div>
-      
-    
-    
+      <div>
+        <div class="section-label">Tags</div>
+        <div class="sidebar-tags">
+          <span class="stag c1" onclick="filterByTag('ai')">🤖 AI</span>
+          <span class="stag c2" onclick="filterByTag('dev')">⚙️ Dev</span>
+          <span class="stag c3" onclick="filterByTag('design')">🎨 Design</span>
+          <span class="stag c4" onclick="filterByTag('read later')">📖 Later</span>
+          <span class="stag c5" onclick="filterByTag('tools')">🛠 Tools</span>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div>
+        <a class="nav-link" href="https://shivaprogramming.com" target="_blank" rel="noopener"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>shivaprogramming.com</a>
+        <a class="nav-link" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>GitHub Source</a>
+      </div>
     </div>
     <div class="storage-bar">
       <div class="storage-label">Storage — Free Plan</div>
@@ -518,6 +535,10 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
         <p class="dash-sub">Portfolio view for your saved links and resources</p>
       </div>
       <div class="dash-actions">
+        <button class="btn-outline" onclick="openImport()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Import
+        </button>
         <button class="btn-primary" onclick="openAddModal()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add New
@@ -574,9 +595,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
           <div class="qa-form">
             <div class="url-row"><div class="fl" style="flex:1"><label class="fl-label">URL</label><input class="fi" type="url" id="quickUrl" placeholder="Paste a link…" autocomplete="off"/></div><button class="fetch-btn" onclick="quickFetch()">Fetch</button></div>
             <div class="fl"><label class="fl-label">Title</label><input class="fi" type="text" id="quickTitle" placeholder="Auto-detected…"/></div>
-            <div class="fl"><label class="fl-label">Description</label><input class="fi" type="text" id="quickDescription" placeholder="Short summary (optional)"/></div>
-            <div class="fl"><label class="fl-label">Tags</label><input class="fi" type="text" id="quickTagsInput" placeholder="ai, dev, tools"/></div>
-            <div class="fl"><label class="fl-label">Notes</label><textarea class="fi" id="quickNotes" placeholder="Optional notes"></textarea></div>
+            <div class="fl"><label class="fl-label">Tags</label><div class="modal-tags" id="quickTags"><button class="modal-tag" onclick="toggleTag(this)">🤖 AI</button><button class="modal-tag" onclick="toggleTag(this)">⚙️ Dev</button><button class="modal-tag" onclick="toggleTag(this)">🎨 Design</button><button class="modal-tag" onclick="toggleTag(this)">📖 Later</button></div></div>
             <div class="form-btns"><button class="btn-outline" onclick="clearForm()">Clear</button><button class="btn-primary" onclick="saveQuick()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save</button></div>
           </div>
         </div>
@@ -639,14 +658,13 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 ════════════════════════════════════════════ -->
 <div class="overlay" id="addModal" onclick="if(event.target===this)closeModal('addModal')">
   <div class="modal">
-    <div class="modal-head"><div><div class="modal-title" id="addModalTitle">Add Bookmark</div><div class="modal-sub" id="addModalSub">Save and organize a new link</div></div><button class="modal-x" onclick="closeModal('addModal')">✕</button></div>
+    <div class="modal-head"><div><div class="modal-title">Add Bookmark</div><div class="modal-sub">Save and organize a new link</div></div><button class="modal-x" onclick="closeModal('addModal')">✕</button></div>
     <div class="modal-form">
       <div class="url-row"><div class="fl" style="flex:1"><label class="fl-label">URL *</label><input class="fi" type="url" id="mUrl" placeholder="https://example.com" autocomplete="off"/></div><button class="fetch-btn" onclick="modalFetch()">Auto-fill</button></div>
       <div class="form-row2"><div class="fl"><label class="fl-label">Title</label><input class="fi" type="text" id="mTitle" placeholder="Page title"/></div><div class="fl"><label class="fl-label">Domain</label><input class="fi" type="text" id="mDomain" placeholder="example.com" readonly style="opacity:.7"/></div></div>
-      <div class="fl"><label class="fl-label">Description</label><input class="fi" type="text" id="mDescription" placeholder="Short summary (optional)"/></div>
       <div class="fl"><label class="fl-label">Quick Tags</label><div class="modal-tags" id="modalTags"><button class="modal-tag" onclick="toggleTag(this)">🤖 AI</button><button class="modal-tag" onclick="toggleTag(this)">⚙️ Dev</button><button class="modal-tag" onclick="toggleTag(this)">🎨 Design</button><button class="modal-tag" onclick="toggleTag(this)">📖 Read Later</button><button class="modal-tag" onclick="toggleTag(this)">🛠 Tools</button><button class="modal-tag" onclick="toggleTag(this)">⭐ Favourite</button></div></div>
       <div class="fl"><label class="fl-label">Notes</label><textarea class="fi" id="mNotes" placeholder="Why you saved this…"></textarea></div>
-      <div class="modal-btns"><button class="btn-outline" onclick="closeModal('addModal')">Cancel</button><button class="btn-primary" id="saveBookmarkBtn" onclick="saveBookmark()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg><span id="saveBookmarkBtnText">Save Bookmark</span></button></div>
+      <div class="modal-btns"><button class="btn-outline" onclick="closeModal('addModal')">Cancel</button><button class="btn-primary" onclick="saveBookmark()"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Save Bookmark</button></div>
     </div>
   </div>
 </div>
@@ -977,23 +995,18 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 // ══════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════
-const API = '/api';
-let bookmarks = [];
+const SEED = [
+  {id:1,title:'Anthropic Claude API Docs',url:'https://anthropic.com/docs',domain:'anthropic.com',tags:['AI','Dev'],notes:'Official API reference',starred:true,date:'Mar 7, 2025',readTime:'8 min',ai:true,imported:false},
+  {id:2,title:'MCP Bookmark Manager — GitHub',url:'https://github.com/shivasharma/website_bookmark_mcp',domain:'github.com',tags:['Dev','Tools'],notes:'Source code',starred:false,date:'Mar 6, 2025',readTime:'5 min',ai:false,imported:false},
+  {id:3,title:'Shiva Programming — Portfolio',url:'https://shivaprogramming.com',domain:'shivaprogramming.com',tags:['Design','Dev'],notes:'Personal portfolio',starred:false,date:'Mar 5, 2025',readTime:'3 min',ai:false,imported:false}
+];
+let bookmarks = [...SEED];
 let currentFilter = 'all';
 let currentView = 'list';
 let selectedIds = new Set();
 let importPreviewItems = [];
 let selectedPreviewIds = new Set();
 let totalImported = 0;
-let editingBookmarkId = null;
-let authBlocked = false;
-let currentUser = null;
-
-const authEls={
-  signInBtn:document.getElementById('signInBtn'),
-  userLogoutBtn:document.getElementById('userLogoutBtn'),
-  userAvatarBtn:document.getElementById('userAvatarBtn')
-};
 
 // ══════════════════════════════════════════════
 // BOOKMARK RENDER
@@ -1001,101 +1014,11 @@ const authEls={
 const TAG_COLORS = {ai:'mt1',dev:'mt2',design:'mt3','read later':'mt4',tools:'mt5',favourite:'mt6',rss:'mt1',feeds:'mt1'};
 function tagClass(t){return TAG_COLORS[t.toLowerCase()]||'mt2'}
 
-function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function safeDomain(url){try{return new URL(url).hostname.replace('www.','')}catch(e){return ''}}
-function fmt(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
-
-async function api(path,options={}){
-  const response=await fetch(API+path,{...options,credentials:'include',headers:{'Content-Type':'application/json',...(options.headers||{})}});
-  let payload=null;
-  try{payload=await response.json()}catch(e){payload=null}
-  return {response,payload};
-}
-
-function toUiBookmark(item){
-  const domain=safeDomain(item.url||'');
-  return {
-    ...item,
-    title:item.title||domain||item.url||'Untitled',
-    tags:Array.isArray(item.tags)?item.tags:[],
-    starred:!!item.is_favorite,
-    domain,
-    date:item.created_at?fmt(new Date(item.created_at)):fmt(new Date()),
-    readTime:item.readTime||'--',
-    ai:false,
-    imported:!!item.imported
-  };
-}
-
-async function loadBookmarks(){
-  try{
-    const {response,payload}=await api('/bookmarks',{method:'GET'});
-    if(!response.ok||!payload?.success){
-      authBlocked=response.status===401;
-      bookmarks=[];
-      return;
-    }
-    authBlocked=false;
-    bookmarks=(Array.isArray(payload.data)?payload.data:[]).map(toUiBookmark);
-    selectedIds.clear();
-    updateBulkBar();
-  }catch(e){bookmarks=[]}
-}
-
-function renderAuthUi(){
-  if(!authEls.signInBtn||!authEls.userLogoutBtn||!authEls.userAvatarBtn)return;
-  if(!currentUser){
-    authEls.signInBtn.classList.remove('hidden');
-    authEls.userLogoutBtn.classList.add('hidden');
-    authEls.userAvatarBtn.classList.add('hidden');
-    authEls.userAvatarBtn.textContent='U';
-    authEls.userAvatarBtn.title='Not signed in';
-    return;
-  }
-  const label=currentUser.name||currentUser.email||'User';
-  const initial=String(label).trim().charAt(0).toUpperCase()||'U';
-  authEls.signInBtn.classList.add('hidden');
-  authEls.userLogoutBtn.classList.remove('hidden');
-  authEls.userAvatarBtn.classList.remove('hidden');
-  authEls.userAvatarBtn.textContent=initial;
-  authEls.userAvatarBtn.title=`Logged in as ${label}`;
-}
-
-async function loadCurrentUser(){
-  try{
-    const {response,payload}=await api('/me',{method:'GET'});
-    if(!response.ok||!payload?.success){
-      currentUser=null;
-      renderAuthUi();
-      return;
-    }
-    currentUser=payload.data;
-    renderAuthUi();
-  }catch(e){
-    currentUser=null;
-    renderAuthUi();
-  }
-}
-
-async function performLogout(){
-  try{await api('/logout',{method:'POST'})}catch(e){}
-  currentUser=null;
-  renderAuthUi();
-  await refreshBookmarks();
-  showToast('Logged out','info');
-}
-
-async function refreshBookmarks(){
-  await loadBookmarks();
-  render();
-}
-
 function getFiltered(){
-  const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
+  const q=document.getElementById('searchInput').value.toLowerCase();
   return bookmarks.filter(b=>{
-    const tags=Array.isArray(b.tags)?b.tags:[];
-    const matchFilter=currentFilter==='all'||(currentFilter==='starred'&&b.starred)||tags.map(t=>String(t).toLowerCase()).some(t=>t.includes(currentFilter));
-    const matchQ=!q||String(b.title||'').toLowerCase().includes(q)||String(b.url||'').toLowerCase().includes(q)||tags.join(' ').toLowerCase().includes(q)||String(b.notes||'').toLowerCase().includes(q)||String(b.description||'').toLowerCase().includes(q);
+    const matchFilter=currentFilter==='all'||(currentFilter==='starred'&&b.starred)||b.tags.map(t=>t.toLowerCase()).some(t=>t.includes(currentFilter));
+    const matchQ=!q||b.title.toLowerCase().includes(q)||b.url.toLowerCase().includes(q)||b.tags.join(' ').toLowerCase().includes(q)||(b.notes||'').toLowerCase().includes(q);
     return matchFilter&&matchQ;
   });
 }
@@ -1114,64 +1037,20 @@ function render(){
   document.getElementById('storageText').textContent=`${bookmarks.length} / 250 bookmarks`;
   document.getElementById('storagePct').textContent=`${pct}% used`;
   container.className=currentView==='grid'?'bk-grid':'bk-list';
-  if(!list.length){
-    if(authBlocked){
-      container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login Is Blocking Local Data</div><div class="empty-s">Enable local fallback on API to read existing DB bookmarks locally: <code>ALLOW_LOCAL_FALLBACK=true</code>.</div></div>`;
-      return;
-    }
-    container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-t">No bookmarks found</div><div class="empty-s">Add your first bookmark or change filters.</div><button class="btn-primary" onclick="openAddModal()" style="margin-top:4px">➕ Add Bookmark</button></div>`;
-    return;
-  }
+  if(!list.length){container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-t">No bookmarks found</div><div class="empty-s">Try a different filter or import some links.</div><button class="btn-primary" onclick="openImport()" style="margin-top:4px">📥 Import Bookmarks</button></div>`;return;}
   if(currentView==='grid'){
-    container.innerHTML=list.map(b=>`<div class="bk-card" onclick="openBookmarkById(${b.id})"><div style="display:flex;align-items:center;gap:10px"><div class="fav-wrap"><img src="https://www.google.com/s2/favicons?domain=${esc(b.domain)}&sz=32" onerror="this.style.display='none'"/></div><div style="flex:1;min-width:0"><div class="bk-title ellipsis">${esc(b.title)}</div><div class="bk-url">${esc(b.domain||b.url)}</div></div>${b.starred?'<span style="color:var(--warn)">⭐</span>':''}</div><div class="bk-foot">${(b.tags||[]).map(t=>`<span class="mtag ${tagClass(String(t))}">${esc(t)}</span>`).join('')}${b.imported?'<span class="ai-badge">📥 Imported</span>':b.ai?'<span class="ai-badge">✦ AI</span>':''}</div><div style="display:flex;justify-content:space-between"><span style="font-size:10px;color:var(--text3)">${esc(b.date)}</span><span style="font-size:10px;color:var(--text3)">${esc(b.readTime||'')}</span></div></div>`).join('');return;
+    container.innerHTML=list.map(b=>`<div class="bk-card" onclick="openUrl('${b.url}')"><div style="display:flex;align-items:center;gap:10px"><div class="fav-wrap"><img src="https://www.google.com/s2/favicons?domain=${b.domain}&sz=32" onerror="this.style.display='none'"/></div><div style="flex:1;min-width:0"><div class="bk-title ellipsis">${b.title}</div><div class="bk-url">${b.domain}</div></div>${b.starred?'<span style="color:var(--warn)">⭐</span>':''}</div><div class="bk-foot">${b.tags.map(t=>`<span class="mtag ${tagClass(t)}">${t}</span>`).join('')}${b.imported?'<span class="ai-badge">📥 Imported</span>':b.ai?'<span class="ai-badge">✦ AI</span>':''}</div><div style="display:flex;justify-content:space-between"><span style="font-size:10px;color:var(--text3)">${b.date}</span><span style="font-size:10px;color:var(--text3)">📖 ${b.readTime}</span></div></div>`).join('');return;
   }
-  container.innerHTML=list.map(b=>`<div class="bk-item${b.starred?' starred':''}" data-id="${b.id}"><div class="bk-check${selectedIds.has(b.id)?' checked':''}" onclick="toggleSelect(event,${b.id})">${selectedIds.has(b.id)?'✓':''}</div><div class="fav-wrap"><img src="https://www.google.com/s2/favicons?domain=${esc(b.domain)}&sz=32" onerror="this.style.display='none'"/></div><div class="bk-body"><div class="bk-title ellipsis">${esc(b.title)}</div><div class="bk-url">${esc(b.url)}</div><div class="bk-foot">${(b.tags||[]).map(t=>`<span class="mtag ${tagClass(String(t))}">${esc(t)}</span>`).join('')}${b.imported?'<span class="ai-badge">📥 Imported</span>':b.ai?'<span class="ai-badge">✦ AI</span>':''}<span class="read-time">${esc(b.readTime||'')}</span></div></div><div class="bk-right"><span class="bk-date">${esc(b.date)}</span><div class="bk-acts"><button class="ib ext" onclick="openBookmarkById(${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button><button class="ib star" onclick="toggleStar(event,${b.id})">${b.starred?'⭐':'☆'}</button><button class="ib" onclick="editBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ib del" onclick="deleteBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join('');
+  container.innerHTML=list.map(b=>`<div class="bk-item${b.starred?' starred':''}" data-id="${b.id}"><div class="bk-check${selectedIds.has(b.id)?' checked':''}" onclick="toggleSelect(event,${b.id})">${selectedIds.has(b.id)?'✓':''}</div><div class="fav-wrap"><img src="https://www.google.com/s2/favicons?domain=${b.domain}&sz=32" onerror="this.style.display='none'"/></div><div class="bk-body"><div class="bk-title ellipsis">${b.title}</div><div class="bk-url">${b.url}</div><div class="bk-foot">${b.tags.map(t=>`<span class="mtag ${tagClass(t)}">${t}</span>`).join('')}${b.imported?'<span class="ai-badge">📥 Imported</span>':b.ai?'<span class="ai-badge">✦ AI</span>':''}<span class="read-time">📖 ${b.readTime}</span></div></div><div class="bk-right"><span class="bk-date">${b.date}</span><div class="bk-acts"><button class="ib ext" onclick="openUrl('${b.url}')"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></button><button class="ib star" onclick="toggleStar(event,${b.id})">${b.starred?'⭐':'☆'}</button><button class="ib" onclick="showToast('Edit mode coming soon','info')"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ib del" onclick="deleteBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join('');
 }
 
-async function toggleStar(e,id){
-  e.stopPropagation();
-  const b=bookmarks.find(x=>x.id===id);if(!b)return;
-  try{
-    const {response,payload}=await api(`/bookmarks/${id}`,{method:'PATCH',body:JSON.stringify({is_favorite:!b.starred})});
-    if(!response.ok||!payload?.success){showToast(payload?.error||'Failed to update','warn');return}
-    await refreshBookmarks();
-    showToast(!b.starred?'⭐ Starred!':'Removed from Starred','info');
-  }catch(err){showToast('Network error while updating','warn')}
-}
-
-async function deleteBk(e,id){
-  e.stopPropagation();
-  try{
-    const {response,payload}=await api(`/bookmarks/${id}`,{method:'DELETE'});
-    if(!response.ok||!payload?.success){showToast(payload?.error||'Delete failed','warn');return}
-    await refreshBookmarks();
-    showToast('Bookmark deleted','warn');
-  }catch(err){showToast('Network error while deleting','warn')}
-}
-
+function toggleStar(e,id){e.stopPropagation();const b=bookmarks.find(x=>x.id===id);if(b){b.starred=!b.starred;render();showToast(b.starred?'⭐ Starred!':'Removed from Starred','info')}}
+function deleteBk(e,id){e.stopPropagation();bookmarks=bookmarks.filter(x=>x.id!==id);render();showToast('Bookmark deleted','warn')}
 function openUrl(u){window.open(u,'_blank','noopener,noreferrer')}
-function openBookmarkById(id){const b=bookmarks.find(x=>x.id===id);if(b)openUrl(b.url)}
-
-function editBk(e,id){
-  e.stopPropagation();
-  const b=bookmarks.find(x=>x.id===id);
-  if(!b)return;
-  openAddModal(b);
-}
-
 function toggleSelect(e,id){e.stopPropagation();selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id);render();updateBulkBar()}
 function updateBulkBar(){const bar=document.getElementById('bulkBar');const cnt=document.getElementById('bulkCount');if(selectedIds.size>0){bar.classList.add('show');cnt.textContent=`${selectedIds.size} selected`}else bar.classList.remove('show')}
 function clearSelection(){selectedIds.clear();updateBulkBar();render()}
-async function deleteSelected(){
-  if(!selectedIds.size)return;
-  const ids=[...selectedIds];
-  for(const id of ids){
-    await api(`/bookmarks/${id}`,{method:'DELETE'});
-  }
-  selectedIds.clear();
-  await refreshBookmarks();
-  showToast('Selected bookmarks deleted','warn');
-}
+function deleteSelected(){bookmarks=bookmarks.filter(b=>!selectedIds.has(b.id));selectedIds.clear();updateBulkBar();render();showToast('Selected bookmarks deleted','warn')}
 function exportSelected(){const sel=bookmarks.filter(b=>selectedIds.has(b.id));const json=JSON.stringify(sel,null,2);downloadFile('markd-export.json',json,'application/json');showToast(`Exported ${sel.length} bookmarks`,'info')}
 function filterByTag(t){currentFilter=t;document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));render();showToast(`Filtered by "${t}"`, 'info')}
 function setView(v){currentView=v;document.getElementById('vList').classList.toggle('on',v==='list');document.getElementById('vGrid').classList.toggle('on',v==='grid');render()}
@@ -1183,33 +1062,8 @@ document.getElementById('searchInput').addEventListener('input',render);
 // ══════════════════════════════════════════════
 // MODAL SYSTEM
 // ══════════════════════════════════════════════
-function openAddModal(bookmark){
-  editingBookmarkId=bookmark?.id??null;
-  const isEdit=Boolean(editingBookmarkId);
-  document.getElementById('addModalTitle').textContent=isEdit?'Edit Bookmark':'Add Bookmark';
-  document.getElementById('addModalSub').textContent=isEdit?'Update bookmark details':'Save and organize a new link';
-  document.getElementById('saveBookmarkBtnText').textContent=isEdit?'Update Bookmark':'Save Bookmark';
-  document.getElementById('mUrl').value=bookmark?.url||'';
-  document.getElementById('mTitle').value=bookmark?.title||'';
-  document.getElementById('mDescription').value=bookmark?.description||'';
-  document.getElementById('mNotes').value=bookmark?.notes||'';
-  document.getElementById('mDomain').value=bookmark?.domain||safeDomain(bookmark?.url||'');
-  const selectedTags=(bookmark?.tags||[]).map(t=>String(t).toLowerCase());
-  document.querySelectorAll('#modalTags .modal-tag').forEach(t=>{
-    const clean=t.textContent.replace(/^.+\s/,'').trim().toLowerCase();
-    t.classList.toggle('sel',selectedTags.includes(clean));
-  });
-  document.getElementById('addModal').classList.add('open');
-  setTimeout(()=>document.getElementById('mUrl').focus(),100);
-}
-
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-  if(id==='addModal'){
-    editingBookmarkId=null;
-  }
-}
-
+function openAddModal(){document.getElementById('addModal').classList.add('open');setTimeout(()=>document.getElementById('mUrl').focus(),100)}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
 function openImport(tab){
   document.getElementById('importModal').classList.add('open');
   if(tab)switchImportTab(tab);
@@ -1219,55 +1073,26 @@ function modalFetch(){
   try{const domain=new URL(url).hostname.replace('www.','');document.getElementById('mDomain').value=domain;document.getElementById('mTitle').value=domain.charAt(0).toUpperCase()+domain.replace(/\..+/,' — Page');showToast('Title detected!','info')}catch(e){showToast('Invalid URL','warn')}
 }
 document.getElementById('mUrl').addEventListener('input',function(){try{document.getElementById('mDomain').value=new URL(this.value).hostname.replace('www.','')}catch(e){document.getElementById('mDomain').value=''}});
-async function saveBookmark(){
-  const isEdit=Boolean(editingBookmarkId);
-  const url=document.getElementById('mUrl').value.trim();
-  if(!url){showToast('Enter a URL','warn');return;}
+function saveBookmark(){
+  const url=document.getElementById('mUrl').value.trim();if(!url){showToast('Enter a URL','warn');return;}
   const title=document.getElementById('mTitle').value.trim();
-  const description=document.getElementById('mDescription').value.trim();
-  const notes=document.getElementById('mNotes').value.trim();
   const tags=[...document.querySelectorAll('#modalTags .modal-tag.sel')].map(t=>t.textContent.replace(/^.+\s/,'').trim());
-
-  const payload={
-    url,
-    title:title||undefined,
-    description:description||undefined,
-    notes:notes||undefined,
-    tags:tags.length?tags:undefined
-  };
-
-  const endpoint=editingBookmarkId?`/bookmarks/${editingBookmarkId}`:'/bookmarks';
-  const method=editingBookmarkId?'PATCH':'POST';
-
-  try{
-    const {response,payload:result}=await api(endpoint,{method,body:JSON.stringify(payload)});
-    if(!response.ok||!result?.success){showToast(result?.error||'Save failed','warn');return}
-    closeModal('addModal');
-    document.querySelectorAll('#modalTags .modal-tag').forEach(t=>t.classList.remove('sel'));
-    ['mUrl','mTitle','mDescription','mNotes','mDomain'].forEach(id=>document.getElementById(id).value='');
-    await refreshBookmarks();
-    showToast(isEdit?'Bookmark updated':'Bookmark saved','success');
-  }catch(err){showToast('Network error while saving','warn')}
+  let domain='';try{domain=new URL(url).hostname.replace('www.','')}catch(e){domain=url}
+  bookmarks.unshift({id:Date.now(),title:title||domain,url,domain,tags:tags.length?tags:['Dev'],notes:document.getElementById('mNotes').value,starred:tags.includes('Favourite'),date:fmt(new Date()),readTime:Math.floor(Math.random()*8+2)+' min',ai:false,imported:false});
+  render();closeModal('addModal');showToast('✓ Bookmark saved!','success');
+  ['mUrl','mTitle','mNotes','mDomain'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#modalTags .modal-tag').forEach(t=>t.classList.remove('sel'));
 }
-
 function quickFetch(){const url=document.getElementById('quickUrl').value.trim();if(!url){showToast('Enter a URL first','warn');return;}try{const d=new URL(url).hostname.replace('www.','');document.getElementById('quickTitle').value=d.charAt(0).toUpperCase()+d.replace(/\..+/,'');showToast('Title fetched!','info')}catch(e){showToast('Invalid URL','warn')}}
-async function saveQuick(){
-  const url=document.getElementById('quickUrl').value.trim();
-  if(!url){showToast('Enter a URL','warn');return;}
+function saveQuick(){
+  const url=document.getElementById('quickUrl').value.trim();if(!url){showToast('Enter a URL','warn');return;}
   const title=document.getElementById('quickTitle').value.trim();
-  const description=document.getElementById('quickDescription').value.trim();
-  const notes=document.getElementById('quickNotes').value.trim();
-  const tags=(document.getElementById('quickTagsInput').value||'').split(',').map(t=>t.trim()).filter(Boolean);
-  try{
-    const {response,payload}=await api('/bookmarks',{method:'POST',body:JSON.stringify({url,title:title||undefined,description:description||undefined,notes:notes||undefined,tags:tags.length?tags:undefined})});
-    if(!response.ok||!payload?.success){showToast(payload?.error||'Save failed','warn');return}
-    clearForm();
-    await refreshBookmarks();
-    showToast('Bookmark saved','success');
-  }catch(err){showToast('Network error while saving','warn')}
+  const tags=[...document.querySelectorAll('#quickTags .modal-tag.sel')].map(t=>t.textContent.replace(/^.+\s/,'').trim());
+  let domain='';try{domain=new URL(url).hostname.replace('www.','')}catch(e){domain=url}
+  bookmarks.unshift({id:Date.now(),title:title||domain,url,domain,tags:tags.length?tags:['Dev'],notes:'',starred:false,date:fmt(new Date()),readTime:Math.floor(Math.random()*8+2)+' min',ai:false,imported:false});
+  render();clearForm();showToast('✓ Saved!','success');
 }
-
-function clearForm(){['quickUrl','quickTitle','quickDescription','quickTagsInput','quickNotes'].forEach(id=>document.getElementById(id).value='')}
+function clearForm(){document.getElementById('quickUrl').value='';document.getElementById('quickTitle').value='';document.querySelectorAll('#quickTags .modal-tag').forEach(t=>t.classList.remove('sel'))}
 function toggleTag(el){el.classList.toggle('sel')}
 function closeBanner(){const b=document.getElementById('onboardBanner');if(!b)return;b.style.transition='all .3s ease';b.style.opacity='0';b.style.transform='translateY(-8px)';setTimeout(()=>b.remove(),300)}
 
@@ -1451,40 +1276,32 @@ function updatePreviewCount(){
   document.getElementById('pmImportBtn').textContent=`Import ${n} Selected`;
 }
 
-async function commitImport(){
+function commitImport(){
   const skipDupes=document.getElementById('skipDupes').checked;
   const existingUrls=new Set(bookmarks.map(b=>b.url));
   let added=0;
-  let failed=0;
-  for(const idx of selectedPreviewIds){
+  selectedPreviewIds.forEach(idx=>{
     const it=importPreviewItems[idx];
-    if(!it) continue;
-    if(skipDupes&&existingUrls.has(it.url)) continue;
-
-    const payload={
-      url:it.url,
-      title:it.title||it.domain||undefined,
-      tags:Array.isArray(it.tags)&&it.tags.length?it.tags:['Imported'],
-      notes:it.notes||undefined
-    };
-
-    try{
-      const {response,payload:result}=await api('/bookmarks',{method:'POST',body:JSON.stringify(payload)});
-      if(!response.ok||!result?.success){failed++;continue;}
-    }catch(e){failed++;continue;}
-
+    if(!it)return;
+    if(skipDupes&&existingUrls.has(it.url))return;
+    bookmarks.unshift({
+      id:Date.now()+added,
+      title:it.title||it.domain,
+      url:it.url,domain:it.domain,
+      tags:it.tags.length?it.tags:['Imported'],
+      notes:it.notes||'',
+      starred:false,
+      date:fmt(new Date()),
+      readTime:Math.floor(Math.random()*8+2)+' min',
+      ai:false,imported:true
+    });
     existingUrls.add(it.url);
     added++;
-  }
-
+  });
   totalImported+=added;
-  await refreshBookmarks();
+  render();
   closeModal('previewModal');
-  if(failed>0){
-    showToast(`Imported ${added}, failed ${failed}`,'warn');
-  }else{
-    showToast(`✓ Imported ${added} bookmarks successfully!`,'success');
-  }
+  showToast(`✓ Imported ${added} bookmarks successfully!`,'success');
   importPreviewItems=[];selectedPreviewIds.clear();
 }
 
@@ -1587,21 +1404,7 @@ function renderCmd(q){
 function cmdFilter(v){renderCmd(v)}
 
 // MOBILE
-function setMobNav(btn,view){
-  document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(view==='profile'){
-    if(!currentUser){
-      window.location.href='/register';
-      return;
-    }
-    showToast('Signed in profile','info');
-    return;
-  }
-  if(view==='import'){openImport();return}
-  currentFilter=view;
-  render()
-}
+function setMobNav(btn,view){document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(view==='profile'){showToast('Sign in to view profile','info');return}if(view==='import'){openImport();return}currentFilter=view;render()}
 
 // KEYBOARD
 document.addEventListener('keydown',e=>{
@@ -1624,16 +1427,7 @@ function showToast(msg,type='success'){
 }
 
 // INIT
-async function initDashboard(){
-  if(authEls.userLogoutBtn){
-    authEls.userLogoutBtn.addEventListener('click',async()=>{await performLogout()});
-  }
-  await loadCurrentUser();
-  await loadBookmarks();
-  render();
-}
-
-initDashboard();
+render();
 // Setup bookmarklet code on load
 setTimeout(()=>{
   const el=document.getElementById('bookmarkletCode');

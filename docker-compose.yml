@@ -40,7 +40,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-change-me-in-prod}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://ai.shivaprogramming.com,http://localhost:3001,http://127.0.0.1:3001}
-      ALLOW_LOCAL_FALLBACK: "false"
+      ALLOW_LOCAL_FALLBACK: ${ALLOW_LOCAL_FALLBACK:-false}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://ai.shivaprogramming.com/auth/google/callback}

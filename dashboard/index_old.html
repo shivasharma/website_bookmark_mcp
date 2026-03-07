@@ -1,0 +1,3062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Project Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --bg-grad-1: #0f2134;
+      --bg-grad-2: #0a1623;
+      --surface: #132338;
+      --surface-2: #1c3150;
+      --surface-3: #243d63;
+      --surface-4: #2b4a6f;
+      --line: #1e3a55;
+      --line-soft: #254867;
+      --border-hi: #2a506e;
+      --text: #e8f2ff;
+      --muted: #8aabc8;
+      --primary: #1b4f72;
+      --accent: #00c9a7;
+      --accent2: #3d9be9;
+      --accent-soft: #3d9be9;
+      --accent-glow: rgba(0, 201, 167, 0.18);
+      --accent2-glow: rgba(61, 155, 233, 0.15);
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --focus: 0 0 0 3px rgba(0, 201, 167, 0.2);
+      --top-clearance: 56px;
+    }
+
+    body[data-theme="light"] {
+      --bg: #102033;
+      --bg-grad-1: #15283d;
+      --bg-grad-2: #0d1b2b;
+      --surface: #162a43;
+      --surface-2: #1c3554;
+      --surface-3: #27466b;
+      --surface-4: #325778;
+      --line: #2a4b69;
+      --line-soft: #325778;
+      --border-hi: #3b6386;
+      --text: #e8f2ff;
+      --muted: #9bb7cf;
+      --primary: #2a628c;
+      --accent: #00c9a7;
+      --accent2: #49aae9;
+      --accent-soft: #49aae9;
+      --accent-glow: rgba(0, 201, 167, 0.18);
+      --accent2-glow: rgba(73, 170, 233, 0.15);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --focus: 0 0 0 3px rgba(0, 201, 167, 0.2);
+    }
+
+    body[data-theme="dark"] {
+      --bg: #0d1b2a;
+      --bg-grad-1: #0f2134;
+      --bg-grad-2: #0a1623;
+      --surface: #132338;
+      --surface-2: #1c3150;
+      --surface-3: #243d63;
+      --surface-4: #2b4a6f;
+      --line: #1e3a55;
+      --line-soft: #254867;
+      --border-hi: #2a506e;
+      --text: #e8f2ff;
+      --muted: #8aabc8;
+      --primary: #1b4f72;
+      --accent: #00c9a7;
+      --accent2: #3d9be9;
+      --accent-soft: #3d9be9;
+      --accent-glow: rgba(0, 201, 167, 0.18);
+      --accent2-glow: rgba(61, 155, 233, 0.15);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --focus: 0 0 0 3px rgba(0, 201, 167, 0.2);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "DM Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(860px 420px at 98% 0%, rgba(0, 201, 167, 0.08), transparent 62%),
+        radial-gradient(640px 340px at 0% 100%, rgba(61, 155, 233, 0.08), transparent 60%),
+        linear-gradient(160deg, var(--bg-grad-1) 0%, var(--bg) 58%, var(--bg-grad-2) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: .35;
+      z-index: 0;
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+    }
+
+    .layout {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 286px 1fr;
+      gap: 14px;
+      padding: calc(var(--top-clearance) + 4px) 14px 14px;
+    }
+
+    .global-status {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 95;
+      height: var(--top-clearance);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(13, 27, 42, 0.86);
+      backdrop-filter: blur(16px);
+    }
+
+    body[data-theme="dark"] .global-status {
+      background: rgba(13, 27, 42, 0.86);
+    }
+
+    .global-left,
+    .global-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .logo-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: "Syne", sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+      flex: 0 0 auto;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: inline-grid;
+      place-items: center;
+      color: #0d1b2a;
+      box-shadow: 0 0 14px rgba(0, 201, 167, .35);
+      font-size: 14px;
+    }
+
+    .logo-accent {
+      color: var(--accent);
+    }
+
+    .topbar-center {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: min(320px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface);
+      padding: 8px 16px;
+      color: var(--muted);
+      transition: border-color .22s ease, box-shadow .22s ease;
+      margin: 0 16px;
+    }
+
+    .topbar-center:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .topbar-center input {
+      width: 100%;
+      border: 0;
+      outline: none;
+      background: transparent;
+      color: var(--text);
+      font: 500 13px "DM Sans", sans-serif;
+    }
+
+    .topbar-center input::placeholder {
+      color: #4d7398;
+    }
+
+    .global-right {
+      margin-left: auto;
+      justify-content: flex-end;
+      flex-wrap: nowrap;
+    }
+
+    .sidebar {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(19, 35, 56, 0.78);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+      transition: box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .brand {
+      padding: 6px 8px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      display: grid;
+      place-items: center;
+      color: #0d1b2a;
+      font: 800 12px "Syne", sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .brand h1 { margin: 0; font-size: 15px; font-weight: 800; }
+    .brand p { margin: 2px 0 0; font-size: 11px; color: var(--muted); }
+
+    .section-label {
+      margin: 0;
+      padding: 0 12px 8px;
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 1.2px;
+      color: #4d7398;
+      text-transform: uppercase;
+    }
+
+    .sidebar-search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 500 12px "DM Sans", sans-serif;
+      padding: 8px 10px;
+      outline: none;
+      margin: 4px 0 8px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 4px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font: 400 13px "DM Sans", sans-serif;
+      text-align: left;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      min-height: 40px;
+      transition: all .22s cubic-bezier(.4,0,.2,1);
+      position: relative;
+    }
+
+    .nav button:hover {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
+    .nav button.active {
+      background: var(--surface-3);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .nav button.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
+      background: var(--accent);
+      border-radius: 0 2px 2px 0;
+    }
+
+    body[data-theme="light"] .nav button:hover { color: var(--text); }
+    body[data-theme="light"] .nav button.active { color: var(--accent); }
+
+    .nav-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .nav-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #496ba0;
+      flex: 0 0 auto;
+    }
+
+    .nav-icon {
+      width: 16px;
+      color: var(--muted);
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      font-size: 12px;
+      opacity: .8;
+    }
+
+    .nav button.active .nav-dot { background: var(--accent); }
+    .nav button.active .nav-icon { color: var(--accent); opacity: 1; }
+    .nav-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .nav-badge {
+      margin-left: auto;
+      border: 0;
+      border-radius: 20px;
+      background: var(--surface-4);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      font-family: "Syne", sans-serif;
+      padding: 2px 7px;
+      flex: 0 0 auto;
+    }
+
+    .nav button.active .nav-badge {
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(0, 201, 167, .3);
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      border-top: 1px solid var(--line);
+      padding: 10px 8px 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .sidebar-clock {
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar-footer {
+      padding: 6px 8px 10px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .sidebar-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.2px;
+      word-break: break-word;
+    }
+
+    .sidebar-footer a:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+    }
+
+    .topbar,
+    .toolbar,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: linear-gradient(180deg, rgba(19, 35, 56, 0.94) 0%, rgba(28, 49, 80, 0.9) 100%);
+    }
+
+    body[data-theme="dark"] .topbar {
+      background: linear-gradient(180deg, rgba(19, 35, 56, 0.94) 0%, rgba(28, 49, 80, 0.9) 100%);
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .topbar h2 { margin: 0; font-size: 20px; font-weight: 800; }
+    .topbar p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+    .mobile-menu {
+      display: none;
+      width: 35px;
+      height: 35px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 16px;
+      cursor: pointer;
+      flex: 0 0 auto;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .mobile-menu:hover { background: var(--surface-3); border-color: var(--border-hi); }
+
+    .top-actions { display: inline-flex; gap: 8px; align-items: center; }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--surface-3);
+      border-color: var(--accent-soft);
+    }
+
+    .github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+    }
+
+    .github-btn:hover {
+      background: var(--surface-3);
+      border-color: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 4px 10px 4px 6px;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.3px;
+      max-width: 220px;
+    }
+
+    .user-chip.show {
+      display: inline-flex;
+    }
+
+    .sign-in-btn {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .sign-in-btn.show {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .sign-in-btn:hover {
+      background: var(--surface-3);
+      border-color: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .logout-btn {
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.3px;
+      padding: 9px 12px;
+      min-height: 38px;
+      cursor: pointer;
+      transition: background-color .2s ease, border-color .2s ease;
+    }
+
+    .logout-btn.show {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .logout-btn:hover {
+      background: var(--surface-3);
+      border-color: var(--accent-soft);
+      color: var(--text);
+    }
+
+    .user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #1a1b23;
+      font: 800 11px "Syne", sans-serif;
+      flex: 0 0 auto;
+    }
+
+    .user-chip-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 700 12px "Syne", sans-serif;
+      padding: 7px 10px;
+    }
+
+    .toolbar {
+      padding: 10px;
+      display: block;
+    }
+
+    .search {
+      width: min(330px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 500 13px "DM Sans", sans-serif;
+      padding: 11px 12px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+    }
+
+    .search:focus,
+    .input:focus,
+    .select:focus,
+    .modal input:focus,
+    .modal textarea:focus {
+      border-color: var(--accent-soft);
+      box-shadow: var(--focus);
+      background: #fff;
+    }
+
+    body[data-theme="dark"] .search:focus,
+    body[data-theme="dark"] .input:focus,
+    body[data-theme="dark"] .select:focus,
+    body[data-theme="dark"] .modal input:focus,
+    body[data-theme="dark"] .modal textarea:focus {
+      background: var(--surface-2);
+    }
+
+    #bookmarkSearchTop {
+      width: 100%;
+    }
+
+    .toolbar small { display: none; }
+
+    .panel {
+      padding: 12px;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .tiles {
+      display: grid;
+      gap: 12px;
+    }
+
+    .project-tile {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #ffffff;
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    body[data-theme="dark"] .project-tile {
+      background: var(--surface);
+    }
+
+    .project-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); border-color: var(--border-hi); }
+
+    .tile-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: linear-gradient(90deg, #fafbfc, #f2f5f8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body[data-theme="dark"] .tile-head {
+      background: linear-gradient(90deg, #1d2631, #1a222d);
+    }
+
+    .tile-id {
+      color: var(--accent);
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-right: 8px;
+    }
+
+    .tile-title {
+      margin: 0;
+      font: 800 24px "Syne", sans-serif;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+    }
+
+    .tile-status {
+      color: var(--accent);
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .tile-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .tile-col {
+      padding: 14px;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .tile-col:last-child { border-right: 0; }
+
+    .tile-label {
+      color: var(--accent);
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .tile-col p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .img-placeholder {
+      border: 1px dashed #c4cfdb;
+      border-radius: 12px;
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      background: var(--surface-2);
+      padding: 14px;
+      font-size: 13px;
+    }
+
+    body[data-theme="dark"] .img-placeholder {
+      border-color: #3c4a5b;
+      background: #1c2430;
+    }
+
+    .tile-tech,
+    .tile-actions {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tile-tech { border-bottom: 1px solid var(--line-soft); }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
+      background: var(--surface-2);
+    }
+
+    body[data-theme="dark"] .chip {
+      border-color: var(--line);
+      color: var(--text);
+      background: #1f2834;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      padding: 9px 12px;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+    }
+
+    .btn:hover { border-color: var(--accent-soft); background: var(--surface-3); transform: translateY(-1px); }
+
+    .btn.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: var(--surface-2);
+    }
+
+    .btn.primary:hover { background: #2a4b76; border-color: #2a4b76; }
+
+    body[data-theme="light"] .btn { border-color: var(--line); background: var(--surface-2); color: #0f172a; }
+
+    body[data-theme="dark"] .btn {
+      border-color: var(--line);
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    body[data-theme="dark"] .btn:hover {
+      border-color: var(--accent-soft);
+      background: var(--surface-3);
+    }
+
+    body[data-theme="dark"] .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #0f1724;
+    }
+
+    body[data-theme="dark"] .btn.primary:hover {
+      background: #00e8bf;
+      border-color: #00e8bf;
+    }
+
+    .bookmark-shell {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bookmark-content {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bookmark-intro {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background:
+        radial-gradient(700px 180px at 100% 0%, rgba(96, 131, 183, 0.15), transparent 62%),
+        linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .bookmark-intro h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .bookmark-intro p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 620px;
+    }
+
+    .bookmark-intro-kpis {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bookmark-intro-kpi {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: 0.4px;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
+    .bookmark-subnav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bookmark-subnav button {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--muted);
+      padding: 9px 12px;
+      font: 700 11px "Syne", sans-serif;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .2s ease, background-color .2s ease, color .2s ease;
+    }
+
+    .bookmark-subnav button.active {
+      border-color: #6a6f77;
+      color: var(--text);
+      background: var(--surface-3);
+    }
+
+    .bookmark-subnav button:hover {
+      border-color: var(--accent-soft);
+      color: var(--text);
+      background: var(--surface-3);
+    }
+
+    .bookmark-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 11px;
+    }
+
+    .stat .k {
+      font: 700 10px "Syne", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .stat .v {
+      margin-top: 4px;
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .bm-workspace {
+      display: grid;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .bm-top-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.85fr) minmax(0, 2fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .bm-add-panel {
+      position: sticky;
+      top: 12px;
+    }
+
+    .readme-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .readme-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .readme-panel-head h3 {
+      margin: 0;
+      font: 800 14px "Syne", sans-serif;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .readme-content {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text);
+      font: 500 12px "Syne", sans-serif;
+      line-height: 1.6;
+      padding: 10px;
+      max-height: 260px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    body[data-theme="dark"] .readme-content {
+      background: #1a212b;
+      color: var(--text);
+      border-color: #3a4758;
+    }
+
+    .bm-panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .bm-panel h3 {
+      margin: 0;
+      font: 800 15px "Syne", sans-serif;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .bm-panel p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .bm-inline-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .input,
+    .select,
+    .modal input,
+    .modal textarea {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      font: 500 13px "DM Sans", sans-serif;
+      padding: 10px 11px;
+      outline: none;
+    }
+
+    .bm-add-panel .bookmark-form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bm-add-panel .bookmark-form-footer {
+      justify-content: stretch;
+    }
+
+    .bm-add-panel .bookmark-form-footer .btn {
+      flex: 1 1 120px;
+      text-align: center;
+    }
+
+    .bm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 11px;
+    }
+
+    .bookmark-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bookmark-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .bookmark-form-grid .full { grid-column: 1 / -1; }
+
+    .bookmark-form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .login-note {
+      border: 1px solid #4c5159;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 10px 11px;
+    }
+
+    .login-note a {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .bookmark-results {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .bm-results-head {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      grid-column: 1 / -1;
+    }
+
+    .bm-results-head h3 {
+      margin: 0;
+      font: 800 13px "Syne", sans-serif;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .bm-results-head .input {
+      width: 100%;
+    }
+
+    .bm-section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .bm-section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .bm-section-head h3 {
+      margin: 0;
+      font: 800 13px "Syne", sans-serif;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
+
+    .bm-count {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: .5px;
+      padding: 2px 8px;
+    }
+
+    .bm-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--surface-2) 100%);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      min-height: 184px;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    body[data-theme="dark"] .bm-card {
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    }
+
+    .bm-card:hover {
+      border-color: #a7b4c3;
+      box-shadow: 0 8px 20px rgba(65, 77, 92, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .bm-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .bm-card-title-wrap {
+      min-width: 0;
+      display: grid;
+      gap: 5px;
+    }
+
+    .bm-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .bm-domain-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 0.4px;
+      color: var(--muted);
+      background: var(--surface);
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: lowercase;
+    }
+
+    .fav-chip {
+      border: 1px solid #f0c36b;
+      border-radius: 999px;
+      color: #8a5a00;
+      background: #fff7df;
+      font: 800 10px "Syne", sans-serif;
+      letter-spacing: 0.4px;
+      padding: 3px 8px;
+      flex: 0 0 auto;
+      text-transform: uppercase;
+    }
+
+    body[data-theme="dark"] .fav-chip {
+      border-color: #8f6a2e;
+      color: #f5daa2;
+      background: #3a2f1d;
+    }
+
+    .bm-url,
+    .bm-desc,
+    .bm-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .bm-url {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #3f5d8a;
+      text-decoration: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bm-url:hover {
+      text-decoration: underline;
+    }
+
+    body[data-theme="dark"] .bm-url {
+      color: #9eb9e6;
+    }
+
+    .bm-desc { min-height: 34px; }
+
+    .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .tag {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: .5px;
+      padding: 2px 6px;
+    }
+
+    .bm-actions {
+      margin-top: auto;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .bm-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      min-height: 32px;
+      border-radius: 9px;
+      font-size: 10px;
+      letter-spacing: 0.45px;
+      transform: none;
+    }
+
+    .bm-action-btn i {
+      font-size: 11px;
+      width: 12px;
+      text-align: center;
+    }
+
+    .bm-action-btn:hover {
+      transform: none;
+    }
+
+    .bm-action-btn.edit:hover {
+      border-color: #7aa2d4;
+      background: #eaf3ff;
+    }
+
+    .bm-action-btn.favorite:hover {
+      border-color: #d3a64f;
+      background: #fff6dd;
+    }
+
+    .bm-action-btn.delete:hover {
+      border-color: #d18f98;
+      background: #fff0f2;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.edit:hover {
+      border-color: #5f86bb;
+      background: #1c2c3f;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.favorite:hover {
+      border-color: #af8a45;
+      background: #3a2f1d;
+    }
+
+    body[data-theme="dark"] .bm-action-btn.delete:hover {
+      border-color: #9f6472;
+      background: #3a242c;
+    }
+
+    .guide-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .stack { display: grid; gap: 10px; }
+
+    .block {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 12px;
+    }
+
+    .block h3 {
+      margin: 0 0 7px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .block p,
+    .block li { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+
+    .health-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .health-kpi {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 10px;
+    }
+
+    .health-kpi .k {
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .health-kpi .v {
+      margin-top: 4px;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .health-services {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .health-service {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+
+    .health-service:hover { border-color: var(--border-hi); box-shadow: var(--shadow-soft); transform: translateY(-1px); }
+
+    .health-service-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .health-service h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 2px 8px;
+      font: 700 10px "Syne", sans-serif;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: var(--surface-2);
+      flex: 0 0 auto;
+    }
+
+    .status-pill.healthy {
+      border-color: #84cc16;
+      color: #3f6212;
+      background: #f7fee7;
+    }
+
+    .status-pill.running {
+      border-color: #22c55e;
+      color: #166534;
+      background: #f0fdf4;
+    }
+
+    .status-pill.restarting {
+      border-color: #f59e0b;
+      color: #92400e;
+      background: #fffbeb;
+    }
+
+    .health-meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .health-note {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 8px 10px;
+    }
+
+    .code {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #091428;
+      color: #b6cdf5;
+      padding: 9px;
+      font: 500 12px "Syne", sans-serif;
+      overflow: auto;
+      white-space: pre;
+    }
+
+    body[data-theme="light"] .code { background: #f5f9ff; color: #2b4a7d; }
+
+    .mcp-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .icon-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .token-copy-btn {
+      display: none;
+    }
+
+    .token-copy-btn.show {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .muted { color: var(--muted); }
+
+    .empty {
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 80;
+    }
+
+    .overlay.open { display: block; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.54);
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-card {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .modal-grid { display: grid; gap: 8px; margin-top: 8px; }
+    .modal textarea { min-height: 78px; resize: vertical; }
+
+    .modal-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Design1 parity pass */
+    .layout {
+      grid-template-columns: 240px 1fr;
+      gap: 0;
+      padding: 60px 0 0;
+    }
+
+    .global-status {
+      height: 60px;
+      padding: 0 24px;
+      background: rgba(13, 27, 42, .85);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .sidebar {
+      border-radius: 0;
+      border: 0;
+      border-right: 1px solid var(--line);
+      box-shadow: none;
+      padding: 24px 16px;
+      gap: 6px;
+      background: rgba(19, 35, 56, .6);
+    }
+
+    .sidebar-note {
+      border-top: 1px solid var(--line);
+      padding: 10px 12px 4px;
+    }
+
+    .sidebar-footer {
+      padding: 6px 12px 10px;
+    }
+
+    .main {
+      display: block;
+      padding: 28px 32px;
+    }
+
+    .topbar,
+    .panel {
+      border-radius: 0;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .page-head {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 18px;
+    }
+
+    .page-head h2 {
+      font-family: "Syne", sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+      line-height: 1.2;
+    }
+
+    .page-head p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .theme-toggle,
+    .github-btn,
+    .logout-btn,
+    .sign-in-btn,
+    .pill {
+      border-radius: 12px;
+      border-color: var(--line);
+      background: var(--surface-2);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .theme-toggle:hover,
+    .github-btn:hover,
+    .logout-btn:hover,
+    .sign-in-btn:hover {
+      border-color: var(--accent2);
+      background: var(--accent2-glow);
+      color: var(--accent2);
+    }
+
+    .btn {
+      border-radius: 12px;
+      font-family: "Syne", sans-serif;
+      font-size: 12px;
+      letter-spacing: .2px;
+    }
+
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0d1b2a;
+      box-shadow: 0 0 24px rgba(0, 201, 167, .12);
+    }
+
+    .btn.primary:hover {
+      background: #00e8bf;
+      border-color: #00e8bf;
+      box-shadow: 0 4px 20px rgba(0, 201, 167, .4);
+    }
+
+    .project-tile,
+    .bm-section,
+    .bm-panel,
+    .block,
+    .readme-panel,
+    .health-kpi,
+    .health-service,
+    .stat {
+      border-color: var(--line);
+      background: var(--surface-2);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, .2);
+    }
+
+    .tile-head {
+      background: linear-gradient(90deg, #1a2e48, #1c3150);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tile-title,
+    .bm-panel h3,
+    .bm-section-head h3,
+    .block h3,
+    .readme-panel-head h3 {
+      font-family: "Syne", sans-serif;
+      letter-spacing: .2px;
+    }
+
+    .panel {
+      padding: 0;
+      background: transparent;
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        --top-clearance: 48px;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 60px 10px 10px;
+      }
+
+      .topbar-center {
+        display: none;
+      }
+
+      .global-status {
+        padding: 0 10px;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: var(--top-clearance);
+        left: 10px;
+        bottom: 10px;
+        width: min(320px, calc(100vw - 20px));
+        z-index: 85;
+        transform: translateX(-110%);
+        transition: transform .2s;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+
+      .mobile-menu { display: inline-grid; place-items: center; }
+
+      .tile-main { grid-template-columns: 1fr; }
+
+      .tile-col {
+        border-right: 0;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .tile-col:last-child { border-bottom: 0; }
+
+      .bookmark-stats { grid-template-columns: 1fr; }
+      .bookmark-form-grid { grid-template-columns: 1fr; }
+      .bm-top-layout { grid-template-columns: 1fr; }
+      .bm-add-panel { position: static; }
+      .bookmark-intro { padding: 12px; }
+
+      .overlay.sidebar-open { display: block; }
+    }
+
+    @media (max-width: 640px) {
+      .layout { gap: 8px; padding: 60px 8px 8px; }
+      .page-head h2 { font-size: 24px; }
+      .page-head p { font-size: 12px; }
+      .user-chip-text { max-width: 92px; }
+      .tile-title { font-size: 19px; }
+      .toolbar { padding: 9px; }
+      .search { width: 100%; }
+      .main { padding: 16px 12px; }
+      .bookmark-subnav {
+        gap: 6px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+      .bookmark-subnav button {
+        min-height: 40px;
+        flex: 0 0 auto;
+      }
+      .bookmark-intro h3 { font-size: 15px; }
+      .bookmark-intro p { font-size: 12px; }
+      .bookmark-intro-kpis { width: 100%; }
+      .bookmark-intro-kpi { font-size: 10px; }
+      .btn { width: 100%; text-align: center; }
+      .bm-actions { width: 100%; justify-content: stretch; }
+      .bm-actions .bm-action-btn { width: auto; flex: 1 1 96px; justify-content: center; }
+      .bm-add-panel .bookmark-form-footer .btn { flex: 1 1 100%; }
+      .bm-results-head .input { width: 100%; }
+      .global-status { height: 60px; min-height: 60px; }
+      .github-btn,
+      .pill { display: none; }
+      .health-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .health-services { grid-template-columns: 1fr; }
+      .bookmark-results { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="global-status">
+    <a class="logo-link" href="/" aria-label="Dashboard home">
+      <span class="logo-icon"><i class="fa-solid fa-bookmark" aria-hidden="true"></i></span>
+      <span>Bookmark <span class="logo-accent">Manager</span></span>
+    </a>
+    <label class="topbar-center" aria-label="Search projects">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="text" placeholder="Search (coming soon)" aria-label="Search" />
+    </label>
+    <div class="global-right">
+      <button class="mobile-menu" id="mobileMenu" aria-label="Open navigation">&#9776;</button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+        <i class="fa-regular fa-moon" aria-hidden="true"></i>
+        <span id="themeToggleText">Dark</span>
+      </button>
+      <a class="github-btn" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">
+        <i class="fa-brands fa-github" aria-hidden="true"></i>
+        <span>GitHub</span>
+      </a>
+      <span class="pill" id="projectCount">0 projects</span>
+      <span class="user-chip" id="userChip" aria-live="polite">
+        <span class="user-avatar" id="userAvatar">U</span>
+        <span class="user-chip-text" id="userChipText">Logged in</span>
+      </span>
+      <button class="logout-btn" id="userLogoutBtn" type="button">Logout</button>
+      <a class="sign-in-btn" id="signInBtn" href="/register">Sign In</a>
+    </div>
+  </div>
+  <div class="overlay" id="overlay"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="section-label">Projects</div>
+      <nav class="nav" id="projectNav"></nav>
+
+      <div class="sidebar-note sidebar-clock" id="sidebarClock" aria-live="polite">--</div>
+      <div class="sidebar-footer" aria-label="Footer links">
+        <a href="https://shivaprogramming.com" target="_blank" rel="noopener">shivaprogramming.com</a>
+        <a href="https://blog.shivaprogramming.com" target="_blank" rel="noopener">blog.shivaprogramming.com</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="page-head">
+        <h2 id="pageTitle">All Projects</h2>
+        <p id="pageSubtitle">Portfolio view for your projects</p>
+      </section>
+      <section class="panel" id="panel"></section>
+    </main>
+  </div>
+
+  <div class="modal" id="bookmarkModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h3 id="modalTitle" style="margin:0;font-size:16px;">Add Bookmark</h3>
+      <div class="modal-grid">
+        <input id="bmUrl" type="url" placeholder="https://example.com" />
+        <input id="bmTitle" type="text" placeholder="Title" />
+        <input id="bmDescription" type="text" placeholder="Description" />
+        <input id="bmTags" type="text" placeholder="Tags (comma separated)" />
+        <textarea id="bmNotes" placeholder="Notes"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelBookmarkBtn" type="button">Cancel</button>
+        <button class="btn primary" id="saveBookmarkBtn" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+    <div class="modal-card">
+      <h3 id="guideTitle" style="margin:0;font-size:16px;">Quick Setup Guide</h3>
+      <ol class="guide-list" style="margin-top:10px;">
+        <li>Use the form on the left to add URL, title, and optional tags/notes.</li>
+        <li>Sign in from the login panel if you are not authenticated yet.</li>
+        <li>Click save after login. Your bookmark will appear in results below.</li>
+        <li>Use search in Results to quickly find saved links.</li>
+        <li>Use Favorite, Edit, and Delete buttons on each card as needed.</li>
+      </ol>
+      <div class="modal-actions">
+        <button class="btn" id="closeGuideBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "/api";
+    const PROJECTS = [
+      {
+        id: "bookmarks",
+        name: "Bookmarks",
+        route: "/bookmarks",
+        subtitle: "Bookmark workspace and operations",
+        badge: "Core",
+        type: "bookmark"
+      },
+      {
+        id: "mcp-server",
+        name: "MCP Server",
+        route: "/projects/mcp-server",
+        subtitle: "Model context gateway",
+        badge: "Live",
+        type: "tile",
+        tech: ["MCP", "TypeScript", "Node.js", "REST API"],
+        problem: "AI assistants are isolated from private systems and secure APIs.",
+        solution: "This service exposes controlled tools and data so clients can access real-time resources safely.",
+        architecture: "Architecture diagram placeholder"
+      },
+      {
+        id: "agents-lab",
+        name: "Agents Lab",
+        route: "/projects/agents-lab",
+        subtitle: "Automation workflows",
+        badge: "Draft",
+        type: "tile",
+        tech: ["Workflows", "Queue", "Workers"],
+        problem: "Manual repetitive tasks slow down delivery.",
+        solution: "A lightweight orchestration layer executes repeatable jobs with clear logs and retries.",
+        architecture: "Workflow map placeholder"
+      }
+    ];
+
+    const DOCKER_SERVICES = [
+      {
+        id: "5f1e810ed89f",
+        name: "bookmark_certbot",
+        image: "certbot/certbot:latest",
+        status: "restarting",
+        health: "degraded",
+        uptime: "Restarting (2), recent restart"
+      },
+      {
+        id: "4c635d674cae",
+        name: "bookmark_app",
+        image: "ghcr.io/shivasharma/website_bookmark_mcp:latest",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 10 minutes (healthy)"
+      },
+      {
+        id: "c4ace7c43db3",
+        name: "bookmark_nginx",
+        image: "nginx:alpine",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 10 minutes"
+      },
+      {
+        id: "0ecd54eda46f",
+        name: "bookmark_postgres",
+        image: "postgres:16-alpine",
+        status: "running",
+        health: "healthy",
+        uptime: "Up 21 hours (healthy)"
+      }
+    ];
+
+    const state = {
+      activeRoute: normalizePath(location.pathname),
+      bookmarkSearch: "",
+      bookmarkReadme: "",
+      bookmarks: [],
+      authRequired: false,
+      currentUser: null,
+      editingId: null,
+      activeBookmarkTab: "bookmarks"
+    };
+
+    const els = {
+      sidebar: document.getElementById("sidebar"),
+      overlay: document.getElementById("overlay"),
+      projectNav: document.getElementById("projectNav"),
+      panel: document.getElementById("panel"),
+      pageTitle: document.getElementById("pageTitle"),
+      pageSubtitle: document.getElementById("pageSubtitle"),
+      projectCount: document.getElementById("projectCount"),
+      themeToggle: document.getElementById("themeToggle"),
+      themeToggleText: document.getElementById("themeToggleText"),
+      sidebarClock: document.getElementById("sidebarClock"),
+      signInBtn: document.getElementById("signInBtn"),
+      userLogoutBtn: document.getElementById("userLogoutBtn"),
+      userChip: document.getElementById("userChip"),
+      userAvatar: document.getElementById("userAvatar"),
+      userChipText: document.getElementById("userChipText"),
+      mobileMenu: document.getElementById("mobileMenu"),
+      bookmarkModal: document.getElementById("bookmarkModal"),
+      guideModal: document.getElementById("guideModal"),
+      modalTitle: document.getElementById("modalTitle"),
+      closeGuideBtn: document.getElementById("closeGuideBtn"),
+      bmUrl: document.getElementById("bmUrl"),
+      bmTitle: document.getElementById("bmTitle"),
+      bmDescription: document.getElementById("bmDescription"),
+      bmTags: document.getElementById("bmTags"),
+      bmNotes: document.getElementById("bmNotes"),
+      cancelBookmarkBtn: document.getElementById("cancelBookmarkBtn"),
+      saveBookmarkBtn: document.getElementById("saveBookmarkBtn")
+    };
+
+    function normalizePath(path) {
+      if (!path || path === "/") return "/";
+      return path.endsWith("/") ? path.slice(0, -1) : path;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;");
+    }
+
+    function byRoute(route) {
+      return PROJECTS.find((project) => project.route === route) || null;
+    }
+
+    function nowRoute() {
+      const current = normalizePath(location.pathname);
+      const exact = byRoute(current);
+      if (exact) return exact.route;
+      if (current.startsWith("/projects/")) return current;
+      if (current === "/dashboard") return "/";
+      return "/";
+    }
+
+    function navigate(route, replace = false) {
+      const next = normalizePath(route);
+      if (replace) history.replaceState({}, "", next);
+      else history.pushState({}, "", next);
+      state.activeRoute = next;
+      render();
+      closeSidebar();
+    }
+
+    function renderUserChip() {
+      if (!els.userChip || !els.userAvatar || !els.userChipText) return;
+      if (!state.currentUser) {
+        els.userChip.classList.remove("show");
+        if (els.signInBtn) {
+          els.signInBtn.classList.add("show");
+        }
+        if (els.userLogoutBtn) {
+          els.userLogoutBtn.classList.remove("show");
+        }
+        return;
+      }
+
+      const label = state.currentUser.name || state.currentUser.email || "User";
+      const initial = String(label).trim().charAt(0).toUpperCase() || "U";
+      els.userAvatar.textContent = initial;
+      els.userChipText.textContent = `Logged in: ${label}`;
+      els.userChip.title = `Logged in as ${label}`;
+      els.userChip.classList.add("show");
+      if (els.signInBtn) {
+        els.signInBtn.classList.remove("show");
+      }
+      if (els.userLogoutBtn) {
+        els.userLogoutBtn.classList.add("show");
+      }
+    }
+
+    async function performLogout() {
+      try { await api("/logout", { method: "POST" }); } catch {}
+      state.currentUser = null;
+      state.authRequired = true;
+      renderUserChip();
+      toast("Logged out");
+
+      if (state.activeRoute === "/bookmarks") {
+        await loadBookmarks();
+      }
+      render();
+    }
+
+    function updateThemeToggleUi(theme) {
+      if (!els.themeToggle || !els.themeToggleText) return;
+      const icon = els.themeToggle.querySelector("i");
+      if (theme === "dark") {
+        els.themeToggleText.textContent = "Dark";
+        if (icon) icon.className = "fa-regular fa-moon";
+      } else {
+        els.themeToggleText.textContent = "Light";
+        if (icon) icon.className = "fa-regular fa-sun";
+      }
+    }
+
+    function applyTheme(theme) {
+      const nextTheme = theme === "light" ? "light" : "dark";
+      document.body.setAttribute("data-theme", nextTheme);
+      try { localStorage.setItem("dashboard-theme", nextTheme); } catch {}
+      updateThemeToggleUi(nextTheme);
+    }
+
+    function themeInit() {
+      let saved = null;
+      try { saved = localStorage.getItem("dashboard-theme"); } catch {}
+      if (saved === "light" || saved === "dark") {
+        applyTheme(saved);
+        return;
+      }
+      applyTheme("dark");
+    }
+
+    function setSidebarClock() {
+      if (!els.sidebarClock) return;
+      const now = new Date();
+      const dateText = new Intl.DateTimeFormat("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(now);
+      const timeText = new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).format(now);
+      els.sidebarClock.textContent = `${dateText} | ${timeText}`;
+    }
+
+    function openSidebar() {
+      els.sidebar.classList.add("open");
+      els.overlay.classList.add("open", "sidebar-open");
+    }
+
+    function closeSidebar() {
+      els.sidebar.classList.remove("open");
+      els.overlay.classList.remove("sidebar-open");
+      if (!els.bookmarkModal.classList.contains("open") && !els.guideModal.classList.contains("open")) {
+        els.overlay.classList.remove("open");
+      }
+    }
+
+    function openModal(editing, bookmark = null) {
+      state.editingId = editing ? bookmark.id : null;
+      els.modalTitle.textContent = editing ? "Edit Bookmark" : "Add Bookmark";
+      els.bmUrl.value = bookmark?.url || "";
+      els.bmTitle.value = bookmark?.title || "";
+      els.bmDescription.value = bookmark?.description || "";
+      els.bmTags.value = Array.isArray(bookmark?.tags) ? bookmark.tags.join(", ") : "";
+      els.bmNotes.value = bookmark?.notes || "";
+      els.bookmarkModal.classList.add("open");
+      els.overlay.classList.add("open");
+    }
+
+    function closeModal() {
+      els.bookmarkModal.classList.remove("open");
+      if (!els.sidebar.classList.contains("open") && !els.guideModal.classList.contains("open")) {
+        els.overlay.classList.remove("open");
+      }
+      state.editingId = null;
+    }
+
+    function openGuideModal() {
+      els.guideModal.classList.add("open");
+      els.overlay.classList.add("open");
+    }
+
+    function closeGuideModal() {
+      els.guideModal.classList.remove("open");
+      if (!els.sidebar.classList.contains("open") && !els.bookmarkModal.classList.contains("open")) {
+        els.overlay.classList.remove("open");
+      }
+    }
+
+    function toast(message, isError = false) {
+      const item = document.createElement("div");
+      item.textContent = message;
+      item.style.position = "fixed";
+      item.style.bottom = "14px";
+      item.style.right = "14px";
+      item.style.padding = "9px 12px";
+      item.style.borderRadius = "10px";
+      item.style.border = "1px solid " + (isError ? "#8b3348" : "#2f5ea2");
+      item.style.background = isError ? "#3d1723" : "#12274b";
+      item.style.color = "#e9f0ff";
+      item.style.font = "700 12px Syne, sans-serif";
+      item.style.zIndex = "120";
+      document.body.appendChild(item);
+      setTimeout(() => item.remove(), 2600);
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(API + path, {
+        ...options,
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      let payload = null;
+      try { payload = await response.json(); } catch {}
+      return { response, payload };
+    }
+
+    async function loadCurrentUser() {
+      try {
+        const { response, payload } = await api("/me", { method: "GET" });
+        if (!response.ok || !payload?.success) {
+          state.currentUser = null;
+          renderUserChip();
+          return;
+        }
+        state.currentUser = payload.data;
+        renderUserChip();
+      } catch {
+        state.currentUser = null;
+        renderUserChip();
+      }
+    }
+
+    async function loadBookmarks() {
+      const search = state.bookmarkSearch.trim();
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+
+      try {
+        const { response, payload } = await api(`/bookmarks?${params.toString()}`, { method: "GET" });
+        if (response.status === 401) {
+          state.bookmarks = [];
+          state.authRequired = true;
+          return;
+        }
+        if (!response.ok || !payload?.success) {
+          state.bookmarks = [];
+          return;
+        }
+        state.authRequired = false;
+        state.bookmarks = Array.isArray(payload.data) ? payload.data : [];
+      } catch {
+        state.bookmarks = [];
+      }
+    }
+
+    async function loadStatsIntoDom() {
+      const totalEl = document.getElementById("statTotal");
+      const favEl = document.getElementById("statFavorites");
+      const recentEl = document.getElementById("statRecent");
+      if (!totalEl || !favEl || !recentEl) return;
+
+      try {
+        const { response, payload } = await api("/stats", { method: "GET" });
+        if (!response.ok || !payload?.success) {
+          totalEl.textContent = String(state.bookmarks.length);
+          favEl.textContent = String(state.bookmarks.filter((item) => item.is_favorite).length);
+          recentEl.textContent = "0";
+          return;
+        }
+        const data = payload.data || {};
+        totalEl.textContent = String(data.total ?? state.bookmarks.length);
+        favEl.textContent = String(data.favorites ?? 0);
+        recentEl.textContent = String(data.recent ?? 0);
+      } catch {
+        totalEl.textContent = String(state.bookmarks.length);
+        favEl.textContent = String(state.bookmarks.filter((item) => item.is_favorite).length);
+        recentEl.textContent = "0";
+      }
+    }
+
+    async function loadHealthIntoDom() {
+      const node = document.getElementById("healthStatus");
+      if (!node) return;
+      try {
+        const { response, payload } = await api("/health", { method: "GET" });
+        if (response.ok && payload?.success) {
+          node.innerHTML = "API status: <strong>OK</strong>";
+          return;
+        }
+      } catch {}
+      node.innerHTML = "API status: <strong>Unavailable</strong>";
+    }
+
+    async function loadMcpTokenIntoDom() {
+      const target = document.getElementById("mcpTokenOutput");
+      const copyBtn = document.getElementById("copyMcpTokenBtn");
+      if (!target) return;
+      if (!state.currentUser) {
+        target.textContent = "Login required before generating token.";
+        if (copyBtn) copyBtn.classList.remove("show");
+        return;
+      }
+      try {
+        const { response, payload } = await api("/mcp-token?expires_in_days=30", { method: "GET" });
+        if (!response.ok || !payload?.success || !payload?.data?.token) {
+          target.textContent = "Could not generate token.";
+          if (copyBtn) copyBtn.classList.remove("show");
+          return;
+        }
+        target.textContent = payload.data.token;
+        if (copyBtn) copyBtn.classList.add("show");
+      } catch {
+        target.textContent = "Could not generate token.";
+        if (copyBtn) copyBtn.classList.remove("show");
+      }
+    }
+
+    async function copyTextToClipboard(text) {
+      const content = String(text || "").trim();
+      if (!content) return false;
+      try {
+        await navigator.clipboard.writeText(content);
+        return true;
+      } catch {
+        const area = document.createElement("textarea");
+        area.value = content;
+        area.setAttribute("readonly", "true");
+        area.style.position = "fixed";
+        area.style.opacity = "0";
+        document.body.appendChild(area);
+        area.focus();
+        area.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch { ok = false; }
+        area.remove();
+        return ok;
+      }
+    }
+
+    async function loadBookmarkReadmeIntoDom() {
+      const target = document.getElementById("bookmarkReadmeContent");
+      if (!target) return;
+
+      if (state.bookmarkReadme) {
+        target.textContent = state.bookmarkReadme;
+        return;
+      }
+
+      target.textContent = "Loading README...";
+
+      const candidates = ["/README.md", "/readme.md", "README.md", "readme.md"];
+      for (const path of candidates) {
+        try {
+          const response = await fetch(path, { credentials: "include" });
+          if (!response.ok) continue;
+          const text = await response.text();
+          if (!text || !text.trim()) continue;
+          state.bookmarkReadme = text;
+          target.textContent = text;
+          return;
+        } catch {
+          // Try next path.
+        }
+      }
+
+      target.textContent = "README not available right now.";
+    }
+
+    function getDomain(url) {
+      try { return new URL(url).hostname; } catch { return ""; }
+    }
+
+    function formatDate(input) {
+      const d = new Date(input);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+
+    function filteredProjects() {
+      return PROJECTS;
+    }
+
+    function navIconByProject(project) {
+      if (project.id === "bookmarks") return "fa-regular fa-bookmark";
+      if (project.id === "mcp-server") return "fa-solid fa-server";
+      if (project.id === "agents-lab") return "fa-solid fa-robot";
+      return "fa-regular fa-folder";
+    }
+
+    function tileMarkup(project, index) {
+      return `
+        <article class="project-tile">
+          <div class="tile-head">
+            <div>
+              <span class="tile-id">${String(index + 1).padStart(2, "0")}</span>
+              <h3 class="tile-title">${escapeHtml(project.name)}</h3>
+            </div>
+            <span class="tile-status">${escapeHtml(project.badge || "Active")}</span>
+          </div>
+          <div class="tile-main">
+            <div class="tile-col">
+              <div class="tile-label">Problem</div>
+              <p>${escapeHtml(project.problem || "Add project problem statement.")}</p>
+            </div>
+            <div class="tile-col">
+              <div class="tile-label">Solution</div>
+              <p>${escapeHtml(project.solution || "Add project solution statement.")}</p>
+            </div>
+            <div class="tile-col">
+              <div class="tile-label">Architecture</div>
+              <div class="img-placeholder">${escapeHtml(project.architecture || "Image placeholder")}</div>
+            </div>
+          </div>
+          <div class="tile-tech">
+            ${(project.tech || []).map((tech) => `<span class="chip">${escapeHtml(tech)}</span>`).join("")}
+          </div>
+          <div class="tile-actions">
+            <button class="btn primary" data-open-route="${escapeHtml(project.route)}">Open Project</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function bookmarksMarkup() {
+      return `
+        <div class="bookmark-shell">
+          <div class="bookmark-subnav" id="bookmarkSubnav">
+            <button data-bm-tab="bookmarks" class="${state.activeBookmarkTab === "bookmarks" ? "active" : ""}">Bookmarks</button>
+            <button data-bm-tab="health" class="${state.activeBookmarkTab === "health" ? "active" : ""}">System Health</button>
+            <button data-bm-tab="about" class="${state.activeBookmarkTab === "about" ? "active" : ""}">About Project</button>
+            <button data-bm-tab="account" class="${state.activeBookmarkTab === "account" ? "active" : ""}">Account</button>
+            <button data-bm-tab="mcp" class="${state.activeBookmarkTab === "mcp" ? "active" : ""}">MCP Setup</button>
+          </div>
+          <div id="bookmarkTabPanel"></div>
+        </div>
+      `;
+    }
+
+    function aboutProjectMarkup() {
+      return `
+        <section class="readme-panel">
+          <div class="readme-panel-head">
+            <h3>About Bookmarks Project</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a class="github-btn" href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">
+                <i class="fa-brands fa-github" aria-hidden="true"></i>
+                <span>GitHub Repo</span>
+              </a>
+              <a class="btn" href="/README.md" target="_blank" rel="noopener">Open README</a>
+            </div>
+          </div>
+          <p class="muted">Project details from <code>README.md</code>. Repository: <a href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" rel="noopener">https://github.com/shivasharma/website_bookmark_mcp</a></p>
+          <pre class="readme-content" id="bookmarkReadmeContent">Loading README...</pre>
+        </section>
+      `;
+    }
+
+    function bookmarkListMarkup() {
+      const favoritesCount = state.bookmarks.filter((item) => item.is_favorite).length;
+
+      const renderBookmarkCard = (bookmark) => {
+        const domain = getDomain(bookmark.url) || "link";
+        return `
+          <article class="bm-card">
+            <div class="bm-card-head">
+              <div class="bm-card-title-wrap">
+                <h4 class="bm-title">${escapeHtml(bookmark.title || bookmark.url)}</h4>
+                <span class="bm-domain-chip">${escapeHtml(domain)}</span>
+              </div>
+              ${bookmark.is_favorite ? `<span class="fav-chip" aria-label="Favorite bookmark"><i class="fa-solid fa-star" aria-hidden="true"></i> Fav</span>` : ""}
+            </div>
+            <a class="bm-url" href="${escapeHtml(bookmark.url)}" target="_blank" rel="noopener">
+              <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+              <span>${escapeHtml(bookmark.url)}</span>
+            </a>
+            <div class="bm-desc">${escapeHtml(bookmark.description || "No description")}</div>
+            <div class="tags">${(bookmark.tags || []).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+            <div class="bm-meta"><i class="fa-regular fa-calendar" aria-hidden="true"></i> ${escapeHtml(formatDate(bookmark.created_at))}</div>
+            <div class="bm-actions">
+              <button class="btn bm-action-btn edit" data-edit-bookmark="${bookmark.id}">
+                <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+                <span>Edit</span>
+              </button>
+              <button class="btn bm-action-btn favorite" data-fav-bookmark="${bookmark.id}" data-fav-current="${bookmark.is_favorite ? "1" : "0"}">
+                <i class="${bookmark.is_favorite ? "fa-solid fa-star" : "fa-regular fa-star"}" aria-hidden="true"></i>
+                <span>${bookmark.is_favorite ? "Unfavorite" : "Favorite"}</span>
+              </button>
+              <button class="btn bm-action-btn delete" data-del-bookmark="${bookmark.id}">
+                <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        `;
+      };
+
+      const allCards = state.bookmarks.length
+        ? state.bookmarks.map((bookmark) => renderBookmarkCard(bookmark)).join("")
+        : `<div class="empty">No bookmarks yet. Use the form to save your first item.</div>`;
+
+      return `
+        <div class="bookmark-content">
+          <section class="bookmark-intro">
+            <div>
+              <h3>Manage your bookmarks in one place</h3>
+              <p>Add new links quickly, search instantly, and keep your collection organized across desktop and mobile.</p>
+            </div>
+            <div class="bookmark-intro-kpis" aria-label="Bookmark quick stats">
+              <span class="bookmark-intro-kpi">Total: ${state.bookmarks.length}</span>
+              <span class="bookmark-intro-kpi">Favorites: ${favoritesCount}</span>
+              <span class="bookmark-intro-kpi">View: Card Grid</span>
+            </div>
+          </section>
+
+          <div class="bm-workspace">
+            <div class="bm-top-layout">
+              <section class="bm-panel bm-add-panel">
+                <h3>Add Bookmark</h3>
+                <p>Quick add form. Save links in seconds.</p>
+                <form class="bookmark-form" id="quickBookmarkForm">
+                  <div class="bookmark-form-grid">
+                    <input class="input full" id="quickBmUrl" type="url" placeholder="https://example.com" required />
+                    <input class="input" id="quickBmTitle" type="text" placeholder="Title" />
+                    <input class="input" id="quickBmTags" type="text" placeholder="Tags (comma separated)" />
+                    <input class="input full" id="quickBmDescription" type="text" placeholder="Description" />
+                    <textarea class="input full" id="quickBmNotes" placeholder="Notes"></textarea>
+                  </div>
+                  <div class="bookmark-form-footer">
+                    <button class="btn primary" type="submit">${state.currentUser && !state.authRequired ? "Save Bookmark" : "Login To Save"}</button>
+                    <button class="btn" type="button" id="openGuideBtn">How It Works</button>
+                  </div>
+                </form>
+              </section>
+
+              <div class="bookmark-results" id="bookmarkGrid">
+                <div class="bm-results-head">
+                  <h3>All Bookmarks</h3>
+                  <input class="input" id="bookmarkSearch" type="text" value="${escapeHtml(state.bookmarkSearch)}" placeholder="Search bookmarks" />
+                </div>
+                <section class="bm-section">
+                  <div class="bm-section-head">
+                    <h3>All Bookmarks</h3>
+                    <span class="bm-count">${state.bookmarks.length}</span>
+                  </div>
+                  <div class="bm-grid">${allCards}</div>
+                </section>
+              </div>
+            </div>
+
+            <section class="bm-panel">
+              <h3>Login & Setup</h3>
+              <div class="login-note">
+                ${state.currentUser && !state.authRequired
+                  ? `You are logged in as <strong>${escapeHtml(state.currentUser.name || state.currentUser.email || "user")}</strong>. You can save bookmarks now.`
+                  : `You need to <a href="/register">login</a> before bookmarks can be saved.`}
+              </div>
+              <div class="bookmark-stats">
+                <div class="stat"><div class="k">Total</div><div class="v" id="statTotal">0</div></div>
+                <div class="stat"><div class="k">Favorites</div><div class="v" id="statFavorites">0</div></div>
+                <div class="stat"><div class="k">Recent</div><div class="v" id="statRecent">0</div></div>
+              </div>
+              <p>Use the inline form to add bookmarks and search links instantly.</p>
+              <p>Use the guide for a quick 5-step overview of adding and managing links.</p>
+              <div class="bm-inline-actions">
+                ${state.currentUser && !state.authRequired
+                  ? `<button class="btn" type="button" id="openGuideBtnSecondary">Open Guide</button>`
+                  : `<a class="btn primary" href="/register">Login / Register</a>`}
+              </div>
+            </section>
+          </div>
+        </div>
+      `;
+    }
+
+    function healthMarkup() {
+      const total = DOCKER_SERVICES.length;
+      const running = DOCKER_SERVICES.filter((service) => service.status === "running").length;
+      const healthy = DOCKER_SERVICES.filter((service) => service.health === "healthy").length;
+      const restarting = DOCKER_SERVICES.filter((service) => service.status === "restarting").length;
+
+      const serviceCards = DOCKER_SERVICES.map((service) => {
+        const badgeClass = service.status === "restarting" ? "restarting" : service.status;
+        const healthLabel = service.health === "healthy" ? "Healthy" : "Needs attention";
+
+        return `
+          <article class="health-service">
+            <div class="health-service-head">
+              <h4 title="${escapeHtml(service.name)}">${escapeHtml(service.name)}</h4>
+              <span class="status-pill ${escapeHtml(badgeClass)}">${escapeHtml(service.status)}</span>
+            </div>
+            <div class="health-meta">Container: <code>${escapeHtml(service.id.slice(0, 12))}</code></div>
+            <div class="health-meta">Image: ${escapeHtml(service.image)}</div>
+            <div class="health-meta">State: ${escapeHtml(service.uptime)}</div>
+            <div class="health-meta">Health: ${escapeHtml(healthLabel)}</div>
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>Docker Overview</h3>
+            <div class="health-kpis">
+              <div class="health-kpi"><div class="k">Containers</div><div class="v">${total}</div></div>
+              <div class="health-kpi"><div class="k">Running</div><div class="v">${running}</div></div>
+              <div class="health-kpi"><div class="k">Healthy</div><div class="v">${healthy}</div></div>
+              <div class="health-kpi"><div class="k">Restarting</div><div class="v">${restarting}</div></div>
+            </div>
+            <div class="health-note">Clean view enabled: port mappings and startup commands are intentionally hidden.</div>
+            <div class="health-services">${serviceCards}</div>
+          </article>
+          <article class="block">
+            <h3>Service Health</h3>
+            <p id="healthStatus">API status: checking...</p>
+          </article>
+          <article class="block">
+            <h3>Deployment Notes</h3>
+            <p>Stack includes Nginx, app service, Postgres, and certbot. This dashboard is read-only and designed for quick status checks.</p>
+          </article>
+        </div>
+      `;
+    }
+
+    function accountMarkup() {
+      const user = state.currentUser;
+      if (!user) {
+        return `<article class="block"><h3>Account</h3><p>You are not logged in. Use <a href="/register" style="color:inherit;">/register</a> to sign in with Google or GitHub.</p></article>`;
+      }
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>Profile</h3>
+            <p>Name: ${escapeHtml(user.name || "-")}</p>
+            <p>Email: ${escapeHtml(user.email || "-")}</p>
+            <p>Provider: ${escapeHtml(user.auth_provider || "oauth")}</p>
+          </article>
+          <article class="block">
+            <h3>Session</h3>
+            <p>Use this account for bookmarks and MCP token generation.</p>
+            <button class="btn" id="logoutBtn">Logout</button>
+          </article>
+        </div>
+      `;
+    }
+
+    function mcpMarkup() {
+      const base = `${location.origin}`;
+      const callback = `${location.origin}/auth/github/callback`;
+      return `
+        <div class="stack">
+          <article class="block">
+            <h3>MCP Setup</h3>
+            <p>Generate a token and paste this config in Claude Desktop, Cursor, or VS Code MCP settings.</p>
+            <div class="mcp-actions">
+              <button class="btn primary" id="refreshMcpTokenBtn">Generate Token</button>
+              <button class="btn icon-copy-btn token-copy-btn" id="copyMcpTokenBtn" type="button" aria-label="Copy generated token">
+                <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                <span>Copy Token</span>
+              </button>
+            </div>
+            <div class="code" id="mcpTokenOutput">Click Generate Token</div>
+          </article>
+          <article class="block">
+            <div class="mcp-actions" style="justify-content:space-between;">
+              <h3 style="margin:0;">Config Template</h3>
+              <button class="btn icon-copy-btn" id="copyMcpConfigBtn" type="button" aria-label="Copy config template">
+                <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                <span>Copy Config</span>
+              </button>
+            </div>
+            <div class="code" id="mcpConfigTemplate">{
+  "mcpServers": {
+    "bookmark": {
+      "command": "npx",
+      "args": [ "-y", "github:shivasharma/website_bookmark_mcp"],
+      "env": {
+        "BOOKMARK_API_BASE_URL": "${base}",
+        "BOOKMARK_API_TOKEN": "paste-token-here"
+      }
+    }
+  }
+}</div>
+          </article>
+          <article class="block">
+            <h3>OAuth Callback</h3>
+            <p>GitHub callback should be set to this URL only:</p>
+            <div class="code">${callback}</div>
+          </article>
+        </div>
+      `;
+    }
+
+    function renderBookmarkTab() {
+      const panel = document.getElementById("bookmarkTabPanel");
+      if (!panel) return;
+
+      if (state.activeBookmarkTab === "bookmarks") {
+        panel.innerHTML = bookmarkListMarkup();
+        loadStatsIntoDom();
+        bindBookmarkInteractions();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "health") {
+        panel.innerHTML = healthMarkup();
+        loadHealthIntoDom();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "about") {
+        panel.innerHTML = aboutProjectMarkup();
+        loadBookmarkReadmeIntoDom();
+        return;
+      }
+
+      if (state.activeBookmarkTab === "account") {
+        panel.innerHTML = accountMarkup();
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", async () => {
+            await performLogout();
+          });
+        }
+        return;
+      }
+
+      panel.innerHTML = mcpMarkup();
+      const refreshBtn = document.getElementById("refreshMcpTokenBtn");
+      const copyTokenBtn = document.getElementById("copyMcpTokenBtn");
+      const copyConfigBtn = document.getElementById("copyMcpConfigBtn");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => {
+          loadMcpTokenIntoDom();
+        });
+      }
+      if (copyTokenBtn) {
+        copyTokenBtn.addEventListener("click", async () => {
+          const token = document.getElementById("mcpTokenOutput")?.textContent || "";
+          const ok = await copyTextToClipboard(token);
+          toast(ok ? "Token copied" : "Unable to copy token", !ok);
+        });
+      }
+      if (copyConfigBtn) {
+        copyConfigBtn.addEventListener("click", async () => {
+          const config = document.getElementById("mcpConfigTemplate")?.textContent || "";
+          const ok = await copyTextToClipboard(config);
+          toast(ok ? "Config copied" : "Unable to copy config", !ok);
+        });
+      }
+    }
+
+    function bindBookmarkInteractions() {
+      const searchInput = document.getElementById("bookmarkSearch");
+      const quickForm = document.getElementById("quickBookmarkForm");
+      const guideBtn = document.getElementById("openGuideBtn");
+      const guideBtnSecondary = document.getElementById("openGuideBtnSecondary");
+
+      if (searchInput) {
+        searchInput.addEventListener("input", async (event) => {
+          state.bookmarkSearch = event.target.value;
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      }
+
+      if (quickForm) {
+        quickForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const urlEl = document.getElementById("quickBmUrl");
+          const titleEl = document.getElementById("quickBmTitle");
+          const descEl = document.getElementById("quickBmDescription");
+          const tagsEl = document.getElementById("quickBmTags");
+          const notesEl = document.getElementById("quickBmNotes");
+          if (!urlEl || !titleEl || !descEl || !tagsEl || !notesEl) return;
+
+          if (!state.currentUser || state.authRequired) {
+            toast("Login required to save bookmarks.", true);
+            openGuideModal();
+            return;
+          }
+
+          const payload = {
+            url: urlEl.value.trim(),
+            title: titleEl.value.trim(),
+            description: descEl.value.trim(),
+            tags: tagsEl.value.split(",").map((item) => item.trim()).filter(Boolean),
+            notes: notesEl.value.trim()
+          };
+
+          if (!payload.url) {
+            toast("URL is required", true);
+            return;
+          }
+
+          const { response, payload: result } = await api("/bookmarks", {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+
+          if (response.status === 401) {
+            state.authRequired = true;
+            toast("Login required to save bookmarks.", true);
+            openGuideModal();
+            renderBookmarkTab();
+            return;
+          }
+
+          if (!response.ok || !result?.success) {
+            toast(result?.error || "Save failed", true);
+            return;
+          }
+
+          quickForm.reset();
+          await loadBookmarks();
+          renderBookmarkTab();
+          toast("Bookmark saved");
+        });
+      }
+
+      if (guideBtn) {
+        guideBtn.addEventListener("click", openGuideModal);
+      }
+
+      if (guideBtnSecondary) {
+        guideBtnSecondary.addEventListener("click", openGuideModal);
+      }
+
+      document.querySelectorAll("[data-edit-bookmark]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = Number(button.getAttribute("data-edit-bookmark"));
+          const bookmark = state.bookmarks.find((item) => item.id === id);
+          if (!bookmark) return;
+          openModal(true, bookmark);
+        });
+      });
+
+      document.querySelectorAll("[data-del-bookmark]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const id = Number(button.getAttribute("data-del-bookmark"));
+          if (!id) return;
+          const { response, payload } = await api(`/bookmarks/${id}`, { method: "DELETE" });
+          if (!response.ok || !payload?.success) {
+            toast(payload?.error || "Delete failed", true);
+            return;
+          }
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      });
+
+      document.querySelectorAll("[data-fav-bookmark]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const id = Number(button.getAttribute("data-fav-bookmark"));
+          const current = button.getAttribute("data-fav-current") === "1";
+          const { response, payload } = await api(`/bookmarks/${id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ is_favorite: !current })
+          });
+          if (!response.ok || !payload?.success) {
+            toast(payload?.error || "Update failed", true);
+            return;
+          }
+          await loadBookmarks();
+          renderBookmarkTab();
+        });
+      });
+    }
+
+    function renderAllProjects() {
+      const items = filteredProjects();
+      const tiles = items
+        .filter((project) => project.type === "tile" || project.type === "bookmark")
+        .map((project, index) => {
+          const tileData = project.type === "bookmark"
+            ? {
+                ...project,
+                problem: "Bookmarks, account, system health, and MCP setup are now in one workspace.",
+                solution: "Single route dashboard with integrated tabs and fast API-driven rendering.",
+                architecture: "Bookmark app panel"
+              }
+            : project;
+          return tileMarkup(tileData, index);
+        })
+        .join("");
+
+      els.panel.innerHTML = `<div class="tiles">${tiles || "<div class='empty'>No projects match your search.</div>"}</div>`;
+
+      els.panel.querySelectorAll("[data-open-route]").forEach((button) => {
+        button.addEventListener("click", () => navigate(button.getAttribute("data-open-route")));
+      });
+    }
+
+    async function renderBookmarksWorkspace() {
+      await loadBookmarks();
+      els.panel.innerHTML = bookmarksMarkup();
+
+      const subnav = document.getElementById("bookmarkSubnav");
+      if (subnav) {
+        subnav.querySelectorAll("button[data-bm-tab]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.activeBookmarkTab = button.getAttribute("data-bm-tab");
+            subnav.querySelectorAll("button").forEach((item) => item.classList.remove("active"));
+            button.classList.add("active");
+            renderBookmarkTab();
+          });
+        });
+      }
+
+      renderBookmarkTab();
+    }
+
+    function renderProjectDetails(project) {
+      els.panel.innerHTML = `<div class="tiles">${tileMarkup(project, 0)}</div>`;
+      els.panel.querySelector("[data-open-route]")?.addEventListener("click", () => navigate(project.route));
+    }
+
+    async function render() {
+      renderUserChip();
+
+      const route = state.activeRoute;
+      const active = byRoute(route) || PROJECTS.find((project) => route.startsWith(project.route + "/"));
+
+      const navItems = PROJECTS;
+
+      els.projectNav.innerHTML = navItems.map((project) => `
+        <button data-route="${escapeHtml(project.route)}" class="${route === project.route ? "active" : ""}">
+          <span class="nav-left"><span class="nav-icon"><i class="${navIconByProject(project)}"></i></span><span class="nav-name">${escapeHtml(project.name)}</span></span>
+          <span class="nav-badge">${escapeHtml(project.badge || "Open")}</span>
+        </button>
+      `).join("");
+
+      els.projectNav.querySelectorAll("button[data-route]").forEach((button) => {
+        button.addEventListener("click", () => navigate(button.getAttribute("data-route")));
+      });
+
+      els.projectCount.textContent = `${PROJECTS.length} projects`;
+
+      if (route === "/") {
+        els.pageTitle.textContent = "All Projects";
+        els.pageSubtitle.textContent = "Project overview";
+       
+        renderAllProjects();
+        return;
+      }
+
+      if (route === "/bookmarks") {
+        els.pageTitle.textContent = "Bookmarks";
+        els.pageSubtitle.textContent = "Bookmarks, health, account, and MCP setup";
+       
+        await renderBookmarksWorkspace();
+        return;
+      }
+
+      if (active) {
+        els.pageTitle.textContent = active.name;
+        els.pageSubtitle.textContent = active.subtitle;
+        renderProjectDetails(active);
+        return;
+      }
+
+      els.pageTitle.textContent = "All Projects";
+      els.pageSubtitle.textContent = "Unknown route, showing dashboard";
+      renderAllProjects();
+    }
+
+    async function saveBookmark() {
+      const payload = {
+        url: els.bmUrl.value.trim(),
+        title: els.bmTitle.value.trim(),
+        description: els.bmDescription.value.trim(),
+        tags: els.bmTags.value.split(",").map((item) => item.trim()).filter(Boolean),
+        notes: els.bmNotes.value.trim()
+      };
+
+      if (!payload.url) {
+        toast("URL is required", true);
+        return;
+      }
+
+      const endpoint = state.editingId ? `/bookmarks/${state.editingId}` : "/bookmarks";
+      const method = state.editingId ? "PATCH" : "POST";
+
+      const { response, payload: result } = await api(endpoint, {
+        method,
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok || !result?.success) {
+        toast(result?.error || "Save failed", true);
+        return;
+      }
+
+      closeModal();
+      await loadBookmarks();
+      renderBookmarkTab();
+      toast(state.editingId ? "Bookmark updated" : "Bookmark saved");
+    }
+
+    function bindGlobalEvents() {
+      window.addEventListener("popstate", () => {
+        state.activeRoute = nowRoute();
+        render();
+      });
+
+      if (els.themeToggle) {
+        els.themeToggle.addEventListener("click", () => {
+          const current = document.body.getAttribute("data-theme") === "light" ? "light" : "dark";
+          applyTheme(current === "light" ? "dark" : "light");
+        });
+      }
+
+      if (els.userLogoutBtn) {
+        els.userLogoutBtn.addEventListener("click", async () => {
+          await performLogout();
+        });
+      }
+
+      els.mobileMenu.addEventListener("click", openSidebar);
+
+      els.overlay.addEventListener("click", () => {
+        closeSidebar();
+        closeModal();
+        closeGuideModal();
+      });
+
+      els.cancelBookmarkBtn.addEventListener("click", closeModal);
+      els.saveBookmarkBtn.addEventListener("click", saveBookmark);
+      if (els.closeGuideBtn) {
+        els.closeGuideBtn.addEventListener("click", closeGuideModal);
+      }
+
+      els.bookmarkModal.addEventListener("click", (event) => {
+        if (event.target === els.bookmarkModal) closeModal();
+      });
+      if (els.guideModal) {
+        els.guideModal.addEventListener("click", (event) => {
+          if (event.target === els.guideModal) closeGuideModal();
+        });
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeSidebar();
+          closeModal();
+          closeGuideModal();
+        }
+      });
+    }
+
+    async function init() {
+      setSidebarClock();
+      setInterval(setSidebarClock, 30000);
+      themeInit();
+      bindGlobalEvents();
+      await loadCurrentUser();
+
+      const startRoute = nowRoute();
+      if (startRoute === "/dashboard") {
+        navigate("/", true);
+      } else {
+        state.activeRoute = startRoute;
+        if (!["/", "/bookmarks"].includes(startRoute) && !startRoute.startsWith("/projects/")) {
+          navigate("/", true);
+        } else {
+          render();
+        }
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

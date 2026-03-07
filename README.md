@@ -44,6 +44,28 @@ Start servers:
 - API dev mode: `npm run dev:api`
 - MCP dev mode: `npm run dev:mcp`
 
+### Local Mode Without Login (read existing DB bookmarks)
+
+Use this when you want to see all bookmarks from your local database before enabling OAuth.
+
+PowerShell (current terminal session):
+
+```powershell
+$env:ALLOW_LOCAL_FALLBACK="true"
+$env:SESSION_COOKIE_SECURE="false"
+npm run dev:api
+```
+
+Then open:
+
+- `http://localhost:3001/bookmarks`
+
+Notes:
+
+- With `ALLOW_LOCAL_FALLBACK=true`, `/api/bookmarks` reads from the local default user and does not require login.
+- Existing bookmarks already in PostgreSQL will be listed immediately.
+- For Docker Compose, you can set `ALLOW_LOCAL_FALLBACK=true` in your environment before `docker compose up`.
+
 ## MCP Client Integration
 
 ### Recommended flow (UI based)
