@@ -19,7 +19,6 @@ export function BookmarksPage() {
   const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState([]);
   const [filter, setFilter] = useState("all");
-  const [section, setSection] = useState("bookmarks");
   const [view, setView] = useState("list");
   const [search, setSearch] = useState("");
   const [authBlocked, setAuthBlocked] = useState(false);
@@ -64,16 +63,10 @@ export function BookmarksPage() {
     refreshAll();
   }, []);
 
-  useEffect(() => {
-    if (location.pathname.startsWith("/syshealth")) {
-      setSection("syshealth");
-      return;
-    }
-    if (location.pathname.startsWith("/mcp")) {
-      setSection("mcp");
-      return;
-    }
-    setSection("bookmarks");
+  const section = useMemo(() => {
+    if (location.pathname.startsWith("/syshealth")) return "syshealth";
+    if (location.pathname.startsWith("/mcp")) return "mcp";
+    return "bookmarks";
   }, [location.pathname]);
 
   const filteredItems = useMemo(() => {
@@ -159,7 +152,6 @@ export function BookmarksPage() {
   }
 
   function handleSectionChange(next) {
-    setSection(next);
     if (next === "syshealth") {
       navigate("/syshealth");
       return;

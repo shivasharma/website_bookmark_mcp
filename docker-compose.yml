@@ -49,6 +49,8 @@ services:
       CALLBACK_URL_GITHUB: ${CALLBACK_URL_GITHUB:-https://ai.shivaprogramming.com/auth/github/callback}
     expose:
       - "3001"
+    ports:
+      - "3001:3001"
     networks:
       - bookmark_network
     security_opt:
