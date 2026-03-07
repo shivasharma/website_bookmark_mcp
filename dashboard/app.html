@@ -661,7 +661,7 @@
 
     <!-- Grid -->
     <div class="grid" id="bookmarkGrid">
-      <div class="loading">Loading bookmarks test</div>
+      <div class="loading">Loading bookmarks </div>
     </div>
   </div>
 
@@ -708,7 +708,8 @@
     let debounceTimer = null;
     let currentUser = null;
     let events = null;
-    async function loadCurrentUser() {
+
+    async function loadCurrentUser() {
       try {
         const res = await fetch(`${API}/me`, { credentials: 'include' });
         if (!res.ok) {
@@ -738,7 +739,8 @@
         <a href="#" class="user-link" onclick="logoutUser(event)">Logout</a>
       `;
     }
-    async function logoutUser(event) {
+
+    async function logoutUser(event) {
       event.preventDefault();
       try {
         await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
@@ -767,7 +769,8 @@
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
-    async function loadBookmarks() {
+
+    async function loadBookmarks() {
       const search = document.getElementById('searchInput').value.trim();
       const tag = document.getElementById('tagFilter').value.trim();
       const grid = document.getElementById('bookmarkGrid');
@@ -792,7 +795,8 @@
         grid.innerHTML = `<div class="empty"><div class="empty-icon">[!]</div><h3>Cannot connect to API</h3><p>Make sure the server is running on port 3001</p></div>`;
       }
     }
-    async function loadStats() {
+
+    async function loadStats() {
       try {
         const res = await fetch(`${API}/stats`, { credentials: 'include' });
         if (res.status === 401 || !res.ok) return;

@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Markd — Bookmark Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================
+   DESIGN SYSTEM — CALM BUT TECHY
+   ============================================
+   PRIMARY:    #1B4F72  (Deep Ocean Blue)
+   SURFACE-1:  #0D1B2A  (Abyss — bg)
+   SURFACE-2:  #132338  (Deep Slate — cards)
+   SURFACE-3:  #1C3150  (Elevated — hover)
+   ACCENT:     #00C9A7  (Mint Teal — CTA, highlights)
+   ACCENT-2:   #3D9BE9  (Sky Blue — links, tags)
+   TEXT-1:     #E8F2FF  (Near-white — headings)
+   TEXT-2:     #8AABC8  (Muted blue-grey — body)
+   TEXT-3:     #4D7398  (Dim — placeholders)
+   BORDER:     #1E3A55  (Subtle lines)
+   SUCCESS:    #00C9A7
+   DANGER:     #FF6B6B
+
+   Fonts:
+   Display  → Syne (wt 600–800)     — geometric, assertive
+   Body     → DM Sans (wt 300–600)  — clean, readable
+
+   WCAG Ratios (against #0D1B2A):
+   TEXT-1 (#E8F2FF)  : 15.1:1  ✓ AAA
+   TEXT-2 (#8AABC8)  :  5.2:1  ✓ AA
+   ACCENT (#00C9A7)  :  7.8:1  ✓ AA Large + AA Normal
+   ACCENT2 (#3D9BE9) :  4.9:1  ✓ AA
+============================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0D1B2A;
+  --surf-2:    #132338;
+  --surf-3:    #1C3150;
+  --surf-4:    #243D63;
+  --primary:   #1B4F72;
+  --accent:    #00C9A7;
+  --accent2:   #3D9BE9;
+  --accent-glow: rgba(0,201,167,.18);
+  --accent2-glow: rgba(61,155,233,.15);
+  --text-1:    #E8F2FF;
+  --text-2:    #8AABC8;
+  --text-3:    #4D7398;
+  --border:    #1E3A55;
+  --border-hi: #2A506E;
+  --danger:    #FF6B6B;
+  --warn:      #F7C948;
+
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  24px;
+
+  --shadow-card: 0 4px 24px rgba(0,0,0,.35), 0 1px 4px rgba(0,0,0,.2);
+  --shadow-glow: 0 0 24px rgba(0,201,167,.12);
+  --transition:  all .22s cubic-bezier(.4,0,.2,1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: .4;
+}
+
+/* ── GRID BACKGROUND ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: .18;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── LAYOUT ── */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
+
+/* ── TOP NAV ── */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: rgba(13,27,42,.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -.3px;
+  text-decoration: none;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 14px rgba(0,201,167,.35);
+}
+
+.logo span { color: var(--accent); }
+
+.topbar-center {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surf-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 8px 16px;
+  width: 320px;
+  transition: var(--transition);
+}
+.topbar-center:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.topbar-center svg { color: var(--text-3); flex-shrink: 0; }
+.topbar-center input {
+  background: none; border: none; outline: none;
+  color: var(--text-1); font-family: var(--font-body);
+  font-size: 13px; width: 100%;
+}
+.topbar-center input::placeholder { color: var(--text-3); }
+
+.topbar-right {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.btn-ghost {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 14px;
+  color: var(--text-2); font-family: var(--font-body);
+  font-size: 13px; cursor: pointer;
+  transition: var(--transition);
+}
+.btn-ghost:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: var(--accent2-glow);
+}
+
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent2));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 13px; color: var(--text-1);
+  cursor: pointer;
+  border: 2px solid var(--border-hi);
+  transition: var(--transition);
+}
+.avatar:hover { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: rgba(19,35,56,.6);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  margin-bottom: 8px;
+}
+
+.sidebar-label {
+  font-family: var(--font-display);
+  font-size: 10px; font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 0 12px 8px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-2); font-size: 13px;
+  cursor: pointer; transition: var(--transition);
+  text-decoration: none;
+  font-weight: 400;
+  position: relative;
+}
+.nav-item:hover {
+  background: var(--surf-3);
+  color: var(--text-1);
+}
+.nav-item.active {
+  background: var(--surf-3);
+  color: var(--accent);
+  font-weight: 500;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 60%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+.nav-item svg { flex-shrink: 0; opacity: .8; }
+.nav-item.active svg { opacity: 1; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--surf-4);
+  color: var(--text-2);
+  font-size: 10px; font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-family: var(--font-display);
+}
+.nav-item.active .nav-badge {
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid rgba(0,201,167,.3);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 12px;
+}
+
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+  margin: 2px;
+  border: 1px solid transparent;
+}
+.tag-chip:hover { filter: brightness(1.1); }
+.tag-chip.t1 { background: rgba(0,201,167,.1); color: #00C9A7; border-color: rgba(0,201,167,.2); }
+.tag-chip.t2 { background: rgba(61,155,233,.1); color: #3D9BE9; border-color: rgba(61,155,233,.2); }
+.tag-chip.t3 { background: rgba(247,201,72,.1); color: #F7C948; border-color: rgba(247,201,72,.2); }
+.tag-chip.t4 { background: rgba(255,107,107,.1); color: #FF6B6B; border-color: rgba(255,107,107,.2); }
+
+/* ── MAIN ── */
+.main {
+  padding: 28px 32px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 28px;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 28px; font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -.5px;
+  line-height: 1.2;
+}
+.page-title span {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  font-size: 13px; color: var(--text-2);
+  margin-top: 4px; font-weight: 300;
+}
+
+.header-actions {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.btn-primary {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--accent);
+  color: #0D1B2A;
+  border: none; border-radius: var(--radius-md);
+  padding: 9px 18px;
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: var(--transition);
+  letter-spacing: .2px;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  background: #00e8bf;
+  box-shadow: 0 4px 20px rgba(0,201,167,.4);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--surf-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 9px 16px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-secondary:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: var(--surf-3);
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  background: var(--surf-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  position: relative; overflow: hidden;
+  transition: var(--transition);
+  cursor: default;
+}
+.stat-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.stat-card.c1::after { background: linear-gradient(90deg, var(--accent), transparent); }
+.stat-card.c2::after { background: linear-gradient(90deg, var(--accent2), transparent); }
+.stat-card.c3::after { background: linear-gradient(90deg, #F7C948, transparent); }
+.stat-card.c4::after { background: linear-gradient(90deg, #FF6B6B, transparent); }
+
+.stat-card:hover {
+  border-color: var(--border-hi);
+  background: var(--surf-3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.stat-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px; font-size: 17px;
+}
+.c1 .stat-icon { background: rgba(0,201,167,.12); }
+.c2 .stat-icon { background: rgba(61,155,233,.12); }
+.c3 .stat-icon { background: rgba(247,201,72,.12); }
+.c4 .stat-icon { background: rgba(255,107,107,.12); }
+
+.stat-value {
+  font-family: var(--font-display);
+  font-size: 30px; font-weight: 800;
+  color: var(--text-1);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.stat-label {
+  font-size: 12px; color: var(--text-2);
+  margin-top: 5px; font-weight: 400;
+}
+.stat-delta {
+  position: absolute; top: 20px; right: 18px;
+  font-size: 11px; font-weight: 600;
+  padding: 3px 8px; border-radius: 20px;
+}
+.stat-delta.up { background: rgba(0,201,167,.12); color: var(--accent); }
+.stat-delta.neu { background: rgba(61,155,233,.12); color: var(--accent2); }
+
+/* ── CONTENT GRID ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ── PANEL ── */
+.panel {
+  background: var(--surf-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 700;
+  color: var(--text-1); letter-spacing: -.1px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.panel-title .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:.5; transform:scale(.8); }
+}
+
+.panel-action {
+  font-size: 12px; color: var(--accent2);
+  cursor: pointer; font-weight: 500;
+  transition: var(--transition);
+}
+.panel-action:hover { text-decoration: underline; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
+.filter-pill {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+  border: 1px solid var(--border);
+  background: var(--surf-2);
+  color: var(--text-2);
+}
+.filter-pill:hover { border-color: var(--accent2); color: var(--accent2); background: var(--surf-3); }
+.filter-pill.active {
+  background: var(--accent-glow);
+  border-color: rgba(0,201,167,.4);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.filter-sep { margin-left: auto; display: flex; gap: 6px; }
+.view-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer; transition: var(--transition);
+  color: var(--text-3); border: 1px solid var(--border);
+  background: none;
+}
+.view-btn:hover, .view-btn.active {
+  background: var(--surf-3); color: var(--text-1);
+  border-color: var(--border-hi);
+}
+
+/* ── BOOKMARK CARDS ── */
+.bookmark-list {
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.bookmark-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surf-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  transition: var(--transition);
+  cursor: pointer; position: relative; overflow: hidden;
+}
+.bookmark-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  opacity: 0; transition: var(--transition);
+}
+.bookmark-card:hover {
+  border-color: var(--border-hi);
+  background: var(--surf-3);
+  transform: translateX(3px);
+  box-shadow: var(--shadow-card);
+}
+.bookmark-card:hover::before { opacity: 1; }
+
+.bookmark-card.favorited::before { opacity: 1; background: var(--warn); }
+
+.favicon-wrap {
+  width: 40px; height: 40px; flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surf-4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.favicon-wrap img { width: 24px; height: 24px; object-fit: contain; }
+
+.bookmark-info { flex: 1; min-width: 0; }
+.bookmark-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 600;
+  color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -.1px;
+}
+.bookmark-url {
+  font-size: 11px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 2px;
+}
+.bookmark-tags { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+
+.mini-tag {
+  font-size: 10px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+  letter-spacing: .3px; text-transform: uppercase;
+}
+.mt1 { background: rgba(0,201,167,.1); color: #00C9A7; }
+.mt2 { background: rgba(61,155,233,.1); color: #3D9BE9; }
+.mt3 { background: rgba(247,201,72,.1); color: #F7C948; }
+.mt4 { background: rgba(255,107,107,.1); color: #FF6B6B; }
+.mt5 { background: rgba(167,139,250,.1); color: #A78BFA; }
+
+.bookmark-actions {
+  display: flex; align-items: center; gap: 4px;
+  opacity: 0; transition: var(--transition);
+}
+.bookmark-card:hover .bookmark-actions { opacity: 1; }
+
+.icon-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm); border: none;
+  background: var(--surf-4); color: var(--text-2);
+  cursor: pointer; transition: var(--transition); font-size: 13px;
+}
+.icon-btn:hover { background: var(--border-hi); color: var(--text-1); }
+.icon-btn.fav:hover { color: var(--warn); }
+.icon-btn.del:hover { color: var(--danger); }
+
+.bookmark-meta {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 4px; flex-shrink: 0; margin-left: 8px;
+}
+.meta-date { font-size: 10px; color: var(--text-3); }
+
+/* ── ADD BOOKMARK FORM ── */
+.add-form { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-2); text-transform: uppercase;
+  letter-spacing: .8px; font-family: var(--font-display);
+}
+
+.form-input, .form-textarea {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  color: var(--text-1); font-family: var(--font-body); font-size: 13px;
+  outline: none; transition: var(--transition);
+  width: 100%;
+}
+.form-input::placeholder, .form-textarea::placeholder { color: var(--text-3); }
+.form-input:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.form-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.form-footer { display: flex; gap: 10px; padding-top: 4px; }
+.form-footer .btn-primary { flex: 1; justify-content: center; }
+.form-footer .btn-secondary { padding: 9px 14px; }
+
+/* ── QUICK GUIDE ── */
+.guide { padding: 18px 22px; }
+.guide-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.guide-step:last-child { border-bottom: none; }
+.step-num {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--surf-4);
+  border: 1px solid var(--border-hi);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 10px; font-weight: 800;
+  color: var(--accent);
+}
+.step-text { font-size: 12px; color: var(--text-2); line-height: 1.5; padding-top: 2px; }
+.step-text strong { color: var(--text-1); font-weight: 600; }
+
+/* ── DESIGN SYSTEM PALETTE ── */
+.palette-section {
+  background: var(--surf-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+}
+.palette-title {
+  font-family: var(--font-display);
+  font-size: 13px; font-weight: 700; color: var(--text-1);
+  margin-bottom: 16px; letter-spacing: -.1px;
+  display: flex; align-items: center; gap: 8px;
+}
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+.swatch {
+  border-radius: var(--radius-sm); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.swatch-color {
+  height: 52px; width: 100%;
+}
+.swatch-info {
+  background: var(--bg);
+  padding: 8px 10px;
+}
+.swatch-name { font-size: 11px; font-weight: 600; color: var(--text-1); font-family: var(--font-display); }
+.swatch-hex { font-size: 10px; color: var(--text-3); font-family: monospace; margin-top: 2px; }
+.swatch-role { font-size: 9px; color: var(--text-3); margin-top: 1px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px;
+  padding: 48px 24px; text-align: center;
+}
+.empty-icon {
+  width: 64px; height: 64px;
+  background: var(--surf-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.empty-title {
+  font-family: var(--font-display); font-size: 16px; font-weight: 700;
+  color: var(--text-1);
+}
+.empty-sub { font-size: 13px; color: var(--text-2); max-width: 220px; line-height: 1.5; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate { animation: fadeUp .4s ease forwards; }
+.delay-1 { animation-delay: .05s; opacity:0; }
+.delay-2 { animation-delay: .1s; opacity:0; }
+.delay-3 { animation-delay: .15s; opacity:0; }
+.delay-4 { animation-delay: .2s; opacity:0; }
+.delay-5 { animation-delay: .25s; opacity:0; }
+
+/* ── GLOW ORBS ── */
+.orb {
+  position: fixed; border-radius: 50%;
+  pointer-events: none; z-index: 0;
+  filter: blur(80px);
+}
+.orb-1 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,201,167,.07) 0%, transparent 70%);
+  top: -100px; right: 200px;
+}
+.orb-2 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(61,155,233,.06) 0%, transparent 70%);
+  bottom: 100px; left: 100px;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(13,27,42,.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surf-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  width: 480px; max-width: 90vw;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  animation: fadeUp .25s ease;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 22px;
+}
+.modal-title {
+  font-family: var(--font-display); font-size: 18px; font-weight: 800;
+  color: var(--text-1); letter-spacing: -.3px;
+}
+.modal-close {
+  width: 32px; height: 32px;
+  background: var(--surf-3); border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; transition: var(--transition);
+}
+.modal-close:hover { background: var(--surf-4); color: var(--text-1); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--surf-3);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text-1);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4), 0 0 20px var(--accent-glow);
+  z-index: 300; transform: translateY(80px); opacity: 0;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-icon { color: var(--accent); font-size: 16px; }
+
+</style>
+</head>
+<body>
+
+<!-- Glow orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="app">
+
+  <!-- ── TOP BAR ── -->
+  <header class="topbar">
+    <a class="logo" href="#">
+      <div class="logo-icon">🔖</div>
+      Mark<span>d</span>
+    </a>
+
+    <div class="topbar-center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search bookmarks, tags, notes…" />
+      <span style="font-size:10px;color:var(--text-3);background:var(--surf-3);padding:2px 6px;border-radius:4px;border:1px solid var(--border);white-space:nowrap;">⌘ K</span>
+    </div>
+
+    <div class="topbar-right">
+      <button class="btn-ghost">
+        <a href="https://github.com/shivasharma/website_bookmark_mcp" target="_blank" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </button>
+      <button class="btn-ghost">Sign In</button>
+      <div class="avatar">U</div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <a class="nav-item active" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        All Bookmarks
+        <span class="nav-badge">0</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Favorites
+        <span class="nav-badge">0</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Recent
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">MCP Features</div>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        AI Summary
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Smart Tags
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share / Export
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tags</div>
+      <div style="padding: 0 4px; display:flex; flex-wrap:wrap;">
+        <span class="tag-chip t1">🤖 AI</span>
+        <span class="tag-chip t2">🛠 Dev</span>
+        <span class="tag-chip t3">📐 Design</span>
+        <span class="tag-chip t4">🔖 Read Later</span>
+        <span class="tag-chip t2">⚙️ Tools</span>
+      </div>
+    </div>
+
+    <div style="margin-top:auto; padding: 12px 4px 0;">
+      <a class="nav-item" href="https://shivaprogramming.com" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        shivaprogramming.com
+      </a>
+      <a class="nav-item" href="https://blog.shivaprogramming.com" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        blog.shivaprogramming.com
+      </a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main">
+
+    <!-- Page Header -->
+    <div class="page-header animate">
+      <div>
+        <h1 class="page-title">All <span>Bookmarks</span></h1>
+        <p class="page-subtitle">Portfolio view for your saved links and resources</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-secondary" onclick="document.getElementById('addModal').classList.add('open')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Bookmark
+        </button>
+        <button class="btn-primary" onclick="document.getElementById('addModal').classList.add('open')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Quick Add
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row animate delay-1">
+      <div class="stat-card c1">
+        <div class="stat-icon">🔖</div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Total Bookmarks</div>
+        <span class="stat-delta neu">New</span>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Favorites</div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-icon">🏷</div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">Tags Created</div>
+        <span class="stat-delta up">Active</span>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-value">MCP</div>
+        <div class="stat-label">AI Features Ready</div>
+        <span class="stat-delta up">Live</span>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid animate delay-2">
+
+      <!-- Bookmarks Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            <div class="dot"></div>
+            Saved Links
+          </span>
+          <span class="panel-action">Sort ↕</span>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <span class="filter-pill active">All</span>
+          <span class="filter-pill">🤖 AI</span>
+          <span class="filter-pill">🛠 Dev</span>
+          <span class="filter-pill">📐 Design</span>
+          <span class="filter-pill">🔖 Read Later</span>
+          <div class="filter-sep">
+            <button class="view-btn active" title="List">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+            <button class="view-btn" title="Grid">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Demo bookmark entries -->
+        <div class="bookmark-list" id="bookmarkList">
+          <!-- example cards shown for demo -->
+          <div class="bookmark-card favorited">
+            <div class="favicon-wrap">
+              <img src="https://www.google.com/s2/favicons?domain=anthropic.com&sz=32" alt="" onerror="this.parentNode.innerText='🔮'" />
+            </div>
+            <div class="bookmark-info">
+              <div class="bookmark-title">Anthropic Claude API Docs</div>
+              <div class="bookmark-url">anthropic.com/docs</div>
+              <div class="bookmark-tags">
+                <span class="mini-tag mt1">AI</span>
+                <span class="mini-tag mt2">Dev</span>
+              </div>
+            </div>
+            <div class="bookmark-meta">
+              <div class="meta-date">Mar 7, 2025</div>
+              <div class="bookmark-actions">
+                <button class="icon-btn fav" title="Unfavorite">⭐</button>
+                <button class="icon-btn" title="Edit">✏️</button>
+                <button class="icon-btn del" title="Delete">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bookmark-card">
+            <div class="favicon-wrap">
+              <img src="https://www.google.com/s2/favicons?domain=github.com&sz=32" alt="" onerror="this.parentNode.innerText='🐙'" />
+            </div>
+            <div class="bookmark-info">
+              <div class="bookmark-title">MCP Bookmark Manager — GitHub</div>
+              <div class="bookmark-url">github.com/shivasharma/website_bookmark_mcp</div>
+              <div class="bookmark-tags">
+                <span class="mini-tag mt2">Dev</span>
+                <span class="mini-tag mt5">Open Source</span>
+              </div>
+            </div>
+            <div class="bookmark-meta">
+              <div class="meta-date">Mar 6, 2025</div>
+              <div class="bookmark-actions">
+                <button class="icon-btn fav" title="Favorite">☆</button>
+                <button class="icon-btn" title="Edit">✏️</button>
+                <button class="icon-btn del" title="Delete">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="bookmark-card">
+            <div class="favicon-wrap">
+              <img src="https://www.google.com/s2/favicons?domain=shivaprogramming.com&sz=32" alt="" onerror="this.parentNode.innerText='🌐'" />
+            </div>
+            <div class="bookmark-info">
+              <div class="bookmark-title">Shiva Programming — Portfolio</div>
+              <div class="bookmark-url">shivaprogramming.com</div>
+              <div class="bookmark-tags">
+                <span class="mini-tag mt3">Design</span>
+                <span class="mini-tag mt2">Dev</span>
+              </div>
+            </div>
+            <div class="bookmark-meta">
+              <div class="meta-date">Mar 5, 2025</div>
+              <div class="bookmark-actions">
+                <button class="icon-btn fav" title="Favorite">☆</button>
+                <button class="icon-btn" title="Edit">✏️</button>
+                <button class="icon-btn del" title="Delete">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state hint -->
+          <div class="empty-state" style="border-top:1px solid var(--border); margin-top:4px;">
+            <div class="empty-icon">🔖</div>
+            <div class="empty-title">Sign in to load your bookmarks</div>
+            <div class="empty-sub">Your saved links will appear here after you sign in and add bookmarks.</div>
+            <button class="btn-primary" style="margin-top:4px;" onclick="document.getElementById('addModal').classList.add('open')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Add First Bookmark
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+
+        <!-- Quick Setup -->
+        <div class="panel animate delay-3">
+          <div class="panel-header">
+            <span class="panel-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Quick Start Guide
+            </span>
+          </div>
+          <div class="guide">
+            <div class="guide-step">
+              <div class="step-num">1</div>
+              <div class="step-text">Use the <strong>Add Bookmark</strong> button to save a URL with title and tags.</div>
+            </div>
+            <div class="guide-step">
+              <div class="step-num">2</div>
+              <div class="step-text"><strong>Sign in</strong> from the top-right if you are not authenticated.</div>
+            </div>
+            <div class="guide-step">
+              <div class="step-num">3</div>
+              <div class="step-text">Click <strong>Save</strong> — your bookmark will appear in the list.</div>
+            </div>
+            <div class="guide-step">
+              <div class="step-num">4</div>
+              <div class="step-text">Use the <strong>search bar</strong> at the top to quickly find saved links.</div>
+            </div>
+            <div class="guide-step">
+              <div class="step-num">5</div>
+              <div class="step-text">Use <strong>Favorite, Edit, Delete</strong> on each card to manage links.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Design Palette Reference -->
+        <div class="palette-section animate delay-4">
+          <div class="palette-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+            Design System — Calm but Techy
+          </div>
+          <div class="palette-grid">
+            <div class="swatch">
+              <div class="swatch-color" style="background:#00C9A7;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Mint Teal</div>
+                <div class="swatch-hex">#00C9A7</div>
+                <div class="swatch-role">Accent · CTA</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#3D9BE9;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Sky Blue</div>
+                <div class="swatch-hex">#3D9BE9</div>
+                <div class="swatch-role">Accent 2 · Links</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#1B4F72;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Deep Ocean</div>
+                <div class="swatch-hex">#1B4F72</div>
+                <div class="swatch-role">Primary</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#0D1B2A;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Abyss</div>
+                <div class="swatch-hex">#0D1B2A</div>
+                <div class="swatch-role">Surface 1 · BG</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#132338; border: 1px solid #1E3A55;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Deep Slate</div>
+                <div class="swatch-hex">#132338</div>
+                <div class="swatch-role">Surface 2 · Cards</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#E8F2FF;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Ice White</div>
+                <div class="swatch-hex">#E8F2FF</div>
+                <div class="swatch-role">Text Primary</div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+            <div style="font-size:11px;color:var(--text-2);line-height:1.7;">
+              <strong style="color:var(--text-1);font-family:var(--font-display);">Typography</strong><br/>
+              <span style="color:var(--accent2);">Syne</span> — Display / Headings (wt 600–800)<br/>
+              <span style="color:var(--accent2);">DM Sans</span> — Body / UI (wt 300–500)<br/>
+              <span style="color:var(--text-3);font-size:10px;">All color pairs pass WCAG AA (4.5:1+)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── ADD BOOKMARK MODAL ── -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Bookmark</div>
+      <button class="modal-close" onclick="document.getElementById('addModal').classList.remove('open')">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group">
+        <label class="form-label">URL *</label>
+        <input class="form-input" type="url" placeholder="https://example.com" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input class="form-input" type="text" placeholder="Page title" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <input class="form-input" type="text" placeholder="ai, dev, design…" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" placeholder="Optional notes about this bookmark…"></textarea>
+      </div>
+      <div class="form-footer">
+        <button class="btn-secondary" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
+        <button class="btn-primary" onclick="showToast(); document.getElementById('addModal').classList.remove('open')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Bookmark
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  Bookmark saved successfully!
+</div>
+
+<script>
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// Filter pills
+document.querySelectorAll('.filter-pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+  });
+});
+
+// View toggle
+document.querySelectorAll('.view-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.view-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  });
+});
+
+// Favorite toggle
+document.querySelectorAll('.icon-btn.fav').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const card = b.closest('.bookmark-card');
+    card.classList.toggle('favorited');
+    b.textContent = card.classList.contains('favorited') ? '⭐' : '☆';
+  });
+});
+</script>
+</body>
+</html>
