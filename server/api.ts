@@ -386,23 +386,23 @@ function normalizeBookmarkPayload(input: unknown): Record<string, unknown> {
 }
 
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "index.html"));
+  res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
 
 app.get("/dashboard", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "index.html"));
+  res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
 
 app.get("/dashboard/:section", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "index.html"));
+  res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
 
 app.get("/bookmarks", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "index.html"));
+  res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
 
 app.get("/projects/:slug", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "index.html"));
+  res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
 
 app.get("/app", (_req, res) => {

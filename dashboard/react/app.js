@@ -2,13 +2,20 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, NavLink, Route, Routes } from "react-router-dom";
 import { baseCss } from "./styles.js";
-import { SysHealthPage } from "./SysHealthPage.js";
-import { McpPage } from "./McpPage.js";
+import { BookmarksPage } from "./bookmarks/BookmarksPage.js";
 
 function RouteTabs() {
   return React.createElement(
     "div",
     { className: "route-tabs wrap", style: { paddingBottom: 0, marginBottom: 0 } },
+    React.createElement(
+      NavLink,
+      {
+        to: "/bookmarks",
+        className: ({ isActive }) => `route-tab${isActive ? " active" : ""}`
+      },
+      "Bookmarks"
+    ),
     React.createElement(
       NavLink,
       {
@@ -37,9 +44,14 @@ function App() {
     React.createElement(
       Routes,
       null,
-      React.createElement(Route, { path: "/syshealth", element: React.createElement(SysHealthPage) }),
-      React.createElement(Route, { path: "/mcp", element: React.createElement(McpPage) }),
-      React.createElement(Route, { path: "*", element: React.createElement(Navigate, { to: "/syshealth", replace: true }) })
+      React.createElement(Route, { path: "/", element: React.createElement(Navigate, { to: "/bookmarks", replace: true }) }),
+      React.createElement(Route, { path: "/bookmarks", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "/dashboard", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "/dashboard/:section", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "/projects/:slug", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "/syshealth", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "/mcp", element: React.createElement(BookmarksPage) }),
+      React.createElement(Route, { path: "*", element: React.createElement(Navigate, { to: "/bookmarks", replace: true }) })
     )
   );
 }
