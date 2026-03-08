@@ -1,4 +1,5 @@
 import React from "react";
+import { IconEdit, IconGrid, IconList, IconStar, IconStarFilled, IconTrash } from "./icons.js";
 
 function tagClass(tag) {
   const value = String(tag || "").toLowerCase();
@@ -11,6 +12,7 @@ function tagClass(tag) {
 }
 
 function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite }) {
+  const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
     { className: "bm-item", onClick: () => onOpen(bookmark.url) },
@@ -44,6 +46,7 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
               onToggleFavorite(bookmark);
             }
           },
+          starIcon,
           bookmark.starred ? "Unstar" : "Star"
         ),
         React.createElement(
@@ -56,6 +59,7 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
               onEdit(bookmark);
             }
           },
+          React.createElement(IconEdit, { className: "bm-icon" }),
           "Edit"
         ),
         React.createElement(
@@ -68,6 +72,7 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
               onDelete(bookmark);
             }
           },
+          React.createElement(IconTrash, { className: "bm-icon" }),
           "Delete"
         )
       )
@@ -76,6 +81,7 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
 }
 
 function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite }) {
+  const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
     { className: "bm-grid-item", onClick: () => onOpen(bookmark.url) },
@@ -101,7 +107,8 @@ function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
             onToggleFavorite(bookmark);
           }
         },
-        bookmark.starred ? "Unstar" : "Star"
+          starIcon,
+          bookmark.starred ? "Unstar" : "Star"
       ),
       React.createElement(
         "button",
@@ -113,7 +120,8 @@ function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
             onEdit(bookmark);
           }
         },
-        "Edit"
+          React.createElement(IconEdit, { className: "bm-icon" }),
+          "Edit"
       ),
       React.createElement(
         "button",
@@ -125,7 +133,8 @@ function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
             onDelete(bookmark);
           }
         },
-        "Delete"
+          React.createElement(IconTrash, { className: "bm-icon" }),
+          "Delete"
       )
     )
   );
@@ -174,11 +183,13 @@ export function BookmarkPanel({
         React.createElement(
           "button",
           { className: `btn${view === "list" ? " primary" : ""}`, type: "button", onClick: () => onViewChange("list") },
+          React.createElement(IconList, { className: "bm-icon" }),
           "List"
         ),
         React.createElement(
           "button",
           { className: `btn${view === "grid" ? " primary" : ""}`, type: "button", onClick: () => onViewChange("grid") },
+          React.createElement(IconGrid, { className: "bm-icon" }),
           "Grid"
         )
       )

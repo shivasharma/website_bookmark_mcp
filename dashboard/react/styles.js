@@ -72,6 +72,12 @@ a { color: inherit; }
   margin-right: 8px;
   margin-bottom: 8px;
 }
+.bm-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  flex-shrink: 0;
+}
 .btn.primary {
   background: #06c0e0;
   border-color: #06c0e0;
@@ -211,18 +217,33 @@ pre {
   font-weight: 800;
   letter-spacing: -0.2px;
   font-size: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 .bm-search {
   flex: 1;
   min-width: 220px;
-}
-.bm-search input {
-  width: 100%;
-  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
+}
+.bm-search:focus-within {
+  border-color: rgba(6, 192, 224, 0.5);
+  box-shadow: 0 0 0 3px rgba(6, 192, 224, 0.12);
+}
+.bm-search-icon { color: var(--muted); }
+.bm-search input {
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  background: transparent;
   color: var(--text);
+  outline: none;
 }
 .bm-top-actions {
   display: flex;
@@ -259,7 +280,9 @@ pre {
 }
 .bm-side-link,
 .bm-side-anchor {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   margin-bottom: 6px;
@@ -271,6 +294,17 @@ pre {
   text-decoration: none;
   font-size: 13px;
   cursor: pointer;
+}
+.bm-side-label { flex: 1; }
+.bm-side-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
 }
 .bm-side-link:hover,
 .bm-side-link.active,
@@ -307,7 +341,24 @@ pre {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
+.bm-stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.bm-stat:nth-child(1) .bm-stat-icon { color: var(--accent); }
+.bm-stat:nth-child(2) .bm-stat-icon { color: var(--warn); }
+.bm-stat:nth-child(3) .bm-stat-icon { color: var(--accent2); }
+.bm-stat:nth-child(4) .bm-stat-icon { color: var(--ok); }
 .bm-stat-value {
   font-size: 24px;
   font-weight: 800;
