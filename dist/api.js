@@ -273,6 +273,8 @@ const listBookmarksQuerySchema = z.object({
     search: z.string().trim().max(200).optional(),
     tag: z.string().trim().min(1).max(50).optional(),
     favorite: z.enum(["true", "false"]).optional(),
+    page: z.coerce.number().int().min(1).max(100000).optional(),
+    pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
 const tokenDaysSchema = z.coerce.number().int().min(1).max(365);
 function ensureUrlProtocol(input) {
@@ -476,9 +478,26 @@ app.get("/api/bookmarks", async (req, res) => {
         const search = parsedQuery.data.search;
         const tag = parsedQuery.data.tag;
         const favorite = parsedQuery.data.favorite === "true";
+        const page = parsedQuery.data.page ?? 1;
+        const pageSize = parsedQuery.data.pageSize ?? 30;
+        const offset = (page - 1) * pageSize;
         const user_id = getUserId(req);
-        const bookmarks = await listBookmarks({ search, tag, favorite, user_id });
-        res.json({ success: true, data: bookmarks, total: bookmarks.length });
+        const { items, total } = await listBookmarks({
+            search,
+            tag,
+            favorite,
+            user_id,
+            limit: pageSize,
+            offset,
+        });
+        res.json({
+            success: true,
+            data: items,
+            total,
+            page,
+            pageSize,
+            hasMore: offset + items.length < total,
+        });
     }
     catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";

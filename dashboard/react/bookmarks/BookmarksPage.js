@@ -9,6 +9,8 @@ import { AddBookmarkModal } from "./components/AddBookmarkModal.js";
 import { SystemHealthPanel } from "./components/SystemHealthPanel.js";
 import { McpSetupPanel } from "./components/McpSetupPanel.js";
 
+const PAGE_SIZE = 30;
+
 function openExternal(url) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
@@ -16,6 +18,11 @@ function openExternal(url) {
 export function BookmarksPage() {
   const [pathname, setPathname] = useState(window.location.pathname || "/bookmarks");
   const [bookmarks, setBookmarks] = useState([]);
+  const [bookmarkStats, setBookmarkStats] = useState({ total: 0, favorites: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadedTotal, setLoadedTotal] = useState(0);
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState("list");
   const [search, setSearch] = useState("");
@@ -38,27 +45,79 @@ export function BookmarksPage() {
     }
   }
 
-  async function loadBookmarks() {
+  async function loadStats() {
     try {
-      const { response, payload } = await api("/bookmarks", { method: "GET" });
+      const { response, payload } = await api("/stats", { method: "GET" });
+      if (!response.ok || !payload || !payload.success || !payload.data) {
+        setBookmarkStats({ total: 0, favorites: 0 });
+        return;
+      }
+      setBookmarkStats({
+        total: Number(payload.data.total || 0),
+        favorites: Number(payload.data.favorites || 0)
+      });
+    } catch {
+      setBookmarkStats({ total: 0, favorites: 0 });
+    }
+  }
+
+  async function loadBookmarks(pageToLoad = 1, append = false) {
+    if (append) {
+      setLoadingMore(true);
+    }
+
+    try {
+      const params = new URLSearchParams();
+      const query = search.trim();
+      if (query) {
+        params.set("search", query);
+      }
+      if (filter === "starred") {
+        params.set("favorite", "true");
+      }
+      params.set("page", String(pageToLoad));
+      params.set("pageSize", String(PAGE_SIZE));
+
+      const { response, payload } = await api(`/bookmarks?${params.toString()}`, { method: "GET" });
       if (!response.ok || !payload || !payload.success) {
         setAuthBlocked(response.status === 401);
-        setBookmarks([]);
+        if (!append) {
+          setBookmarks([]);
+          setLoadedTotal(0);
+          setCurrentPage(1);
+        }
+        setHasMore(false);
         return;
       }
       setAuthBlocked(false);
-      setBookmarks((Array.isArray(payload.data) ? payload.data : []).map(toUiBookmark));
+      const nextItems = (Array.isArray(payload.data) ? payload.data : []).map(toUiBookmark);
+      setBookmarks((prev) => (append ? [...prev, ...nextItems] : nextItems));
+      setLoadedTotal(Number(payload.total || 0));
+      setCurrentPage(pageToLoad);
+      setHasMore(Boolean(payload.hasMore));
     } catch {
-      setBookmarks([]);
+      if (!append) {
+        setBookmarks([]);
+        setLoadedTotal(0);
+        setCurrentPage(1);
+      }
+      setHasMore(false);
+    } finally {
+      if (append) {
+        setLoadingMore(false);
+      }
     }
   }
 
   async function refreshAll() {
-    await Promise.all([loadCurrentUser(), loadBookmarks()]);
+    await Promise.all([loadCurrentUser(), loadStats()]);
+    if (section === "bookmarks") {
+      await loadBookmarks(1, false);
+    }
   }
 
   useEffect(() => {
-    refreshAll();
+    Promise.all([loadCurrentUser(), loadStats()]);
   }, []);
 
   useEffect(() => {
@@ -79,28 +138,28 @@ export function BookmarksPage() {
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
 
   const filteredItems = useMemo(() => {
-    const q = search.trim().toLowerCase();
     const sorted = [...bookmarks].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
     return sorted.filter((item) => {
-      const tags = Array.isArray(item.tags) ? item.tags : [];
-      const passFilter =
-        filter === "all" ||
-        (filter === "starred" && item.starred) ||
-        (filter === "recent" && true) ||
-        (filter === "unread" && false);
-      const passQuery =
-        !q ||
-        String(item.title || "").toLowerCase().includes(q) ||
-        String(item.url || "").toLowerCase().includes(q) ||
-        String(item.description || "").toLowerCase().includes(q) ||
-        String(item.notes || "").toLowerCase().includes(q) ||
-        tags.join(" ").toLowerCase().includes(q);
-      return passFilter && passQuery;
+      if (filter === "recent") {
+        const createdAt = new Date(item.created_at || 0).getTime();
+        return Number.isFinite(createdAt) && Date.now() - createdAt <= 7 * 24 * 60 * 60 * 1000;
+      }
+      if (filter === "unread") {
+        return false;
+      }
+      return true;
     });
-  }, [bookmarks, filter, search]);
+  }, [bookmarks, filter]);
 
-  const total = bookmarks.length;
-  const starred = bookmarks.filter((item) => item.starred).length;
+  useEffect(() => {
+    if (section !== "bookmarks") {
+      return;
+    }
+    loadBookmarks(1, false);
+  }, [section, filter, search]);
+
+  const total = Number(bookmarkStats.total || 0);
+  const starred = Number(bookmarkStats.favorites || 0);
   const tagsCount = new Set(bookmarks.flatMap((item) => item.tags || []).map((tag) => String(tag).toLowerCase())).size;
 
   async function handleSave(payload, id) {
@@ -115,7 +174,7 @@ export function BookmarksPage() {
       setMessage(id ? "Bookmark updated" : "Bookmark saved");
       setModalOpen(false);
       setEditingBookmark(null);
-      await loadBookmarks();
+      await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while saving");
     }
@@ -129,7 +188,7 @@ export function BookmarksPage() {
         return;
       }
       setMessage("Bookmark deleted");
-      await loadBookmarks();
+      await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while deleting");
     }
@@ -146,10 +205,17 @@ export function BookmarksPage() {
         return;
       }
       setMessage(!bookmark.starred ? "Starred" : "Removed from starred");
-      await loadBookmarks();
+      await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while updating");
     }
+  }
+
+  async function handleLoadMore() {
+    if (!hasMore || loadingMore) {
+      return;
+    }
+    await loadBookmarks(currentPage + 1, true);
   }
 
   async function handleLogout() {
@@ -218,6 +284,11 @@ export function BookmarksPage() {
                 view,
                 onViewChange: setView,
                 onOpen: openExternal,
+                hasMore,
+                loadingMore,
+                loadedCount: bookmarks.length,
+                totalCount: loadedTotal,
+                onLoadMore: handleLoadMore,
                 onEdit: (bookmark) => {
                   setEditingBookmark(bookmark);
                   setModalOpen(true);

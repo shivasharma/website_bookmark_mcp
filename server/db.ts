@@ -353,10 +353,12 @@ export async function getBookmarkById(id: number, userId?: number): Promise<Book
   return rowToBookmark(rows[0]);
 }
 
-export async function listBookmarks(input: ListBookmarksInput = {}): Promise<Bookmark[]> {
+export async function listBookmarks(input: ListBookmarksInput = {}): Promise<{ items: Bookmark[]; total: number }> {
   const values: unknown[] = [input.user_id ?? Number(process.env.DEFAULT_USER_ID ?? 1)];
   const where: string[] = ["user_id = $1"];
   let arg = 2;
+  const limit = Math.max(1, Math.min(100, Number(input.limit ?? 30)));
+  const offset = Math.max(0, Number(input.offset ?? 0));
 
   if (input.search) {
     where.push(
@@ -376,16 +378,31 @@ export async function listBookmarks(input: ListBookmarksInput = {}): Promise<Boo
     where.push("is_favorite = TRUE");
   }
 
+  const { rows: countRows } = await pool.query(
+    `
+      SELECT COUNT(*)::int AS total
+      FROM bookmarks
+      WHERE ${where.join(" AND ")}
+    `,
+    values,
+  );
+
+  const pageValues = [...values, limit, offset];
   const { rows } = await pool.query(
     `
       SELECT *
       FROM bookmarks
       WHERE ${where.join(" AND ")}
       ORDER BY created_at DESC
+      LIMIT $${arg}
+      OFFSET $${arg + 1}
     `,
-    values,
+    pageValues,
   );
-  return rows.map((row: Record<string, unknown>) => rowToBookmark(row));
+  return {
+    items: rows.map((row: Record<string, unknown>) => rowToBookmark(row)),
+    total: Number(countRows[0]?.total ?? 0),
+  };
 }
 
 export async function updateBookmark(id: number, fields: UpdateBookmarkInput, userId?: number): Promise<Bookmark | null> {

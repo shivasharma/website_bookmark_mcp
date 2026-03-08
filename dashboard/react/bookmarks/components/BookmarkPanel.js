@@ -144,6 +144,11 @@ export function BookmarkPanel({
   items,
   view,
   onViewChange,
+  hasMore,
+  loadingMore,
+  loadedCount,
+  totalCount,
+  onLoadMore,
   onOpen,
   onEdit,
   onDelete,
@@ -222,6 +227,22 @@ export function BookmarkPanel({
               onToggleFavorite
             })
           )
-        )
+        ),
+    hasMore &&
+      React.createElement(
+        "div",
+        { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 12 } },
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: onLoadMore,
+            disabled: loadingMore
+          },
+          loadingMore ? "Loading..." : "Load More"
+        ),
+        React.createElement("span", { className: "sub" }, `${loadedCount}/${totalCount || loadedCount} loaded`)
+      )
   );
 }

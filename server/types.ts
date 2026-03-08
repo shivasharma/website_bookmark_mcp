@@ -37,6 +37,8 @@ export type ListBookmarksInput = {
   tag?: string;
   favorite?: boolean;
   user_id?: number;
+  limit?: number;
+  offset?: number;
 };
 
 export type BookmarkStats = {
