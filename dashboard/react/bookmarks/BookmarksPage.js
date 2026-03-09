@@ -70,9 +70,20 @@ function formatNotificationTarget(payload) {
   return String(payload?.bookmark_url || "bookmark").trim() || "bookmark";
 }
 
+function getSourceLabel(source) {
+  const value = String(source || "portal").toLowerCase();
+  if (value === "mcp") {
+    return "MCP";
+  }
+  if (value === "server") {
+    return "Server";
+  }
+  return "Portal";
+}
+
 function getRealtimeMessage(payload) {
   const action = String(payload?.action || "").toLowerCase();
-  const source = String(payload?.source || "portal").toLowerCase() === "mcp" ? "MCP" : "Portal";
+  const source = getSourceLabel(payload?.source);
   const target = formatNotificationTarget(payload);
 
   if (action === "created") {
@@ -103,7 +114,18 @@ export function BookmarksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
+  const [activity, setActivity] = useState([]);
   const sectionRef = useRef("bookmarks");
+
+  function pushActivity(text, source = "portal") {
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      text,
+      source: getSourceLabel(source),
+      at: new Date().toLocaleTimeString()
+    };
+    setActivity((prev) => [entry, ...prev].slice(0, 12));
+  }
 
   async function loadCurrentUser() {
     try {
@@ -272,7 +294,9 @@ export function BookmarksPage() {
         payload = null;
       }
 
-      setMessage(getRealtimeMessage(payload));
+      const realtimeMessage = getRealtimeMessage(payload);
+      setMessage(realtimeMessage);
+      pushActivity(realtimeMessage, payload?.source);
 
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);
@@ -311,6 +335,7 @@ export function BookmarksPage() {
         return;
       }
       setMessage(id ? "Bookmark updated" : "Bookmark saved");
+      pushActivity(id ? "Portal: updated bookmark" : "Portal: added bookmark", "portal");
       setModalOpen(false);
       setEditingBookmark(null);
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
@@ -327,6 +352,7 @@ export function BookmarksPage() {
         return;
       }
       setMessage("Bookmark deleted");
+      pushActivity("Portal: deleted bookmark", "portal");
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while deleting");
@@ -344,6 +370,7 @@ export function BookmarksPage() {
         return;
       }
       setMessage(!bookmark.starred ? "Starred" : "Removed from starred");
+      pushActivity(!bookmark.starred ? "Portal: starred bookmark" : "Portal: unstarred bookmark", "portal");
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while updating");
@@ -406,6 +433,25 @@ export function BookmarksPage() {
             React.Fragment,
             null,
             React.createElement(StatsStrip, { total, starred, tags: tagsCount, imported: 0 }),
+            activity.length > 0 &&
+              React.createElement(
+                "section",
+                { className: "card bm-activity" },
+                React.createElement("h2", null, "Recent Activity"),
+                React.createElement(
+                  "div",
+                  { className: "bm-activity-list" },
+                  ...activity.map((entry) =>
+                    React.createElement(
+                      "div",
+                      { className: "bm-activity-item", key: entry.id },
+                      React.createElement("span", { className: "bm-activity-source" }, entry.source),
+                      React.createElement("span", { className: "bm-activity-text" }, entry.text),
+                      React.createElement("span", { className: "bm-activity-time" }, entry.at)
+                    )
+                  )
+                )
+              ),
             React.createElement(
               "div",
               { className: "bm-content-grid" },

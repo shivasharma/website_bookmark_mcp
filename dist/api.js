@@ -228,6 +228,10 @@ function getBearerToken(req) {
     return token.trim() || null;
 }
 function getRequestSource(req) {
+    const explicitSource = String(req.header("x-bookmark-source") || "").trim().toLowerCase();
+    if (explicitSource === "server") {
+        return "server";
+    }
     return getBearerToken(req) ? "mcp" : "portal";
 }
 function getUserId(req) {

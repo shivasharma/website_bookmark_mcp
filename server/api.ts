@@ -298,7 +298,11 @@ function getBearerToken(req: express.Request): string | null {
   return token.trim() || null;
 }
 
-function getRequestSource(req: express.Request): "portal" | "mcp" {
+function getRequestSource(req: express.Request): "portal" | "mcp" | "server" {
+  const explicitSource = String(req.header("x-bookmark-source") || "").trim().toLowerCase();
+  if (explicitSource === "server") {
+    return "server";
+  }
   return getBearerToken(req) ? "mcp" : "portal";
 }
 

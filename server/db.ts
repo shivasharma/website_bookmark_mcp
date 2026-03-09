@@ -21,7 +21,7 @@ let listenerClient: Client | null = null;
 let listenerStarted = false;
 
 type AuthProvider = "google" | "github" | "local";
-type BookmarkEventSource = "portal" | "mcp";
+type BookmarkEventSource = "portal" | "mcp" | "server";
 type BookmarkEvent = {
   action: "created" | "updated" | "deleted";
   user_id: number;
