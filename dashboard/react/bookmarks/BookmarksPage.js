@@ -12,6 +12,8 @@ import { NotificationsPage } from "./components/NotificationsPage.js";
 
 const PAGE_SIZE = 30;
 const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const NOTIFICATIONS_ACTIVITY_LIMIT = 50;
+const NOTIFICATIONS_PAGE_SIZE = 25;
 
 function openExternal(url) {
   try {
@@ -124,13 +126,23 @@ export function BookmarksPage() {
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
   const [notifications, setNotifications] = useState([]);
+  const [notificationsTotal, setNotificationsTotal] = useState(0);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
+  const [notificationsPage, setNotificationsPage] = useState(1);
+  const notificationsPageRef = useRef(1);
   const sectionRef = useRef("bookmarks");
 
-  async function loadNotifications() {
+  async function loadNotifications(options = {}) {
+    const mode = options.mode === "page" ? "page" : "activity";
+    const page = Math.max(1, Number(options.page || 1));
+    const pageSize = mode === "page" ? NOTIFICATIONS_PAGE_SIZE : NOTIFICATIONS_ACTIVITY_LIMIT;
     try {
-      const { response, payload } = await api("/notifications?limit=50", { method: "GET" });
+      const query = mode === "page" ? `page=${page}&pageSize=${pageSize}` : `limit=${pageSize}`;
+      const { response, payload } = await api(`/notifications?${query}`, { method: "GET" });
       if (!response.ok || !payload || !payload.success || !Array.isArray(payload.data)) {
         setNotifications([]);
+        setNotificationsTotal(0);
+        setNotificationsUnread(0);
         return;
       }
       const mapped = payload.data.map((item) => ({
@@ -142,8 +154,15 @@ export function BookmarksPage() {
         read: !!item.is_read
       }));
       setNotifications(mapped);
+      setNotificationsTotal(Number(payload.total || mapped.length || 0));
+      setNotificationsUnread(Number(payload.unread || 0));
+      if (mode === "page") {
+        setNotificationsPage(Number(payload.page || page));
+      }
     } catch {
       setNotifications([]);
+      setNotificationsTotal(0);
+      setNotificationsUnread(0);
     }
   }
 
@@ -246,8 +265,12 @@ export function BookmarksPage() {
     sectionRef.current = section;
   }, [section]);
 
+  useEffect(() => {
+    notificationsPageRef.current = notificationsPage;
+  }, [notificationsPage]);
+
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
-  const unreadCount = notifications.filter((item) => !item.read).length;
+  const unreadCount = Number(notificationsUnread || 0);
 
   const filteredItems = useMemo(() => {
     const now = Date.now();
@@ -304,10 +327,22 @@ export function BookmarksPage() {
     if (section !== "notifications") {
       return;
     }
+    loadNotifications({ mode: "page", page: 1 });
     api("/notifications/read-all", { method: "POST" })
-      .then(() => loadNotifications())
+      .then(() => loadNotifications({ mode: "page", page: 1 }))
       .catch(() => {});
   }, [section]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (sectionRef.current === "notifications") {
+        loadNotifications({ mode: "page", page: notificationsPage });
+        return;
+      }
+      loadNotifications({ mode: "activity" });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [notificationsPage]);
 
   useEffect(() => {
     let isDisposed = false;
@@ -327,7 +362,11 @@ export function BookmarksPage() {
 
       const realtimeMessage = getRealtimeMessage(payload);
       setMessage(realtimeMessage);
-      loadNotifications();
+      if (sectionRef.current === "notifications") {
+        loadNotifications({ mode: "page", page: notificationsPageRef.current });
+      } else {
+        loadNotifications({ mode: "activity" });
+      }
 
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);
@@ -398,7 +437,11 @@ export function BookmarksPage() {
         return;
       }
       setMessage("Bookmark deleted");
-      await Promise.all([loadStats(), loadBookmarks(1, false), loadNotifications()]);
+      const notificationRequest =
+        sectionRef.current === "notifications"
+          ? loadNotifications({ mode: "page", page: notificationsPageRef.current })
+          : loadNotifications({ mode: "activity" });
+      await Promise.all([loadStats(), loadBookmarks(1, false), notificationRequest]);
     } catch {
       setBookmarks(previousBookmarks);
       setBookmarkStats(previousStats);
@@ -433,7 +476,11 @@ export function BookmarksPage() {
         return;
       }
       setMessage(!bookmark.starred ? "Starred" : "Removed from starred");
-      await Promise.all([loadStats(), loadBookmarks(1, false), loadNotifications()]);
+      const notificationRequest =
+        sectionRef.current === "notifications"
+          ? loadNotifications({ mode: "page", page: notificationsPageRef.current })
+          : loadNotifications({ mode: "activity" });
+      await Promise.all([loadStats(), loadBookmarks(1, false), notificationRequest]);
     } catch {
       setBookmarks(previousBookmarks);
       setBookmarkStats(previousStats);
@@ -504,7 +551,20 @@ export function BookmarksPage() {
               React.createElement(
                 "section",
                 { className: "card bm-activity" },
-                React.createElement("h2", null, "Recent Activity"),
+                React.createElement(
+                  "div",
+                  { className: "bm-panel-head" },
+                  React.createElement("h2", null, "Recent Activity"),
+                  React.createElement(
+                    "button",
+                    {
+                      className: "btn",
+                      type: "button",
+                      onClick: () => handleSectionChange("notifications")
+                    },
+                    "View all notifications"
+                  )
+                ),
                 React.createElement(
                   "div",
                   { className: "bm-activity-list" },
@@ -560,19 +620,25 @@ export function BookmarksPage() {
           React.createElement(NotificationsPage, {
             items: notifications,
             unreadCount,
+            page: notificationsPage,
+            pageSize: NOTIFICATIONS_PAGE_SIZE,
+            total: notificationsTotal,
+            onPageChange: (nextPage) => {
+              loadNotifications({ mode: "page", page: nextPage });
+            },
             onMarkAllRead: () => {
               api("/notifications/read-all", { method: "POST" })
-                .then(() => loadNotifications())
+                .then(() => loadNotifications({ mode: "page", page: notificationsPageRef.current }))
                 .catch(() => {});
             },
             onMarkRead: (id) => {
               api(`/notifications/${id}/read`, { method: "PATCH" })
-                .then(() => loadNotifications())
+                .then(() => loadNotifications({ mode: "page", page: notificationsPageRef.current }))
                 .catch(() => {});
             },
             onClearAll: () => {
               api("/notifications", { method: "DELETE" })
-                .then(() => loadNotifications())
+                .then(() => loadNotifications({ mode: "page", page: 1 }))
                 .catch(() => {});
             }
           }),

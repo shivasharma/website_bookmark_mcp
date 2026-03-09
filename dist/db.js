@@ -482,16 +482,34 @@ export async function getDatabaseHealth() {
         };
     }
 }
-export async function listNotifications(userId, limit = 50) {
+export async function listNotifications(userId, limit = 50, offset = 0) {
     const boundedLimit = Math.max(1, Math.min(200, Number(limit || 50)));
-    const { rows } = await pool.query(`
-      SELECT *
-      FROM notifications
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-      LIMIT $2
-    `, [userId, boundedLimit]);
-    return rows.map((row) => rowToNotification(row));
+    const boundedOffset = Math.max(0, Number(offset || 0));
+    const [{ rows: countRows }, { rows: unreadRows }, { rows }] = await Promise.all([
+        pool.query(`
+        SELECT COUNT(*)::int AS total
+        FROM notifications
+        WHERE user_id = $1
+      `, [userId]),
+        pool.query(`
+        SELECT COUNT(*)::int AS unread
+        FROM notifications
+        WHERE user_id = $1 AND is_read = FALSE
+      `, [userId]),
+        pool.query(`
+        SELECT *
+        FROM notifications
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT $2
+        OFFSET $3
+      `, [userId, boundedLimit, boundedOffset]),
+    ]);
+    return {
+        items: rows.map((row) => rowToNotification(row)),
+        total: Number(countRows[0]?.total ?? 0),
+        unread: Number(unreadRows[0]?.unread ?? 0),
+    };
 }
 export async function markNotificationRead(id, userId) {
     const { rows } = await pool.query(`

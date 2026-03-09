@@ -1,6 +1,10 @@
 import React from "react";
 
-export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRead, onClearAll }) {
+export function NotificationsPage({ items, unreadCount, page = 1, pageSize = 25, total = 0, onPageChange, onMarkAllRead, onMarkRead, onClearAll }) {
+  const totalPages = Math.max(1, Math.ceil(Number(total || 0) / Number(pageSize || 25)));
+  const canGoPrev = Number(page) > 1;
+  const canGoNext = Number(page) < totalPages;
+
   return React.createElement(
     "section",
     { className: "card" },
@@ -30,6 +34,35 @@ export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRea
             disabled: items.length <= 0
           },
           "Clear all"
+        )
+      )
+    ),
+    React.createElement(
+      "div",
+      { className: "bm-panel-head" },
+      React.createElement("p", { className: "sub" }, `Showing ${items.length} of ${Number(total || 0)} notifications • Page ${page} of ${totalPages}`),
+      React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: () => onPageChange && onPageChange(Number(page) - 1),
+            disabled: !canGoPrev
+          },
+          "Previous"
+        ),
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: () => onPageChange && onPageChange(Number(page) + 1),
+            disabled: !canGoNext
+          },
+          "Next"
         )
       )
     ),

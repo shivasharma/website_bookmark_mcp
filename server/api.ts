@@ -482,6 +482,8 @@ const listBookmarksQuerySchema = z.object({
 
 const listNotificationsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional(),
+  page: z.coerce.number().int().min(1).max(100000).optional(),
+  pageSize: z.coerce.number().int().min(1).max(200).optional(),
 });
 
 const tokenDaysSchema = z.coerce.number().int().min(1).max(365);
@@ -762,9 +764,19 @@ app.get("/api/notifications", async (req, res) => {
     }
 
     const userId = getUserId(req);
-    const items = await listNotifications(userId, parsedQuery.data.limit ?? 50);
-    const unread = items.filter((item) => !item.is_read).length;
-    res.json({ success: true, data: items, unread });
+    const pageSize = parsedQuery.data.pageSize ?? parsedQuery.data.limit ?? 50;
+    const page = parsedQuery.data.page ?? 1;
+    const offset = (page - 1) * pageSize;
+    const { items, total, unread } = await listNotifications(userId, pageSize, offset);
+    res.json({
+      success: true,
+      data: items,
+      unread,
+      total,
+      page,
+      pageSize,
+      hasMore: offset + items.length < total,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     res.status(401).json({ success: false, error: message });
