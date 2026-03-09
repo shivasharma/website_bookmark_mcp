@@ -369,6 +369,9 @@ app.get("/syshealth", (_req, res) => {
 app.get("/mcp", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "react-shell.html"));
 });
+app.get("/notifications", (_req, res) => {
+    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+});
 app.get("/auth/google", authLimiter, (req, res, next) => {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         res.status(400).json({ success: false, error: "Google OAuth is not configured" });

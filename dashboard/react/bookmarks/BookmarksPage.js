@@ -8,6 +8,7 @@ import { QuickAddPanel } from "./components/QuickAddPanel.js";
 import { AddBookmarkModal } from "./components/AddBookmarkModal.js";
 import { SystemHealthPanel } from "./components/SystemHealthPanel.js";
 import { McpSetupPanel } from "./components/McpSetupPanel.js";
+import { NotificationsPage } from "./components/NotificationsPage.js";
 
 const PAGE_SIZE = 30;
 const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -122,19 +123,20 @@ export function BookmarksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
-  const [activity, setActivity] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const sectionRef = useRef("bookmarks");
 
-  function pushActivity(text, source = "portal", action = "updated") {
+  function pushNotification(text, source = "portal", action = "updated") {
     const normalizedAction = normalizeAction(action);
     const entry = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       text,
       source: getSourceLabel(source),
       action: normalizedAction,
-      at: new Date().toLocaleTimeString()
+      at: new Date().toLocaleTimeString(),
+      read: sectionRef.current === "notifications"
     };
-    setActivity((prev) => [entry, ...prev].slice(0, 12));
+    setNotifications((prev) => [entry, ...prev].slice(0, 50));
   }
 
   async function loadCurrentUser() {
@@ -228,6 +230,7 @@ export function BookmarksPage() {
   const section = useMemo(() => {
     if (pathname.startsWith("/syshealth")) return "syshealth";
     if (pathname.startsWith("/mcp")) return "mcp";
+    if (pathname.startsWith("/notifications")) return "notifications";
     return "bookmarks";
   }, [pathname]);
 
@@ -236,6 +239,7 @@ export function BookmarksPage() {
   }, [section]);
 
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
+  const unreadCount = notifications.filter((item) => !item.read).length;
 
   const filteredItems = useMemo(() => {
     const now = Date.now();
@@ -289,6 +293,13 @@ export function BookmarksPage() {
   }, [section]);
 
   useEffect(() => {
+    if (section !== "notifications") {
+      return;
+    }
+    setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+  }, [section]);
+
+  useEffect(() => {
     let isDisposed = false;
     const eventSource = new EventSource("/api/events", { withCredentials: true });
 
@@ -306,7 +317,7 @@ export function BookmarksPage() {
 
       const realtimeMessage = getRealtimeMessage(payload);
       setMessage(realtimeMessage);
-      pushActivity(realtimeMessage, payload?.source, payload?.action);
+      pushNotification(realtimeMessage, payload?.source, payload?.action);
 
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);
@@ -345,7 +356,6 @@ export function BookmarksPage() {
         return;
       }
       setMessage(id ? "Bookmark updated" : "Bookmark saved");
-      pushActivity(id ? "Portal: updated bookmark" : "Portal: added bookmark", "portal", id ? "updated" : "created");
       setModalOpen(false);
       setEditingBookmark(null);
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
@@ -362,7 +372,6 @@ export function BookmarksPage() {
         return;
       }
       setMessage("Bookmark deleted");
-      pushActivity("Portal: deleted bookmark", "portal", "deleted");
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while deleting");
@@ -380,7 +389,6 @@ export function BookmarksPage() {
         return;
       }
       setMessage(!bookmark.starred ? "Starred" : "Removed from starred");
-      pushActivity(!bookmark.starred ? "Portal: starred bookmark" : "Portal: unstarred bookmark", "portal", "updated");
       await Promise.all([loadStats(), loadBookmarks(1, false)]);
     } catch {
       setMessage("Network error while updating");
@@ -403,7 +411,7 @@ export function BookmarksPage() {
   }
 
   function handleSectionChange(next) {
-    const target = next === "syshealth" ? "/syshealth" : next === "mcp" ? "/mcp" : "/bookmarks";
+    const target = next === "syshealth" ? "/syshealth" : next === "mcp" ? "/mcp" : next === "notifications" ? "/notifications" : "/bookmarks";
     if (window.location.pathname !== target) {
       window.history.pushState({}, "", target);
     }
@@ -419,6 +427,8 @@ export function BookmarksPage() {
         setModalOpen(true);
       },
       onOpenMcp: () => handleSectionChange("mcp"),
+      onOpenNotifications: () => handleSectionChange("notifications"),
+      unreadCount,
       currentUser,
       onLogout: handleLogout
     }),
@@ -431,19 +441,20 @@ export function BookmarksPage() {
         onSectionChange: handleSectionChange,
         onFilterChange: setFilter,
         total,
-        starred
+        starred,
+        unreadCount
       }),
       React.createElement(
         "main",
         { className: "bm-content" },
-        React.createElement("h1", { className: "bm-section-title" }, sectionTitle),
+        React.createElement("h1", { className: "bm-section-title" }, section === "notifications" ? "Notifications" : sectionTitle),
         !!message && React.createElement("div", { className: "bm-message" }, message),
         section === "bookmarks" &&
           React.createElement(
             React.Fragment,
             null,
             React.createElement(StatsStrip, { total, starred, tags: tagsCount, imported: 0 }),
-            activity.length > 0 &&
+            notifications.length > 0 &&
               React.createElement(
                 "section",
                 { className: "card bm-activity" },
@@ -451,7 +462,7 @@ export function BookmarksPage() {
                 React.createElement(
                   "div",
                   { className: "bm-activity-list" },
-                  ...activity.map((entry) =>
+                  ...notifications.slice(0, 8).map((entry) =>
                     React.createElement(
                       "div",
                       { className: "bm-activity-item", key: entry.id },
@@ -499,9 +510,20 @@ export function BookmarksPage() {
               })
             )
           ),
+        section === "notifications" &&
+          React.createElement(NotificationsPage, {
+            items: notifications,
+            unreadCount,
+            onMarkAllRead: () => {
+              setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+            },
+            onMarkRead: (id) => {
+              setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+            }
+          }),
         section === "syshealth" && React.createElement(SystemHealthPanel),
         section === "mcp" && React.createElement(McpSetupPanel, { currentUser, onMessage: setMessage }),
-        section !== "bookmarks" && section !== "syshealth" && section !== "mcp" &&
+        section !== "bookmarks" && section !== "notifications" && section !== "syshealth" && section !== "mcp" &&
           React.createElement("div", { className: "bm-message" }, "Unknown section. Returning to bookmarks...")
       )
     ),

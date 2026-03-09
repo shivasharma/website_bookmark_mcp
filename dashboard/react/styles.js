@@ -261,6 +261,26 @@ pre {
   flex-wrap: wrap;
   margin-left: auto;
 }
+.bm-bell-btn {
+  position: relative;
+}
+.bm-bell-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
 .bm-avatar {
   width: 34px;
   height: 34px;
@@ -469,6 +489,32 @@ pre {
   font-size: 11px;
   color: var(--muted);
 }
+.bm-notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bm-notification-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--surface-2);
+}
+.bm-notification-item.is-read {
+  opacity: 0.82;
+}
+.bm-notification-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.bm-notification-text {
+  font-size: 13px;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
 .bm-panel-head {
   display: flex;
   justify-content: space-between;
@@ -660,6 +706,10 @@ pre {
     flex: 1 1 calc(50% - 8px);
     justify-content: center;
     margin-right: 0;
+  }
+  .bm-bell-badge {
+    top: -4px;
+    right: -4px;
   }
   .bm-panel-tools .btn {
     flex: 1 1 calc(50% - 8px);

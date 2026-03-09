@@ -1,5 +1,5 @@
 import React from "react";
-import { IconBookmark, IconClock, IconReadLater, IconSettings, IconShield, IconStar } from "./icons.js";
+import { IconBell, IconBookmark, IconClock, IconReadLater, IconSettings, IconShield, IconStar } from "./icons.js";
 
 function NavLink({ label, active, onClick, icon, count }) {
   return React.createElement(
@@ -15,7 +15,7 @@ function NavLink({ label, active, onClick, icon, count }) {
   );
 }
 
-export function Sidebar({ filter, section, onSectionChange, onFilterChange, total, starred }) {
+export function Sidebar({ filter, section, onSectionChange, onFilterChange, total, starred, unreadCount }) {
   function openBookmarks(nextFilter) {
     onSectionChange("bookmarks");
     onFilterChange(nextFilter);
@@ -50,6 +50,13 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
       icon: React.createElement(IconReadLater, { className: "bm-icon" }),
       active: section === "bookmarks" && filter === "unread",
       onClick: () => openBookmarks("unread")
+    }),
+    React.createElement(NavLink, {
+      label: "Notifications",
+      count: unreadCount,
+      icon: React.createElement(IconBell, { className: "bm-icon" }),
+      active: section === "notifications",
+      onClick: () => onSectionChange("notifications")
     }),
     React.createElement("div", { className: "bm-side-divider" }),
     React.createElement(NavLink, {

@@ -173,3 +173,12 @@ export function IconDownload(props = {}) {
     React.createElement("path", { d: "M5 19h14" })
   );
 }
+
+export function IconBell(props = {}) {
+  return React.createElement(
+    "svg",
+    { ...baseProps, ...props },
+    React.createElement("path", { d: "M6 10a6 6 0 1 1 12 0v4l2 2H4l2-2v-4" }),
+    React.createElement("path", { d: "M10 18a2 2 0 0 0 4 0" })
+  );
+}
