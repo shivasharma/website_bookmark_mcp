@@ -73,3 +73,45 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
     })
   );
 }
+
+export function MobileNav({ section, unreadCount, onSectionChange }) {
+  function NavTab({ id, label, icon, count }) {
+    return React.createElement(
+      "button",
+      {
+        className: `bm-mobile-tab${section === id ? " active" : ""}`,
+        type: "button",
+        onClick: () => onSectionChange(id)
+      },
+      icon,
+      React.createElement("span", { className: "bm-mobile-label" }, label),
+      count !== undefined && count !== null && count > 0 && React.createElement("span", { className: "bm-mobile-count" }, count > 99 ? "99+" : String(count))
+    );
+  }
+
+  return React.createElement(
+    "nav",
+    { className: "bm-mobile-nav", "aria-label": "Primary" },
+    React.createElement(NavTab, {
+      id: "bookmarks",
+      label: "Library",
+      icon: React.createElement(IconBookmark, { className: "bm-icon" })
+    }),
+    React.createElement(NavTab, {
+      id: "notifications",
+      label: "Alerts",
+      icon: React.createElement(IconBell, { className: "bm-icon" }),
+      count: unreadCount
+    }),
+    React.createElement(NavTab, {
+      id: "syshealth",
+      label: "Health",
+      icon: React.createElement(IconShield, { className: "bm-icon" })
+    }),
+    React.createElement(NavTab, {
+      id: "mcp",
+      label: "MCP",
+      icon: React.createElement(IconSettings, { className: "bm-icon" })
+    })
+  );
+}

@@ -684,11 +684,77 @@ pre {
   gap: 8px;
   margin-bottom: 8px;
 }
+.bm-mobile-nav {
+  display: none;
+}
 @media (max-width: 900px) {
   .bm-main { grid-template-columns: 1fr; }
   .bm-sidebar { display: none; }
   .bm-content-grid { grid-template-columns: 1fr; }
-  .bm-content { max-width: 100%; }
+  .bm-content {
+    max-width: 100%;
+    padding-bottom: 96px;
+  }
+  .bm-mobile-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: rgba(12, 21, 33, 0.94);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  }
+  .bm-mobile-tab {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 12px;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 48px;
+    position: relative;
+  }
+  .bm-mobile-tab .bm-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .bm-mobile-tab.active {
+    background: rgba(6, 192, 224, 0.14);
+    color: var(--text);
+  }
+  .bm-mobile-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .bm-mobile-count {
+    position: absolute;
+    top: 2px;
+    right: 10px;
+    min-width: 17px;
+    height: 17px;
+    border-radius: 999px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    font-weight: 700;
+  }
 }
 @media (max-width: 700px) {
   .bm-content { padding: 12px; }
@@ -719,18 +785,25 @@ pre {
 @media (max-width: 540px) {
   .bm-top {
     padding: 10px 12px;
+    gap: 8px;
   }
   .bm-brand {
     font-size: 18px;
+    flex: 1;
   }
   .bm-top-actions {
-    width: 100%;
     margin-left: 0;
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 6px;
   }
   .bm-top-actions .btn {
-    flex: 1 1 calc(50% - 8px);
+    min-height: 34px;
+    padding: 7px 10px;
     justify-content: center;
     margin-right: 0;
+    margin-bottom: 0;
+    font-size: 12px;
   }
   .bm-bell-badge {
     top: -4px;

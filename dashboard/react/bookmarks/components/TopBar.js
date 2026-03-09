@@ -1,7 +1,7 @@
 import React from "react";
-import { IconBell, IconBookmark, IconMcp, IconPlus } from "./icons.js";
+import { IconBell, IconBookmark, IconMcp } from "./icons.js";
 
-export function TopBar({ onAddClick, onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout }) {
+export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout }) {
   const userLabel = currentUser ? currentUser.name || currentUser.email || "User" : "";
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
 
@@ -48,16 +48,6 @@ export function TopBar({ onAddClick, onOpenMcp, onOpenNotifications, unreadCount
         },
         React.createElement(IconMcp, { className: "bm-icon" }),
         "MCP"
-      ),
-      React.createElement(
-        "button",
-        {
-          className: "btn primary",
-          type: "button",
-          onClick: onAddClick
-        },
-        React.createElement(IconPlus, { className: "bm-icon" }),
-        "Add Bookmark"
       ),
       !currentUser && React.createElement("a", { className: "btn", href: "/register" }, "GitHub Login"),
       !!currentUser && React.createElement("button", { className: "btn", type: "button", onClick: onLogout }, "Logout"),

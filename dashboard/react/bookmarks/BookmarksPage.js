@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api, toUiBookmark } from "./api.js";
 import { TopBar } from "./components/TopBar.js";
-import { Sidebar } from "./components/Sidebar.js";
+import { MobileNav, Sidebar } from "./components/Sidebar.js";
 import { StatsStrip } from "./components/StatsStrip.js";
 import { BookmarkPanel } from "./components/BookmarkPanel.js";
 import { QuickAddPanel } from "./components/QuickAddPanel.js";
@@ -525,10 +525,6 @@ export function BookmarksPage() {
     "div",
     { className: "bm-shell" },
     React.createElement(TopBar, {
-      onAddClick: () => {
-        setEditingBookmark(null);
-        setModalOpen(true);
-      },
       onOpenMcp: () => handleSectionChange("mcp"),
       onOpenNotifications: () => handleSectionChange("notifications"),
       unreadCount,
@@ -659,6 +655,11 @@ export function BookmarksPage() {
           React.createElement("div", { className: "bm-message" }, "Unknown section. Returning to bookmarks...")
       )
     ),
+    React.createElement(MobileNav, {
+      section,
+      unreadCount,
+      onSectionChange: handleSectionChange
+    }),
     React.createElement(AddBookmarkModal, {
       open: modalOpen,
       bookmark: editingBookmark,
