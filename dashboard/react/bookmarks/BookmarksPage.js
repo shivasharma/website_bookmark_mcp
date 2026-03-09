@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api, toUiBookmark } from "./api.js";
 import { TopBar } from "./components/TopBar.js";
 import { Sidebar } from "./components/Sidebar.js";
@@ -38,6 +38,43 @@ function buildBookmarkQueryParams({ search, filter, page }) {
   return params;
 }
 
+function normalizeSharedUrl(value) {
+  const input = String(value || "").trim();
+  if (!input) {
+    return "";
+  }
+  try {
+    const parsed = new URL(input);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString();
+    }
+    return "";
+  } catch {
+    try {
+      const parsed = new URL(`https://${input}`);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        return parsed.toString();
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  }
+}
+
+function getRealtimeMessage(action) {
+  if (action === "created") {
+    return "New bookmark added from another client";
+  }
+  if (action === "deleted") {
+    return "A bookmark was removed from another client";
+  }
+  if (action === "updated") {
+    return "A bookmark was updated from another client";
+  }
+  return "Bookmarks updated in real time";
+}
+
 export function BookmarksPage() {
   const [pathname, setPathname] = useState(window.location.pathname || "/bookmarks");
   const [bookmarks, setBookmarks] = useState([]);
@@ -54,6 +91,7 @@ export function BookmarksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
+  const sectionRef = useRef("bookmarks");
 
   async function loadCurrentUser() {
     try {
@@ -149,6 +187,10 @@ export function BookmarksPage() {
     return "bookmarks";
   }, [pathname]);
 
+  useEffect(() => {
+    sectionRef.current = section;
+  }, [section]);
+
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
 
   const filteredItems = useMemo(() => {
@@ -172,6 +214,77 @@ export function BookmarksPage() {
     }
     loadBookmarks(1, false);
   }, [section, filter, search]);
+
+  useEffect(() => {
+    if (section !== "bookmarks") {
+      return;
+    }
+
+    const query = new URLSearchParams(window.location.search || "");
+    const sharedUrl = normalizeSharedUrl(query.get("url"));
+    const sharedTitle = String(query.get("title") || "").trim();
+    const sharedText = String(query.get("text") || "").trim();
+
+    if (!sharedUrl) {
+      return;
+    }
+
+    setEditingBookmark({
+      url: sharedUrl,
+      title: sharedTitle,
+      description: sharedText,
+      notes: sharedText,
+      tags: []
+    });
+    setModalOpen(true);
+
+    const targetPath = window.location.pathname || "/bookmarks";
+    if (window.location.search) {
+      window.history.replaceState({}, "", targetPath);
+    }
+  }, [section]);
+
+  useEffect(() => {
+    let isDisposed = false;
+    const eventSource = new EventSource("/api/events", { withCredentials: true });
+
+    function onBookmarkEvent(event) {
+      if (isDisposed) {
+        return;
+      }
+
+      let payload = null;
+      try {
+        payload = JSON.parse(event.data || "{}");
+      } catch {
+        payload = null;
+      }
+
+      const action = String(payload?.action || "").toLowerCase();
+      setMessage(getRealtimeMessage(action));
+
+      if (sectionRef.current === "bookmarks") {
+        loadBookmarks(1, false);
+      }
+      loadStats();
+    }
+
+    function onError() {
+      if (isDisposed) {
+        return;
+      }
+      setMessage("Realtime notifications disconnected. Retrying...");
+    }
+
+    eventSource.addEventListener("bookmark", onBookmarkEvent);
+    eventSource.onerror = onError;
+
+    return () => {
+      isDisposed = true;
+      eventSource.removeEventListener("bookmark", onBookmarkEvent);
+      eventSource.close();
+    };
+  }, []);
 
   const total = Number(bookmarkStats.total || 0);
   const starred = Number(bookmarkStats.favorites || 0);
