@@ -494,6 +494,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
     <a class="logo" href="#"><div class="logo-mark">🔖</div><span class="logo-text">BookMark<em>Manager</em></span></a>
     <div class="topbar-actions">
       <button class="btn-primary" type="button" onclick="openAddModal()">+ Add</button>
+      <button class="btn-icon hidden" id="topNotifyBtn" type="button" title="Notifications" onclick="window.location.assign('/notifications')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge hidden" id="topNotifyBadge">0</span></button>
       <a class="btn-outline" id="signInBtn" href="/register">Login</a>
       <div class="avatar-btn hidden" id="userAvatarBtn" title="Profile">U</div>
       <div class="top-menu-wrap">
@@ -986,6 +987,7 @@ let totalImported = 0;
 let editingBookmarkId = null;
 let authBlocked = false;
 let currentUser = null;
+let notificationsUnread = 0;
 const RECENT_SEARCHES_KEY = 'markd_recent_searches_v1';
 const MAX_RECENT_SEARCHES = 6;
 const TUTORIAL_DISMISSED_KEY = 'markd_first_save_tutorial_dismissed_v1';
@@ -1000,6 +1002,8 @@ const SUGGESTED_BOOKMARKS = [
 
 const authEls={
   signInBtn:document.getElementById('signInBtn'),
+  topNotifyBtn:document.getElementById('topNotifyBtn'),
+  topNotifyBadge:document.getElementById('topNotifyBadge'),
   menuLogoutBtn:document.getElementById('menuLogoutBtn'),
   menuLoginLink:document.getElementById('menuLoginLink'),
   settingsMenuBtn:document.getElementById('settingsMenuBtn'),
@@ -1070,9 +1074,11 @@ async function loadBookmarks(){
 }
 
 function renderAuthUi(){
-  if(!authEls.signInBtn||!authEls.menuLogoutBtn||!authEls.userAvatarBtn||!authEls.menuLoginLink)return;
+  if(!authEls.signInBtn||!authEls.menuLogoutBtn||!authEls.userAvatarBtn||!authEls.menuLoginLink||!authEls.topNotifyBtn||!authEls.topNotifyBadge)return;
   if(!currentUser){
     authEls.signInBtn.classList.remove('hidden');
+    authEls.topNotifyBtn.classList.add('hidden');
+    authEls.topNotifyBadge.classList.add('hidden');
     authEls.menuLoginLink.classList.remove('hidden');
     authEls.menuLogoutBtn.classList.add('hidden');
     authEls.userAvatarBtn.classList.add('hidden');
@@ -1083,11 +1089,39 @@ function renderAuthUi(){
   const label=currentUser.name||currentUser.email||'User';
   const initial=String(label).trim().charAt(0).toUpperCase()||'U';
   authEls.signInBtn.classList.add('hidden');
+  authEls.topNotifyBtn.classList.remove('hidden');
+  if(Number(notificationsUnread||0)>0){
+    authEls.topNotifyBadge.textContent=notificationsUnread>99?'99+':String(notificationsUnread);
+    authEls.topNotifyBadge.classList.remove('hidden');
+  }else{
+    authEls.topNotifyBadge.classList.add('hidden');
+  }
   authEls.menuLoginLink.classList.add('hidden');
   authEls.menuLogoutBtn.classList.remove('hidden');
   authEls.userAvatarBtn.classList.remove('hidden');
   authEls.userAvatarBtn.textContent=initial;
   authEls.userAvatarBtn.title=`Logged in as ${label}`;
+}
+
+async function loadNotificationSummary(){
+  if(!currentUser){
+    notificationsUnread=0;
+    renderAuthUi();
+    return;
+  }
+  try{
+    const {response,payload}=await api('/notifications?limit=1',{method:'GET'});
+    if(!response.ok||!payload?.success){
+      notificationsUnread=0;
+      renderAuthUi();
+      return;
+    }
+    notificationsUnread=Number(payload.unread||0);
+    renderAuthUi();
+  }catch(e){
+    notificationsUnread=0;
+    renderAuthUi();
+  }
 }
 
 function toggleSettingsMenu(force){
@@ -1123,6 +1157,7 @@ async function loadCurrentUser(){
 async function performLogout(){
   try{await api('/logout',{method:'POST'})}catch(e){}
   currentUser=null;
+  notificationsUnread=0;
   renderAuthUi();
   await refreshBookmarks();
   showToast('Logged out','info');
@@ -1878,6 +1913,7 @@ async function initDashboard(){
   setupQuickSmartInput();
   renderQuickMeta(null);
   await loadCurrentUser();
+  await loadNotificationSummary();
   await loadBookmarks();
   render();
 }

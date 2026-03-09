@@ -731,7 +731,7 @@ app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/register?error=google_auth_failed" }),
   (_req, res) => {
-    res.redirect("/");
+    res.redirect("/dashboard/index.html");
   },
 );
 
@@ -762,7 +762,7 @@ app.get(
           res.redirect("/register?error=github_session_error");
           return;
         }
-        res.redirect("/");
+        res.redirect("/dashboard/index.html");
       });
     })(req, res, next);
   },
