@@ -1,7 +1,7 @@
 import React from "react";
-import { IconBookmark, IconMcp, IconPlus, IconSearch } from "./icons.js";
+import { IconBookmark, IconMcp, IconPlus } from "./icons.js";
 
-export function TopBar({ search, onSearchChange, onAddClick, onOpenMcp, currentUser, onLogout }) {
+export function TopBar({ onAddClick, onOpenMcp, currentUser, onLogout }) {
   const userLabel = currentUser ? currentUser.name || currentUser.email || "User" : "";
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
 
@@ -13,16 +13,6 @@ export function TopBar({ search, onSearchChange, onAddClick, onOpenMcp, currentU
       { className: "bm-brand" },
       React.createElement(IconBookmark, { className: "bm-icon" }),
       React.createElement("span", null, "Markd")
-    ),
-    React.createElement(
-      "div",
-      { className: "bm-search" },
-      React.createElement(IconSearch, { className: "bm-icon bm-search-icon" }),
-      React.createElement("input", {
-        value: search,
-        onChange: (event) => onSearchChange(event.target.value),
-        placeholder: "Search bookmarks..."
-      })
     ),
     React.createElement(
       "div",

@@ -1,5 +1,17 @@
 import React, { useState } from "react";
 
+function toOptionalText(value) {
+  const trimmed = String(value || "").trim();
+  return trimmed || undefined;
+}
+
+function parseTags(tagsText) {
+  return String(tagsText || "")
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
 export function QuickAddPanel({ onSave }) {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
@@ -16,14 +28,19 @@ export function QuickAddPanel({ onSave }) {
   }
 
   async function submit() {
-    if (!url.trim()) return;
+    const normalizedUrl = toOptionalText(url);
+    if (!normalizedUrl) {
+      return;
+    }
+
     const payload = {
-      url: url.trim(),
-      title: title.trim() || undefined,
-      description: description.trim() || undefined,
-      notes: notes.trim() || undefined,
-      tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+      url: normalizedUrl,
+      title: toOptionalText(title),
+      description: toOptionalText(description),
+      notes: toOptionalText(notes),
+      tags: parseTags(tags)
     };
+
     await onSave(payload);
     clearForm();
   }

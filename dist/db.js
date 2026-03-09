@@ -399,6 +399,24 @@ export async function getStats(userId) {
         recent: Number(row.recent),
     };
 }
+export async function getDatabaseHealth() {
+    const startedAt = Date.now();
+    try {
+        const { rows } = await pool.query(`SELECT NOW() AS now`);
+        return {
+            ok: true,
+            latencyMs: Date.now() - startedAt,
+            serverTime: rows[0]?.now ? new Date(String(rows[0].now)).toISOString() : null,
+        };
+    }
+    catch {
+        return {
+            ok: false,
+            latencyMs: null,
+            serverTime: null,
+        };
+    }
+}
 export async function closeDb() {
     if (listenerClient) {
         await listenerClient.end();

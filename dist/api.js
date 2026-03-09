@@ -8,9 +8,10 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import path from "node:path";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { deleteBookmark, ensureLocalDefaultUser, getBookmarkById, getOrCreateOAuthUser, getStats, getUserById, initRealtimeListener, initDb, listBookmarks, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
+import { deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getUserById, initRealtimeListener, initDb, listBookmarks, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
 import { z } from "zod";
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -38,6 +39,15 @@ const CORS_ORIGINS = (process.env.CORS_ORIGINS
         "https://ai.shivaprogramming.com",
     ]).filter(Boolean);
 const MAX_JSON_BODY = process.env.MAX_JSON_BODY ?? "64kb";
+function isHttpUrl(value) {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+    }
+    catch {
+        return false;
+    }
+}
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(cors({
@@ -252,20 +262,38 @@ function getHttpStatusForError(message, fallback = 400) {
     return fallback;
 }
 const saveBookmarkSchema = z.object({
-    url: z.string().trim().url().max(2048),
+    url: z.string().trim().url().max(2048).refine((value) => isHttpUrl(value), "URL must use http or https"),
     title: z.string().trim().max(300).optional(),
     description: z.string().trim().max(2000).optional(),
     tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
     notes: z.string().trim().max(4000).optional(),
-    favicon: z.string().trim().url().max(2048).optional(),
+    favicon: z
+        .string()
+        .trim()
+        .url()
+        .max(2048)
+        .refine((value) => isHttpUrl(value), "Favicon URL must use http or https")
+        .optional(),
 });
 const updateBookmarkSchema = z.object({
-    url: z.string().trim().url().max(2048).optional(),
+    url: z
+        .string()
+        .trim()
+        .url()
+        .max(2048)
+        .refine((value) => isHttpUrl(value), "URL must use http or https")
+        .optional(),
     title: z.string().trim().max(300).optional(),
     description: z.string().trim().max(2000).optional(),
     tags: z.array(z.string().trim().min(1).max(50)).max(30).optional(),
     notes: z.string().trim().max(4000).optional(),
-    favicon: z.string().trim().url().max(2048).optional(),
+    favicon: z
+        .string()
+        .trim()
+        .url()
+        .max(2048)
+        .refine((value) => isHttpUrl(value), "Favicon URL must use http or https")
+        .optional(),
     is_favorite: z.boolean().optional(),
 });
 const idParamSchema = z.coerce.number().int().positive();
@@ -439,6 +467,42 @@ app.post("/api/logout", (req, res) => {
 });
 app.get("/api/health", (_req, res) => {
     res.json({ success: true, status: "ok" });
+});
+app.get("/api/system-health", async (_req, res) => {
+    const db = await getDatabaseHealth();
+    const memory = process.memoryUsage();
+    const [loadAvg1, loadAvg5, loadAvg15] = os.loadavg();
+    res.json({
+        success: true,
+        data: {
+            timestamp: new Date().toISOString(),
+            api: {
+                status: "ok",
+                uptimeSec: Math.floor(process.uptime()),
+                pid: process.pid,
+                nodeVersion: process.version,
+            },
+            database: {
+                status: db.ok ? "ok" : "down",
+                latencyMs: db.latencyMs,
+                serverTime: db.serverTime,
+            },
+            system: {
+                platform: process.platform,
+                arch: process.arch,
+                cpuCount: os.cpus().length,
+                loadAvg1,
+                loadAvg5,
+                loadAvg15,
+                memory: {
+                    rss: memory.rss,
+                    heapUsed: memory.heapUsed,
+                    heapTotal: memory.heapTotal,
+                    external: memory.external,
+                },
+            },
+        },
+    });
 });
 app.get("/api/events", (req, res) => {
     let userId;

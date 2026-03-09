@@ -1,5 +1,5 @@
 import React from "react";
-import { IconEdit, IconGrid, IconList, IconStar, IconStarFilled, IconTrash } from "./icons.js";
+import { IconEdit, IconGrid, IconList, IconSearch, IconStar, IconStarFilled, IconTrash } from "./icons.js";
 
 function tagClass(tag) {
   const value = String(tag || "").toLowerCase();
@@ -144,6 +144,10 @@ export function BookmarkPanel({
   items,
   view,
   onViewChange,
+  search,
+  onSearchChange,
+  filter,
+  onFilterChange,
   hasMore,
   loadingMore,
   loadedCount,
@@ -184,7 +188,27 @@ export function BookmarkPanel({
       React.createElement("h2", null, "Saved Links"),
       React.createElement(
         "div",
-        null,
+        { className: "bm-panel-tools" },
+        React.createElement(
+          "div",
+          { className: "bm-panel-search" },
+          React.createElement(IconSearch, { className: "bm-icon bm-search-icon" }),
+          React.createElement("input", {
+            value: search,
+            onChange: (event) => onSearchChange(event.target.value),
+            placeholder: "Search bookmarks..."
+          })
+        ),
+        React.createElement(
+          "button",
+          {
+            className: `btn${filter === "starred" ? " primary" : ""}`,
+            type: "button",
+            onClick: () => onFilterChange(filter === "starred" ? "all" : "starred")
+          },
+          React.createElement(IconStar, { className: "bm-icon" }),
+          "Starred"
+        ),
         React.createElement(
           "button",
           { className: `btn${view === "list" ? " primary" : ""}`, type: "button", onClick: () => onViewChange("list") },

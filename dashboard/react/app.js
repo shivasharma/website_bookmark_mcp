@@ -13,6 +13,10 @@ function App() {
 }
 
 const rootNode = document.getElementById("root");
+if (!rootNode) {
+  throw new Error("Root element #root not found");
+}
+
 const root = createRoot(rootNode);
 root.render(
   React.createElement(

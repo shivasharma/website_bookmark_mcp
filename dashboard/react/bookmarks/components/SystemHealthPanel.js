@@ -1,44 +1,96 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-const SERVICES = [
-  { id: "5f1e810ed89f", name: "bookmark_certbot", image: "certbot/certbot:latest", status: "restarting", health: "degraded", uptime: "Restarting (2), recent restart" },
-  { id: "4c635d674cae", name: "bookmark_app", image: "ghcr.io/shivasharma/website_bookmark_mcp:latest", status: "running", health: "healthy", uptime: "Up 10 minutes (healthy)" },
-  { id: "c4ace7c43db3", name: "bookmark_nginx", image: "nginx:alpine", status: "running", health: "healthy", uptime: "Up 10 minutes" },
-  { id: "0ecd54eda46f", name: "bookmark_postgres", image: "postgres:16-alpine", status: "running", health: "healthy", uptime: "Up 21 hours (healthy)" }
-];
+const POLL_INTERVAL_MS = 10000;
+
+function formatBytes(value) {
+  const bytes = Number(value || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 B";
+  }
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  const unitValue = bytes / 1024 ** unitIndex;
+  return `${unitValue.toFixed(unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
+
+function formatUptime(seconds) {
+  const totalSeconds = Math.max(0, Number(seconds || 0));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${secs}s`;
+  }
+  return `${secs}s`;
+}
 
 export function SystemHealthPanel() {
-  const [apiStatus, setApiStatus] = useState("checking");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [snapshot, setSnapshot] = useState(null);
 
   const kpis = useMemo(() => {
-    const total = SERVICES.length;
-    const running = SERVICES.filter((s) => s.status === "running").length;
-    const healthy = SERVICES.filter((s) => s.health === "healthy").length;
-    const restarting = SERVICES.filter((s) => s.status === "restarting").length;
-    return [
-      ["Containers", total],
-      ["Running", running],
-      ["Healthy", healthy],
-      ["Restarting", restarting]
-    ];
-  }, []);
+    if (!snapshot) {
+      return [
+        ["API", "--"],
+        ["Database", "--"],
+        ["Uptime", "--"],
+        ["Memory", "--"]
+      ];
+    }
 
-  async function refreshHealth() {
-    setApiStatus("checking");
+    const apiUp = snapshot.api?.status === "ok";
+    const dbUp = snapshot.database?.status === "ok";
+    return [
+      ["API", apiUp ? "OK" : "Down"],
+      ["Database", dbUp ? "OK" : "Down"],
+      ["Uptime", formatUptime(snapshot.api?.uptimeSec)],
+      ["Memory", formatBytes(snapshot.system?.memory?.rss)]
+    ];
+  }, [snapshot]);
+
+  async function refreshHealth(signal) {
+    setError("");
     try {
-      const response = await fetch("/api/health", { credentials: "include" });
+      const response = await fetch("/api/system-health", {
+        credentials: "include",
+        cache: "no-store",
+        signal
+      });
       const payload = await response.json().catch(() => null);
-      if (response.ok && payload && payload.success) {
-        setApiStatus("ok");
+      if (!response.ok || !payload || !payload.success || !payload.data) {
+        throw new Error("Unable to fetch health data");
+      }
+      setSnapshot(payload.data);
+      setLoading(false);
+    } catch (fetchError) {
+      if (fetchError && typeof fetchError === "object" && fetchError.name === "AbortError") {
         return;
       }
-    } catch {}
-    setApiStatus("down");
+      setError("Unable to reach real-time health endpoint");
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
-    refreshHealth();
+    const controller = new AbortController();
+    refreshHealth(controller.signal);
+    const timer = window.setInterval(() => {
+      refreshHealth(controller.signal);
+    }, POLL_INTERVAL_MS);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
   }, []);
+
+  const apiStatus = snapshot?.api?.status === "ok" ? "ok" : error ? "down" : "checking";
+  const dbStatus = snapshot?.database?.status === "ok" ? "ok" : error ? "down" : "checking";
+  const lastUpdated = snapshot?.timestamp ? new Date(snapshot.timestamp).toLocaleTimeString() : "--";
 
   return React.createElement(
     React.Fragment,
@@ -46,7 +98,7 @@ export function SystemHealthPanel() {
     React.createElement(
       "section",
       { className: "card" },
-      React.createElement("h2", null, "Docker Overview"),
+      React.createElement("h2", null, "Runtime Overview"),
       React.createElement(
         "div",
         { className: "kpis" },
@@ -59,24 +111,46 @@ export function SystemHealthPanel() {
           )
         )
       ),
-      React.createElement("p", { className: "sub" }, "Clean view enabled: port mappings and startup commands are intentionally hidden."),
+      React.createElement("p", { className: "sub" }, `Real-time polling every ${Math.floor(POLL_INTERVAL_MS / 1000)}s. Last update: ${lastUpdated}`),
       React.createElement(
         "div",
         { className: "services" },
-        SERVICES.map((s) =>
+        [
+          {
+            id: "api",
+            name: "Application API",
+            status: apiStatus,
+            details: snapshot?.api
+              ? `PID ${snapshot.api.pid} • Node ${snapshot.api.nodeVersion} • Uptime ${formatUptime(snapshot.api.uptimeSec)}`
+              : "Collecting runtime metrics..."
+          },
+          {
+            id: "database",
+            name: "PostgreSQL",
+            status: dbStatus,
+            details: snapshot?.database
+              ? `Latency ${snapshot.database.latencyMs ?? "--"} ms${snapshot.database.serverTime ? ` • DB time ${new Date(snapshot.database.serverTime).toLocaleTimeString()}` : ""}`
+              : "Collecting database metrics..."
+          },
+          {
+            id: "host",
+            name: "Host Runtime",
+            status: "ok",
+            details: snapshot?.system
+              ? `${snapshot.system.platform}/${snapshot.system.arch} • CPU ${snapshot.system.cpuCount} • Load ${Number(snapshot.system.loadAvg1 || 0).toFixed(2)}`
+              : "Collecting host metrics..."
+          }
+        ].map((service) =>
           React.createElement(
             "article",
-            { className: "service", key: s.id },
+            { className: "service", key: service.id },
             React.createElement(
               "div",
               { className: "service-head" },
-              React.createElement("h3", { className: "service-name" }, s.name),
-              React.createElement("span", { className: `pill ${s.status}` }, s.status)
+              React.createElement("h3", { className: "service-name" }, service.name),
+              React.createElement("span", { className: `pill ${service.status === "ok" ? "running" : service.status}` }, service.status)
             ),
-            React.createElement("div", { className: "meta" }, "Container: ", React.createElement("span", { className: "code-inline" }, s.id.slice(0, 12))),
-            React.createElement("div", { className: "meta" }, `Image: ${s.image}`),
-            React.createElement("div", { className: "meta" }, `State: ${s.uptime}`),
-            React.createElement("div", { className: "meta" }, `Health: ${s.health === "healthy" ? "Healthy" : "Needs attention"}`)
+            React.createElement("div", { className: "meta" }, service.details)
           )
         )
       )
@@ -88,17 +162,29 @@ export function SystemHealthPanel() {
         "div",
         { className: "bm-panel-head" },
         React.createElement("h2", null, "Service Health"),
-        React.createElement("button", { className: "btn", type: "button", onClick: refreshHealth }, "Refresh")
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: () => refreshHealth()
+          },
+          "Refresh"
+        )
       ),
+      loading && React.createElement("p", { className: "sub" }, "Loading health telemetry..."),
       apiStatus === "checking" && React.createElement("p", { className: "sub" }, "API status: checking..."),
       apiStatus === "ok" && React.createElement("p", { className: "sub" }, "API status: ", React.createElement("strong", null, "OK")),
-      apiStatus === "down" && React.createElement("p", { className: "sub" }, "API status: ", React.createElement("strong", null, "Unavailable"))
+      apiStatus === "down" && React.createElement("p", { className: "sub" }, "API status: ", React.createElement("strong", null, "Unavailable")),
+      dbStatus === "ok" && React.createElement("p", { className: "sub" }, "Database status: ", React.createElement("strong", null, "OK")),
+      dbStatus === "down" && React.createElement("p", { className: "sub" }, "Database status: ", React.createElement("strong", null, "Unavailable")),
+      !!error && React.createElement("p", { className: "sub" }, error)
     ),
     React.createElement(
       "section",
       { className: "card" },
       React.createElement("h2", null, "Deployment Notes"),
-      React.createElement("p", { className: "sub" }, "Stack includes Nginx, app service, Postgres, and certbot. This panel is read-only and designed for quick status checks.")
+      React.createElement("p", { className: "sub" }, "Values are now read from live API and database probes instead of static constants. Extend /api/system-health to include container orchestrator metrics if needed.")
     )
   );
 }

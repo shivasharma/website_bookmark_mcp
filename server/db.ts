@@ -509,6 +509,28 @@ export async function getStats(userId?: number): Promise<BookmarkStats> {
   };
 }
 
+export async function getDatabaseHealth(): Promise<{
+  ok: boolean;
+  latencyMs: number | null;
+  serverTime: string | null;
+}> {
+  const startedAt = Date.now();
+  try {
+    const { rows } = await pool.query(`SELECT NOW() AS now`);
+    return {
+      ok: true,
+      latencyMs: Date.now() - startedAt,
+      serverTime: rows[0]?.now ? new Date(String(rows[0].now)).toISOString() : null,
+    };
+  } catch {
+    return {
+      ok: false,
+      latencyMs: null,
+      serverTime: null,
+    };
+  }
+}
+
 export async function closeDb(): Promise<void> {
   if (listenerClient) {
     await listenerClient.end();

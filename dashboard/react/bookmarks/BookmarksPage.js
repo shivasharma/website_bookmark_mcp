@@ -10,9 +10,32 @@ import { SystemHealthPanel } from "./components/SystemHealthPanel.js";
 import { McpSetupPanel } from "./components/McpSetupPanel.js";
 
 const PAGE_SIZE = 30;
+const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 function openExternal(url) {
-  window.open(url, "_blank", "noopener,noreferrer");
+  try {
+    const parsed = new URL(String(url || ""));
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return;
+    }
+    window.open(parsed.toString(), "_blank", "noopener,noreferrer");
+  } catch {
+    return;
+  }
+}
+
+function buildBookmarkQueryParams({ search, filter, page }) {
+  const params = new URLSearchParams();
+  const query = search.trim();
+  if (query) {
+    params.set("search", query);
+  }
+  if (filter === "starred") {
+    params.set("favorite", "true");
+  }
+  params.set("page", String(page));
+  params.set("pageSize", String(PAGE_SIZE));
+  return params;
 }
 
 export function BookmarksPage() {
@@ -67,16 +90,7 @@ export function BookmarksPage() {
     }
 
     try {
-      const params = new URLSearchParams();
-      const query = search.trim();
-      if (query) {
-        params.set("search", query);
-      }
-      if (filter === "starred") {
-        params.set("favorite", "true");
-      }
-      params.set("page", String(pageToLoad));
-      params.set("pageSize", String(PAGE_SIZE));
+      const params = buildBookmarkQueryParams({ search, filter, page: pageToLoad });
 
       const { response, payload } = await api(`/bookmarks?${params.toString()}`, { method: "GET" });
       if (!response.ok || !payload || !payload.success) {
@@ -138,11 +152,12 @@ export function BookmarksPage() {
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
 
   const filteredItems = useMemo(() => {
+    const now = Date.now();
     const sorted = [...bookmarks].sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
     return sorted.filter((item) => {
       if (filter === "recent") {
         const createdAt = new Date(item.created_at || 0).getTime();
-        return Number.isFinite(createdAt) && Date.now() - createdAt <= 7 * 24 * 60 * 60 * 1000;
+        return Number.isFinite(createdAt) && now - createdAt <= RECENT_WINDOW_MS;
       }
       if (filter === "unread") {
         return false;
@@ -232,21 +247,12 @@ export function BookmarksPage() {
       window.history.pushState({}, "", target);
     }
     setPathname(target);
-
-    if (next === "syshealth") {
-      return;
-    }
-    if (next === "mcp") {
-      return;
-    }
   }
 
   return React.createElement(
     "div",
     { className: "bm-shell" },
     React.createElement(TopBar, {
-      search,
-      onSearchChange: setSearch,
       onAddClick: () => {
         setEditingBookmark(null);
         setModalOpen(true);
@@ -283,6 +289,10 @@ export function BookmarksPage() {
                 items: filteredItems,
                 view,
                 onViewChange: setView,
+                search,
+                onSearchChange: setSearch,
+                filter,
+                onFilterChange: setFilter,
                 onOpen: openExternal,
                 hasMore,
                 loadingMore,
