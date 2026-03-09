@@ -47,6 +47,19 @@ export type BookmarkStats = {
   recent: number;
 };
 
+export type Notification = {
+  id: number;
+  user_id: number;
+  action: "created" | "updated" | "deleted";
+  source: "portal" | "mcp" | "server";
+  bookmark_id: number;
+  bookmark_title: string;
+  bookmark_url: string;
+  text: string;
+  is_read: boolean;
+  created_at: string;
+};
+
 export type User = {
   id: number;
   name: string;

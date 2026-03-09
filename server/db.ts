@@ -6,6 +6,7 @@ import type {
   Bookmark,
   BookmarkStats,
   ListBookmarksInput,
+  Notification,
   SaveBookmarkInput,
   UpdateBookmarkInput,
   User,
@@ -29,11 +30,61 @@ type BookmarkEvent = {
   bookmark_title: string;
   bookmark_url: string;
   source: BookmarkEventSource;
+  notification_id: number;
   at: string;
 };
 
-async function emitBookmarkEvent(event: BookmarkEvent): Promise<void> {
-  await pool.query(`SELECT pg_notify($1, $2)`, [BOOKMARKS_CHANNEL, JSON.stringify(event)]);
+function buildNotificationText(event: {
+  action: "created" | "updated" | "deleted";
+  source: BookmarkEventSource;
+  bookmark_title: string;
+  bookmark_url: string;
+}): string {
+  const sourceLabel = event.source === "mcp" ? "MCP" : event.source === "server" ? "Server" : "Portal";
+  const target = event.bookmark_title || event.bookmark_url || "bookmark";
+  if (event.action === "created") {
+    return `${sourceLabel}: added ${target}`;
+  }
+  if (event.action === "deleted") {
+    return `${sourceLabel}: deleted ${target}`;
+  }
+  return `${sourceLabel}: updated ${target}`;
+}
+
+function rowToNotification(row: Record<string, unknown>): Notification {
+  return {
+    id: Number(row.id),
+    user_id: Number(row.user_id),
+    action: String(row.action) as Notification["action"],
+    source: String(row.source) as Notification["source"],
+    bookmark_id: Number(row.bookmark_id),
+    bookmark_title: String(row.bookmark_title ?? ""),
+    bookmark_url: String(row.bookmark_url ?? ""),
+    text: String(row.text ?? ""),
+    is_read: Boolean(row.is_read),
+    created_at: new Date(String(row.created_at)).toISOString(),
+  };
+}
+
+async function createNotificationFromEvent(event: Omit<BookmarkEvent, "notification_id">): Promise<Notification> {
+  const text = buildNotificationText(event);
+  const { rows } = await pool.query(
+    `
+      INSERT INTO notifications (user_id, action, source, bookmark_id, bookmark_title, bookmark_url, text, is_read)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
+      RETURNING *
+    `,
+    [event.user_id, event.action, event.source, event.bookmark_id, event.bookmark_title, event.bookmark_url, text],
+  );
+  return rowToNotification(rows[0]);
+}
+
+async function emitBookmarkEvent(event: Omit<BookmarkEvent, "notification_id">): Promise<void> {
+  const notification = await createNotificationFromEvent(event);
+  await pool.query(`SELECT pg_notify($1, $2)`, [
+    BOOKMARKS_CHANNEL,
+    JSON.stringify({ ...event, notification_id: notification.id }),
+  ]);
 }
 
 export async function initRealtimeListener(): Promise<void> {
@@ -121,6 +172,26 @@ export async function initDb(): Promise<void> {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE (user_id, url)
     );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      action TEXT NOT NULL CHECK (action IN ('created', 'updated', 'deleted')),
+      source TEXT NOT NULL CHECK (source IN ('portal', 'mcp', 'server')),
+      bookmark_id INTEGER NOT NULL,
+      bookmark_title TEXT NOT NULL DEFAULT '',
+      bookmark_url TEXT NOT NULL DEFAULT '',
+      text TEXT NOT NULL,
+      is_read BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS notifications_user_created_idx
+    ON notifications (user_id, created_at DESC);
   `);
 }
 
@@ -555,6 +626,60 @@ export async function getDatabaseHealth(): Promise<{
       serverTime: null,
     };
   }
+}
+
+export async function listNotifications(userId: number, limit = 50): Promise<Notification[]> {
+  const boundedLimit = Math.max(1, Math.min(200, Number(limit || 50)));
+  const { rows } = await pool.query(
+    `
+      SELECT *
+      FROM notifications
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      LIMIT $2
+    `,
+    [userId, boundedLimit],
+  );
+  return rows.map((row: Record<string, unknown>) => rowToNotification(row));
+}
+
+export async function markNotificationRead(id: number, userId: number): Promise<Notification | null> {
+  const { rows } = await pool.query(
+    `
+      UPDATE notifications
+      SET is_read = TRUE
+      WHERE id = $1 AND user_id = $2
+      RETURNING *
+    `,
+    [id, userId],
+  );
+  if (!rows.length) {
+    return null;
+  }
+  return rowToNotification(rows[0]);
+}
+
+export async function markAllNotificationsRead(userId: number): Promise<number> {
+  const { rowCount } = await pool.query(
+    `
+      UPDATE notifications
+      SET is_read = TRUE
+      WHERE user_id = $1 AND is_read = FALSE
+    `,
+    [userId],
+  );
+  return Number(rowCount ?? 0);
+}
+
+export async function clearNotifications(userId: number): Promise<number> {
+  const { rowCount } = await pool.query(
+    `
+      DELETE FROM notifications
+      WHERE user_id = $1
+    `,
+    [userId],
+  );
+  return Number(rowCount ?? 0);
 }
 
 export async function closeDb(): Promise<void> {

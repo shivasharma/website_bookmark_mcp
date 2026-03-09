@@ -59,7 +59,7 @@ export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRea
                 {
                   className: "btn",
                   type: "button",
-                  onClick: () => onMarkRead(item.id)
+                  onClick: () => onMarkRead(String(item.id))
                 },
                 "Mark read"
               )

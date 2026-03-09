@@ -11,7 +11,7 @@ import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getUserById, initRealtimeListener, initDb, listBookmarks, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
+import { clearNotifications, deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getUserById, initRealtimeListener, initDb, listBookmarks, listNotifications, markAllNotificationsRead, markNotificationRead, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
 import { z } from "zod";
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -311,7 +311,11 @@ const listBookmarksQuerySchema = z.object({
     page: z.coerce.number().int().min(1).max(100000).optional(),
     pageSize: z.coerce.number().int().min(1).max(100).optional(),
 });
+const listNotificationsQuerySchema = z.object({
+    limit: z.coerce.number().int().min(1).max(200).optional(),
+});
 const tokenDaysSchema = z.coerce.number().int().min(1).max(365);
+const notificationIdParamSchema = z.coerce.number().int().positive();
 function ensureUrlProtocol(input) {
     const value = input.trim();
     return /^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(value) ? value : `https://${value}`;
@@ -541,6 +545,62 @@ app.get("/api/events", (req, res) => {
         clearInterval(keepAlive);
         unsubscribe();
     });
+});
+app.get("/api/notifications", async (req, res) => {
+    try {
+        const parsedQuery = listNotificationsQuerySchema.safeParse(req.query);
+        if (!parsedQuery.success) {
+            res.status(400).json({ success: false, error: "Invalid notifications query" });
+            return;
+        }
+        const userId = getUserId(req);
+        const items = await listNotifications(userId, parsedQuery.data.limit ?? 50);
+        const unread = items.filter((item) => !item.is_read).length;
+        res.json({ success: true, data: items, unread });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        res.status(401).json({ success: false, error: message });
+    }
+});
+app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+        const parsedId = notificationIdParamSchema.safeParse(req.params.id);
+        if (!parsedId.success) {
+            res.status(400).json({ success: false, error: "Invalid notification id" });
+            return;
+        }
+        const updated = await markNotificationRead(parsedId.data, getUserId(req));
+        if (!updated) {
+            res.status(404).json({ success: false, error: "Notification not found" });
+            return;
+        }
+        res.json({ success: true, data: updated });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        res.status(401).json({ success: false, error: message });
+    }
+});
+app.post("/api/notifications/read-all", async (req, res) => {
+    try {
+        const count = await markAllNotificationsRead(getUserId(req));
+        res.json({ success: true, data: { updated: count } });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        res.status(401).json({ success: false, error: message });
+    }
+});
+app.delete("/api/notifications", async (req, res) => {
+    try {
+        const count = await clearNotifications(getUserId(req));
+        res.json({ success: true, data: { deleted: count } });
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown error";
+        res.status(401).json({ success: false, error: message });
+    }
 });
 app.get("/api/bookmarks", async (req, res) => {
     try {

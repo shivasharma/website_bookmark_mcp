@@ -12,7 +12,6 @@ import { NotificationsPage } from "./components/NotificationsPage.js";
 
 const PAGE_SIZE = 30;
 const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-const NOTIFICATIONS_STORAGE_KEY = "markd.notifications.v1";
 
 function openExternal(url) {
   try {
@@ -108,32 +107,6 @@ function getRealtimeMessage(payload) {
   return `${source}: bookmarks updated`;
 }
 
-function loadStoredNotifications() {
-  try {
-    const raw = window.localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-    if (!raw) {
-      return [];
-    }
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed
-      .filter((item) => item && typeof item === "object")
-      .map((item) => ({
-        id: String(item.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`),
-        text: String(item.text || ""),
-        source: getSourceLabel(item.source),
-        action: normalizeAction(item.action),
-        at: String(item.at || ""),
-        read: !!item.read
-      }))
-      .slice(0, 50);
-  } catch {
-    return [];
-  }
-}
-
 export function BookmarksPage() {
   const [pathname, setPathname] = useState(window.location.pathname || "/bookmarks");
   const [bookmarks, setBookmarks] = useState([]);
@@ -150,20 +123,28 @@ export function BookmarksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
-  const [notifications, setNotifications] = useState(() => loadStoredNotifications());
+  const [notifications, setNotifications] = useState([]);
   const sectionRef = useRef("bookmarks");
 
-  function pushNotification(text, source = "portal", action = "updated") {
-    const normalizedAction = normalizeAction(action);
-    const entry = {
-      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-      text,
-      source: getSourceLabel(source),
-      action: normalizedAction,
-      at: new Date().toLocaleTimeString(),
-      read: sectionRef.current === "notifications"
-    };
-    setNotifications((prev) => [entry, ...prev].slice(0, 50));
+  async function loadNotifications() {
+    try {
+      const { response, payload } = await api("/notifications?limit=50", { method: "GET" });
+      if (!response.ok || !payload || !payload.success || !Array.isArray(payload.data)) {
+        setNotifications([]);
+        return;
+      }
+      const mapped = payload.data.map((item) => ({
+        id: String(item.id),
+        text: String(item.text || getRealtimeMessage(item)),
+        source: getSourceLabel(item.source),
+        action: normalizeAction(item.action),
+        at: new Date(String(item.created_at || Date.now())).toLocaleTimeString(),
+        read: !!item.is_read
+      }));
+      setNotifications(mapped);
+    } catch {
+      setNotifications([]);
+    }
   }
 
   async function loadCurrentUser() {
@@ -235,14 +216,14 @@ export function BookmarksPage() {
   }
 
   async function refreshAll() {
-    await Promise.all([loadCurrentUser(), loadStats()]);
+    await Promise.all([loadCurrentUser(), loadStats(), loadNotifications()]);
     if (section === "bookmarks") {
       await loadBookmarks(1, false);
     }
   }
 
   useEffect(() => {
-    Promise.all([loadCurrentUser(), loadStats()]);
+    Promise.all([loadCurrentUser(), loadStats(), loadNotifications()]);
   }, []);
 
   useEffect(() => {
@@ -264,12 +245,6 @@ export function BookmarksPage() {
   useEffect(() => {
     sectionRef.current = section;
   }, [section]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
-    } catch {}
-  }, [notifications]);
 
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
   const unreadCount = notifications.filter((item) => !item.read).length;
@@ -329,7 +304,9 @@ export function BookmarksPage() {
     if (section !== "notifications") {
       return;
     }
-    setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+    api("/notifications/read-all", { method: "POST" })
+      .then(() => loadNotifications())
+      .catch(() => {});
   }, [section]);
 
   useEffect(() => {
@@ -350,7 +327,7 @@ export function BookmarksPage() {
 
       const realtimeMessage = getRealtimeMessage(payload);
       setMessage(realtimeMessage);
-      pushNotification(realtimeMessage, payload?.source, payload?.action);
+      loadNotifications();
 
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);
@@ -398,32 +375,68 @@ export function BookmarksPage() {
   }
 
   async function handleDelete(bookmark) {
+    const previousBookmarks = bookmarks;
+    const previousStats = bookmarkStats;
+    const previousLoadedTotal = loadedTotal;
+    const wasFavorite = !!bookmark?.starred;
+
+    setBookmarks((prev) => prev.filter((item) => item.id !== bookmark.id));
+    setLoadedTotal((prev) => Math.max(0, Number(prev || 0) - 1));
+    setBookmarkStats((prev) => ({
+      total: Math.max(0, Number(prev.total || 0) - 1),
+      favorites: Math.max(0, Number(prev.favorites || 0) - (wasFavorite ? 1 : 0))
+    }));
+    setMessage("Deleting bookmark...");
+
     try {
       const { response, payload } = await api(`/bookmarks/${bookmark.id}`, { method: "DELETE" });
       if (!response.ok || !payload || !payload.success) {
+        setBookmarks(previousBookmarks);
+        setBookmarkStats(previousStats);
+        setLoadedTotal(previousLoadedTotal);
         setMessage((payload && payload.error) || "Delete failed");
         return;
       }
       setMessage("Bookmark deleted");
-      await Promise.all([loadStats(), loadBookmarks(1, false)]);
+      await Promise.all([loadStats(), loadBookmarks(1, false), loadNotifications()]);
     } catch {
+      setBookmarks(previousBookmarks);
+      setBookmarkStats(previousStats);
+      setLoadedTotal(previousLoadedTotal);
       setMessage("Network error while deleting");
     }
   }
 
   async function handleToggleFavorite(bookmark) {
+    const previousBookmarks = bookmarks;
+    const previousStats = bookmarkStats;
+    const nextStarred = !bookmark.starred;
+
+    setBookmarks((prev) =>
+      prev.map((item) => (item.id === bookmark.id ? { ...item, starred: nextStarred, is_favorite: nextStarred } : item))
+    );
+    setBookmarkStats((prev) => ({
+      total: Number(prev.total || 0),
+      favorites: Math.max(0, Number(prev.favorites || 0) + (nextStarred ? 1 : -1))
+    }));
+    setMessage(nextStarred ? "Starring bookmark..." : "Removing star...");
+
     try {
       const { response, payload } = await api(`/bookmarks/${bookmark.id}`, {
         method: "PATCH",
         body: JSON.stringify({ is_favorite: !bookmark.starred })
       });
       if (!response.ok || !payload || !payload.success) {
+        setBookmarks(previousBookmarks);
+        setBookmarkStats(previousStats);
         setMessage((payload && payload.error) || "Update failed");
         return;
       }
       setMessage(!bookmark.starred ? "Starred" : "Removed from starred");
-      await Promise.all([loadStats(), loadBookmarks(1, false)]);
+      await Promise.all([loadStats(), loadBookmarks(1, false), loadNotifications()]);
     } catch {
+      setBookmarks(previousBookmarks);
+      setBookmarkStats(previousStats);
       setMessage("Network error while updating");
     }
   }
@@ -548,13 +561,19 @@ export function BookmarksPage() {
             items: notifications,
             unreadCount,
             onMarkAllRead: () => {
-              setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
+              api("/notifications/read-all", { method: "POST" })
+                .then(() => loadNotifications())
+                .catch(() => {});
             },
             onMarkRead: (id) => {
-              setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+              api(`/notifications/${id}/read`, { method: "PATCH" })
+                .then(() => loadNotifications())
+                .catch(() => {});
             },
             onClearAll: () => {
-              setNotifications([]);
+              api("/notifications", { method: "DELETE" })
+                .then(() => loadNotifications())
+                .catch(() => {});
             }
           }),
         section === "syshealth" && React.createElement(SystemHealthPanel),
