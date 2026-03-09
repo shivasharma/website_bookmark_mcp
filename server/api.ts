@@ -197,9 +197,23 @@ app.use(
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    limit: 300,
+    limit: Number(process.env.GLOBAL_RATE_LIMIT ?? 1200),
     standardHeaders: "draft-7",
     legacyHeaders: false,
+    message: { success: false, error: "Too many requests. Please retry shortly." },
+    skip: (req) => {
+      const routePath = String(req.path || "");
+      if (routePath === "/mcp" || routePath === "/mcp-setup") {
+        return true;
+      }
+      if (routePath === "/api/events") {
+        return true;
+      }
+      if (routePath.startsWith("/api/") && Boolean(getBearerToken(req))) {
+        return true;
+      }
+      return false;
+    },
   }),
 );
 app.use(express.json({ limit: MAX_JSON_BODY, strict: true }));
