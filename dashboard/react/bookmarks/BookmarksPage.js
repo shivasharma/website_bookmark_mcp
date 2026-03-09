@@ -12,6 +12,7 @@ import { NotificationsPage } from "./components/NotificationsPage.js";
 
 const PAGE_SIZE = 30;
 const RECENT_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const NOTIFICATIONS_STORAGE_KEY = "markd.notifications.v1";
 
 function openExternal(url) {
   try {
@@ -107,6 +108,32 @@ function getRealtimeMessage(payload) {
   return `${source}: bookmarks updated`;
 }
 
+function loadStoredNotifications() {
+  try {
+    const raw = window.localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+    if (!raw) {
+      return [];
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed
+      .filter((item) => item && typeof item === "object")
+      .map((item) => ({
+        id: String(item.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`),
+        text: String(item.text || ""),
+        source: getSourceLabel(item.source),
+        action: normalizeAction(item.action),
+        at: String(item.at || ""),
+        read: !!item.read
+      }))
+      .slice(0, 50);
+  } catch {
+    return [];
+  }
+}
+
 export function BookmarksPage() {
   const [pathname, setPathname] = useState(window.location.pathname || "/bookmarks");
   const [bookmarks, setBookmarks] = useState([]);
@@ -123,7 +150,7 @@ export function BookmarksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
   const [message, setMessage] = useState("");
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(() => loadStoredNotifications());
   const sectionRef = useRef("bookmarks");
 
   function pushNotification(text, source = "portal", action = "updated") {
@@ -237,6 +264,12 @@ export function BookmarksPage() {
   useEffect(() => {
     sectionRef.current = section;
   }, [section]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
+    } catch {}
+  }, [notifications]);
 
   const sectionTitle = section === "syshealth" ? "System Health" : section === "mcp" ? "MCP Setup" : "Bookmarks";
   const unreadCount = notifications.filter((item) => !item.read).length;
@@ -519,6 +552,9 @@ export function BookmarksPage() {
             },
             onMarkRead: (id) => {
               setNotifications((prev) => prev.map((item) => (item.id === id ? { ...item, read: true } : item)));
+            },
+            onClearAll: () => {
+              setNotifications([]);
             }
           }),
         section === "syshealth" && React.createElement(SystemHealthPanel),

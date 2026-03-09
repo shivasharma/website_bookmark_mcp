@@ -1,6 +1,6 @@
 import React from "react";
 
-export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRead }) {
+export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRead, onClearAll }) {
   return React.createElement(
     "section",
     { className: "card" },
@@ -9,14 +9,28 @@ export function NotificationsPage({ items, unreadCount, onMarkAllRead, onMarkRea
       { className: "bm-panel-head" },
       React.createElement("h2", null, "Notifications"),
       React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: onMarkAllRead,
-          disabled: unreadCount <= 0
-        },
-        unreadCount > 0 ? `Mark all read (${unreadCount})` : "All caught up"
+        "div",
+        null,
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: onMarkAllRead,
+            disabled: unreadCount <= 0
+          },
+          unreadCount > 0 ? `Mark all read (${unreadCount})` : "All caught up"
+        ),
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: onClearAll,
+            disabled: items.length <= 0
+          },
+          "Clear all"
+        )
       )
     ),
     items.length === 0 && React.createElement("p", { className: "sub" }, "No notifications yet. Events from MCP/Portal/Server will appear here in real time."),
