@@ -604,7 +604,7 @@ app.get("/auth/google", authLimiter, (req, res, next) => {
     passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/register?error=google_auth_failed" }), (_req, res) => {
-    res.redirect("/");
+    res.redirect("/dashboard/index.html");
 });
 app.get("/auth/github", authLimiter, (req, res, next) => {
     if (!CLIENT_ID_GITHUB || !CLIENT_SECRET_GITHUB) {
@@ -630,7 +630,7 @@ app.get("/auth/github/callback", (req, res, next) => {
                 res.redirect("/register?error=github_session_error");
                 return;
             }
-            res.redirect("/");
+            res.redirect("/dashboard/index.html");
         });
     })(req, res, next);
 });
