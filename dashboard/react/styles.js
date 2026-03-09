@@ -378,7 +378,7 @@ pre {
 .bm-panel-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   flex-wrap: wrap;
 }
@@ -387,14 +387,15 @@ pre {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  width: 100%;
 }
 .bm-panel-search {
-  width: 280px;
-  max-width: 100%;
+  flex: 1 1 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
+  padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -405,7 +406,7 @@ pre {
 }
 .bm-panel-search input {
   width: 100%;
-  padding: 10px 0;
+  padding: 12px 0;
   border: none;
   background: transparent;
   color: var(--text);
@@ -418,7 +419,7 @@ pre {
   gap: 10px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px;
+  padding: 8px;
   background: var(--surface-2);
   cursor: pointer;
 }
@@ -456,13 +457,13 @@ pre {
 .bm-tag.t5 { background: rgba(167, 139, 250, 0.14); color: #a78bfa; }
 .bm-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(190px, 1fr));
+  grid-template-columns: repeat(2, minmax(170px, 1fr));
   gap: 8px;
 }
 .bm-grid-item {
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px;
+  padding: 8px;
   background: var(--surface-2);
   cursor: pointer;
 }
@@ -507,7 +508,45 @@ pre {
   .bm-content-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
+  .bm-content { padding: 12px; }
   .bm-stats { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
   .bm-grid { grid-template-columns: 1fr; }
+  .bm-panel-tools {
+    gap: 6px;
+  }
+  .bm-panel-tools .btn {
+    margin-right: 0;
+  }
+  .bm-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bm-item-right {
+    text-align: left;
+  }
+  .bm-actions {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 540px) {
+  .bm-top {
+    padding: 10px 12px;
+  }
+  .bm-brand {
+    font-size: 18px;
+  }
+  .bm-top-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .bm-top-actions .btn {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+    margin-right: 0;
+  }
+  .bm-panel-tools .btn {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
 }
 `;
