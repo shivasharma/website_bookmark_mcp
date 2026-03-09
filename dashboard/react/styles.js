@@ -13,12 +13,17 @@ export const baseCss = `
   --radius: 12px;
 }
 * { box-sizing: border-box; }
+:focus-visible {
+  outline: 2px solid rgba(6, 192, 224, 0.65);
+  outline-offset: 2px;
+}
 body {
   margin: 0;
   font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
   background: radial-gradient(circle at 20% 20%, rgba(6, 192, 224, 0.08), transparent 40%), var(--bg);
   color: var(--text);
   min-height: 100vh;
+  line-height: 1.45;
 }
 a { color: inherit; }
 .wrap {
@@ -51,6 +56,7 @@ a { color: inherit; }
   border-radius: var(--radius);
   padding: 14px;
   margin-bottom: 12px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
 .card h2 {
   margin: 0 0 10px;
@@ -71,6 +77,8 @@ a { color: inherit; }
   gap: 8px;
   margin-right: 8px;
   margin-bottom: 8px;
+  min-height: 36px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 .bm-icon {
   width: 16px;
@@ -86,6 +94,7 @@ a { color: inherit; }
 }
 .btn:hover { border-color: #224060; }
 .btn.primary:hover { background: #1bd4f2; border-color: #1bd4f2; }
+.btn:active { transform: translateY(1px); }
 .status {
   font-size: 13px;
   color: var(--muted);
@@ -271,6 +280,10 @@ pre {
   border-right: 1px solid var(--border);
   padding: 12px;
   background: rgba(17, 30, 45, 0.7);
+  position: sticky;
+  top: 62px;
+  height: calc(100vh - 62px);
+  overflow-y: auto;
 }
 .bm-side-title {
   font-size: 10px;
@@ -319,7 +332,11 @@ pre {
   margin: 10px 0;
   background: var(--border);
 }
-.bm-content { padding: 16px; }
+.bm-content {
+  padding: 16px;
+  max-width: 1280px;
+  width: 100%;
+}
 .bm-section-title {
   margin: 0 0 12px;
   font-size: 22px;
@@ -329,7 +346,7 @@ pre {
 .bm-content-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 12px;
+  gap: 14px;
 }
 .bm-stats {
   display: grid;
@@ -383,14 +400,14 @@ pre {
   flex-wrap: wrap;
 }
 .bm-panel-tools {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto auto;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
   width: 100%;
 }
 .bm-panel-search {
-  flex: 1 1 100%;
+  grid-column: 1 / 2;
   width: 100%;
   display: flex;
   align-items: center;
@@ -422,6 +439,11 @@ pre {
   padding: 8px;
   background: var(--surface-2);
   cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.bm-item:hover {
+  border-color: #224060;
+  background: rgba(22, 37, 57, 0.92);
 }
 .bm-item-main { min-width: 0; }
 .bm-item-title {
@@ -441,6 +463,13 @@ pre {
 .bm-item-right { text-align: right; }
 .bm-date { font-size: 11px; color: var(--muted); }
 .bm-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; margin-top: 6px; }
+.bm-actions .btn,
+.bm-grid-actions .btn {
+  margin-right: 0;
+  margin-bottom: 0;
+  padding: 7px 10px;
+  font-size: 12px;
+}
 .bm-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .bm-tag {
   font-size: 10px;
@@ -457,7 +486,7 @@ pre {
 .bm-tag.t5 { background: rgba(167, 139, 250, 0.14); color: #a78bfa; }
 .bm-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 8px;
 }
 .bm-grid-item {
@@ -466,6 +495,11 @@ pre {
   padding: 8px;
   background: var(--surface-2);
   cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.bm-grid-item:hover {
+  border-color: #224060;
+  background: rgba(22, 37, 57, 0.92);
 }
 .bm-grid-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .bm-input {
@@ -506,17 +540,15 @@ pre {
   .bm-main { grid-template-columns: 1fr; }
   .bm-sidebar { display: none; }
   .bm-content-grid { grid-template-columns: 1fr; }
+  .bm-content { max-width: 100%; }
 }
 @media (max-width: 700px) {
   .bm-content { padding: 12px; }
   .bm-stats { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
   .bm-grid { grid-template-columns: 1fr; }
-  .bm-panel-tools {
-    gap: 6px;
-  }
-  .bm-panel-tools .btn {
-    margin-right: 0;
-  }
+  .bm-panel-tools { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .bm-panel-search { grid-column: 1 / -1; }
+  .bm-panel-tools .btn { margin-right: 0; }
   .bm-item {
     flex-direction: column;
     gap: 8px;
