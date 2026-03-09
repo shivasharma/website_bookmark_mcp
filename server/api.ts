@@ -489,6 +489,10 @@ const listNotificationsQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(200).optional(),
 });
 
+const metadataQuerySchema = z.object({
+  url: z.string().trim().min(1).max(2048),
+});
+
 const tokenDaysSchema = z.coerce.number().int().min(1).max(365);
 const notificationIdParamSchema = z.coerce.number().int().positive();
 
@@ -519,6 +523,156 @@ function normalizeBookmarkPayload(input: unknown): Record<string, unknown> {
     payload.tags = tags.length ? tags : undefined;
   }
   return payload;
+}
+
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&#(\d+);/g, (_match, code) => String.fromCharCode(Number(code)));
+}
+
+function stripHtml(value: string): string {
+  return decodeHtmlEntities(String(value || "").replace(/<[^>]*>/g, "")).replace(/\s+/g, " ").trim();
+}
+
+function parseMetaTags(html: string): Array<Record<string, string>> {
+  const tags: Array<Record<string, string>> = [];
+  const metaMatches = html.match(/<meta\s+[^>]*>/gi) || [];
+  for (const tag of metaMatches.slice(0, 200)) {
+    const attrs: Record<string, string> = {};
+    const attrRegex = /([a-zA-Z:-]+)\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/g;
+    let match: RegExpExecArray | null;
+    while ((match = attrRegex.exec(tag))) {
+      const key = String(match[1] || "").toLowerCase();
+      const value = String(match[3] ?? match[4] ?? match[5] ?? "").trim();
+      if (key) {
+        attrs[key] = value;
+      }
+    }
+    if (Object.keys(attrs).length) {
+      tags.push(attrs);
+    }
+  }
+  return tags;
+}
+
+function extractMetadataFromHtml(html: string): { title: string; description: string } {
+  const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const tags = parseMetaTags(html);
+
+  const findMeta = (keys: string[]): string => {
+    for (const tag of tags) {
+      const name = String(tag.name || tag.property || "").toLowerCase();
+      if (!name || !keys.includes(name)) {
+        continue;
+      }
+      const content = stripHtml(tag.content || "");
+      if (content) {
+        return content;
+      }
+    }
+    return "";
+  };
+
+  const title =
+    findMeta(["og:title", "twitter:title"]) ||
+    stripHtml(titleMatch?.[1] || "");
+  const description = findMeta(["description", "og:description", "twitter:description"]);
+  return {
+    title: title.slice(0, 300),
+    description: description.slice(0, 2000),
+  };
+}
+
+function toCandidateUrls(rawUrl: string): string[] {
+  const input = String(rawUrl || "").trim();
+  if (!input) {
+    return [];
+  }
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(input)) {
+    return [input];
+  }
+  return [`https://${input}`, `http://${input}`];
+}
+
+function titleFromHostname(url: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./i, "");
+    const base = host.split(".")[0] || host;
+    return `${base.charAt(0).toUpperCase()}${base.slice(1)} - Website`;
+  } catch {
+    return "Website";
+  }
+}
+
+async function fetchUrlMetadata(rawUrl: string): Promise<{ url: string; title: string; description: string; protocol: "http" | "https" | "unknown" }> {
+  const candidates = toCandidateUrls(rawUrl);
+  if (!candidates.length) {
+    throw new Error("URL is required");
+  }
+
+  let lastResolved = candidates[0];
+
+  for (const candidate of candidates) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(candidate, {
+        method: "GET",
+        redirect: "follow",
+        signal: controller.signal,
+        headers: {
+          "user-agent": "BookmarkFetcher/1.0 (+https://ai.shivaprogramming.com)",
+          accept: "text/html,application/xhtml+xml",
+        },
+      });
+      clearTimeout(timeout);
+
+      lastResolved = response.url || candidate;
+      const type = String(response.headers.get("content-type") || "").toLowerCase();
+      if (!type.includes("text/html")) {
+        const fallbackTitle = titleFromHostname(lastResolved);
+        return {
+          url: lastResolved,
+          title: fallbackTitle,
+          description: `Saved from ${new URL(lastResolved).hostname.replace(/^www\./i, "")}`,
+          protocol: lastResolved.startsWith("https://") ? "https" : lastResolved.startsWith("http://") ? "http" : "unknown",
+        };
+      }
+
+      const html = await response.text();
+      const { title, description } = extractMetadataFromHtml(html);
+      const fallbackTitle = titleFromHostname(lastResolved);
+      return {
+        url: lastResolved,
+        title: title || fallbackTitle,
+        description: description || `Saved from ${new URL(lastResolved).hostname.replace(/^www\./i, "")}`,
+        protocol: lastResolved.startsWith("https://") ? "https" : lastResolved.startsWith("http://") ? "http" : "unknown",
+      };
+    } catch {
+      clearTimeout(timeout);
+    }
+  }
+
+  const fallbackUrl = ensureUrlProtocol(rawUrl);
+  return {
+    url: fallbackUrl,
+    title: titleFromHostname(fallbackUrl),
+    description: `Saved from ${safeHost(fallbackUrl)}`,
+    protocol: fallbackUrl.startsWith("https://") ? "https" : fallbackUrl.startsWith("http://") ? "http" : "unknown",
+  };
+}
+
+function safeHost(value: string): string {
+  try {
+    return new URL(value).hostname.replace(/^www\./i, "");
+  } catch {
+    return value;
+  }
 }
 
 app.get("/", (_req, res) => {
@@ -686,6 +840,21 @@ app.post("/api/logout", (req, res) => {
 
 app.get("/api/health", (_req, res) => {
   res.json({ success: true, status: "ok" });
+});
+
+app.get("/api/url-metadata", tokenLimiter, async (req, res) => {
+  const parsed = metadataQuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: "Invalid url query" });
+    return;
+  }
+  try {
+    const data = await fetchUrlMetadata(parsed.data.url);
+    res.json({ success: true, data });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to fetch metadata";
+    res.status(400).json({ success: false, error: message });
+  }
 });
 
 app.get("/api/system-health", async (_req, res) => {
