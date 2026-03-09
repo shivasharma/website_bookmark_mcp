@@ -402,7 +402,7 @@ pre {
 }
 .bm-activity-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
@@ -415,7 +415,48 @@ pre {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--accent);
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+}
+.bm-source-portal {
+  color: #06c0e0;
+  background: rgba(6, 192, 224, 0.14);
+  border-color: rgba(6, 192, 224, 0.3);
+}
+.bm-source-mcp {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.14);
+  border-color: rgba(167, 139, 250, 0.3);
+}
+.bm-source-server {
+  color: #2f80ed;
+  background: rgba(47, 128, 237, 0.14);
+  border-color: rgba(47, 128, 237, 0.3);
+}
+.bm-activity-action {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+}
+.bm-action-created {
+  color: var(--ok);
+  background: rgba(0, 212, 160, 0.14);
+  border-color: rgba(0, 212, 160, 0.3);
+}
+.bm-action-updated {
+  color: var(--warn);
+  background: rgba(245, 166, 35, 0.14);
+  border-color: rgba(245, 166, 35, 0.3);
+}
+.bm-action-deleted {
+  color: var(--danger);
+  background: rgba(240, 82, 82, 0.14);
+  border-color: rgba(240, 82, 82, 0.3);
 }
 .bm-activity-text {
   font-size: 12px;
