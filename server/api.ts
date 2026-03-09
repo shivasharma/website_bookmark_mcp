@@ -74,6 +74,89 @@ const CORS_ORIGINS = (
       ]
 ).filter(Boolean);
 const MAX_JSON_BODY = process.env.MAX_JSON_BODY ?? "64kb";
+const AUTO_TAGGING_ENABLED = process.env.AUTO_TAGGING_ENABLED !== "false";
+
+const TAG_KEYWORDS: Array<{ tag: string; keywords: string[] }> = [
+  { tag: "ai", keywords: ["ai", "llm", "gpt", "openai", "anthropic", "prompt", "machine learning", "neural"] },
+  { tag: "dev", keywords: ["developer", "programming", "coding", "javascript", "typescript", "python", "api", "backend", "frontend"] },
+  { tag: "design", keywords: ["design", "ux", "ui", "figma", "prototype", "wireframe"] },
+  { tag: "docs", keywords: ["documentation", "docs", "guide", "reference", "manual"] },
+  { tag: "video", keywords: ["youtube", "vimeo", "video", "watch", "podcast"] },
+  { tag: "tutorial", keywords: ["tutorial", "learn", "course", "how to", "walkthrough"] },
+  { tag: "news", keywords: ["news", "release", "announcement", "update", "blog"] },
+  { tag: "tool", keywords: ["tool", "app", "plugin", "extension", "software", "platform"] },
+  { tag: "cloud", keywords: ["aws", "azure", "gcp", "cloud", "kubernetes", "docker"] },
+  { tag: "security", keywords: ["security", "auth", "oauth", "jwt", "vulnerability", "encryption"] },
+  { tag: "database", keywords: ["database", "sql", "postgres", "mysql", "mongodb", "redis"] },
+  { tag: "productivity", keywords: ["productivity", "workflow", "automation", "organize", "management"] },
+];
+
+const DOMAIN_TAGS: Array<{ match: RegExp; tags: string[] }> = [
+  { match: /github\.com$/i, tags: ["dev", "code"] },
+  { match: /stackoverflow\.com$/i, tags: ["dev", "qna"] },
+  { match: /docs\./i, tags: ["docs"] },
+  { match: /youtube\.com$|youtu\.be$/i, tags: ["video"] },
+  { match: /medium\.com$/i, tags: ["article"] },
+  { match: /notion\.so$/i, tags: ["productivity"] },
+  { match: /openai\.com$|anthropic\.com$|huggingface\.co$/i, tags: ["ai"] },
+];
+
+function normalizeTag(value: string): string {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .slice(0, 50);
+}
+
+function uniqueTags(tags: string[], max = 30): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const rawTag of tags) {
+    const tag = normalizeTag(rawTag);
+    if (!tag || seen.has(tag)) {
+      continue;
+    }
+    seen.add(tag);
+    result.push(tag);
+    if (result.length >= max) {
+      break;
+    }
+  }
+  return result;
+}
+
+function inferSmartTags(input: { url?: string; title?: string; description?: string; notes?: string }): string[] {
+  const combined = [input.title, input.description, input.notes, input.url]
+    .map((part) => String(part || "").toLowerCase())
+    .join(" ");
+  const inferred: string[] = [];
+
+  for (const rule of TAG_KEYWORDS) {
+    if (rule.keywords.some((keyword) => combined.includes(keyword))) {
+      inferred.push(rule.tag);
+    }
+  }
+
+  if (input.url) {
+    try {
+      const host = new URL(input.url).hostname.toLowerCase();
+      for (const domainRule of DOMAIN_TAGS) {
+        if (domainRule.match.test(host)) {
+          inferred.push(...domainRule.tags);
+        }
+      }
+    } catch {}
+  }
+
+  return uniqueTags(inferred, 10);
+}
+
+function mergeTags(existing: string[] | undefined, inferred: string[]): string[] | undefined {
+  const merged = uniqueTags([...(existing || []), ...inferred]);
+  return merged.length ? merged : undefined;
+}
 
 function isHttpUrl(value: string): boolean {
   try {
