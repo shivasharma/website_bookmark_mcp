@@ -21,10 +21,14 @@ let listenerClient: Client | null = null;
 let listenerStarted = false;
 
 type AuthProvider = "google" | "github" | "local";
+type BookmarkEventSource = "portal" | "mcp";
 type BookmarkEvent = {
   action: "created" | "updated" | "deleted";
   user_id: number;
   bookmark_id: number;
+  bookmark_title: string;
+  bookmark_url: string;
+  source: BookmarkEventSource;
   at: string;
 };
 
@@ -281,7 +285,10 @@ export async function ensureLocalDefaultUser(): Promise<number> {
   return user.id;
 }
 
-export async function saveBookmark(input: SaveBookmarkInput): Promise<Bookmark> {
+export async function saveBookmark(
+  input: SaveBookmarkInput,
+  source: BookmarkEventSource = "portal",
+): Promise<Bookmark> {
   const userId = input.user_id ?? Number(process.env.DEFAULT_USER_ID ?? 1);
 
   const existing = await pool.query(
@@ -304,6 +311,7 @@ export async function saveBookmark(input: SaveBookmarkInput): Promise<Bookmark> 
       notes: input.notes,
       },
       userId,
+      source,
     );
     if (!updated) {
       throw new Error("Failed to update existing bookmark");
@@ -332,6 +340,9 @@ export async function saveBookmark(input: SaveBookmarkInput): Promise<Bookmark> 
     action: "created",
     user_id: created.user_id,
     bookmark_id: created.id,
+    bookmark_title: created.title,
+    bookmark_url: created.url,
+    source,
     at: new Date().toISOString(),
   });
   return created;
@@ -405,7 +416,12 @@ export async function listBookmarks(input: ListBookmarksInput = {}): Promise<{ i
   };
 }
 
-export async function updateBookmark(id: number, fields: UpdateBookmarkInput, userId?: number): Promise<Bookmark | null> {
+export async function updateBookmark(
+  id: number,
+  fields: UpdateBookmarkInput,
+  userId?: number,
+  source: BookmarkEventSource = "portal",
+): Promise<Bookmark | null> {
   const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
   const current = await getBookmarkById(id, effectiveUserId);
   if (!current) {
@@ -460,12 +476,19 @@ export async function updateBookmark(id: number, fields: UpdateBookmarkInput, us
     action: "updated",
     user_id: effectiveUserId,
     bookmark_id: updated.id,
+    bookmark_title: updated.title,
+    bookmark_url: updated.url,
+    source,
     at: new Date().toISOString(),
   });
   return updated;
 }
 
-export async function deleteBookmark(id: number, userId?: number): Promise<Bookmark | null> {
+export async function deleteBookmark(
+  id: number,
+  userId?: number,
+  source: BookmarkEventSource = "portal",
+): Promise<Bookmark | null> {
   const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
   const { rows } = await pool.query(
     `
@@ -483,6 +506,9 @@ export async function deleteBookmark(id: number, userId?: number): Promise<Bookm
     action: "deleted",
     user_id: effectiveUserId,
     bookmark_id: deleted.id,
+    bookmark_title: deleted.title,
+    bookmark_url: deleted.url,
+    source,
     at: new Date().toISOString(),
   });
   return deleted;

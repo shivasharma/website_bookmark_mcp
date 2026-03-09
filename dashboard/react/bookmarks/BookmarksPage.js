@@ -62,17 +62,29 @@ function normalizeSharedUrl(value) {
   }
 }
 
-function getRealtimeMessage(action) {
+function formatNotificationTarget(payload) {
+  const title = String(payload?.bookmark_title || "").trim();
+  if (title) {
+    return title;
+  }
+  return String(payload?.bookmark_url || "bookmark").trim() || "bookmark";
+}
+
+function getRealtimeMessage(payload) {
+  const action = String(payload?.action || "").toLowerCase();
+  const source = String(payload?.source || "portal").toLowerCase() === "mcp" ? "MCP" : "Portal";
+  const target = formatNotificationTarget(payload);
+
   if (action === "created") {
-    return "New bookmark added from another client";
+    return `${source}: added ${target}`;
   }
   if (action === "deleted") {
-    return "A bookmark was removed from another client";
+    return `${source}: deleted ${target}`;
   }
   if (action === "updated") {
-    return "A bookmark was updated from another client";
+    return `${source}: updated ${target}`;
   }
-  return "Bookmarks updated in real time";
+  return `${source}: bookmarks updated`;
 }
 
 export function BookmarksPage() {
@@ -260,8 +272,7 @@ export function BookmarksPage() {
         payload = null;
       }
 
-      const action = String(payload?.action || "").toLowerCase();
-      setMessage(getRealtimeMessage(action));
+      setMessage(getRealtimeMessage(payload));
 
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);

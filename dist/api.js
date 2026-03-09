@@ -227,6 +227,9 @@ function getBearerToken(req) {
     }
     return token.trim() || null;
 }
+function getRequestSource(req) {
+    return getBearerToken(req) ? "mcp" : "portal";
+}
 function getUserId(req) {
     const bearer = getBearerToken(req);
     if (bearer) {
@@ -597,7 +600,10 @@ app.post("/api/bookmarks", writeLimiter, async (req, res) => {
                 error: firstIssue ? `Invalid field "${firstIssue.path.join(".")}": ${firstIssue.message}` : "Invalid bookmark payload",
             });
         }
-        const bookmark = await saveBookmark({ ...parsed.data, user_id: getUserId(req) });
+        const userId = getUserId(req);
+        const source = getRequestSource(req);
+        const bookmark = await saveBookmark({ ...parsed.data, user_id: userId }, source);
+        console.info(`[bookmark-event] action=created source=${source} user=${userId} id=${bookmark.id} title=${bookmark.title || "(untitled)"}`);
         return res.status(201).json({ success: true, data: bookmark });
     }
     catch (error) {
@@ -613,6 +619,7 @@ app.patch("/api/bookmarks/:id", writeLimiter, async (req, res) => {
         }
         const id = parsedId.data;
         const userId = getUserId(req);
+        const source = getRequestSource(req);
         const existing = await getBookmarkById(id, userId);
         if (!existing) {
             return res.status(404).json({ success: false, error: "Not found" });
@@ -627,7 +634,10 @@ app.patch("/api/bookmarks/:id", writeLimiter, async (req, res) => {
                     : "Invalid bookmark update payload",
             });
         }
-        const updated = await updateBookmark(id, parsed.data, userId);
+        const updated = await updateBookmark(id, parsed.data, userId, source);
+        if (updated) {
+            console.info(`[bookmark-event] action=updated source=${source} user=${userId} id=${updated.id} title=${updated.title || "(untitled)"}`);
+        }
         return res.json({ success: true, data: updated });
     }
     catch (error) {
@@ -642,10 +652,13 @@ app.delete("/api/bookmarks/:id", writeLimiter, async (req, res) => {
             res.status(400).json({ success: false, error: "Invalid bookmark id" });
             return;
         }
-        const deleted = await deleteBookmark(parsedId.data, getUserId(req));
+        const userId = getUserId(req);
+        const source = getRequestSource(req);
+        const deleted = await deleteBookmark(parsedId.data, userId, source);
         if (!deleted) {
             return res.status(404).json({ success: false, error: "Not found" });
         }
+        console.info(`[bookmark-event] action=deleted source=${source} user=${userId} id=${deleted.id} title=${deleted.title || "(untitled)"}`);
         res.json({ success: true, data: deleted });
     }
     catch (error) {

@@ -218,7 +218,7 @@ export async function ensureLocalDefaultUser() {
     });
     return user.id;
 }
-export async function saveBookmark(input) {
+export async function saveBookmark(input, source = "portal") {
     const userId = input.user_id ?? Number(process.env.DEFAULT_USER_ID ?? 1);
     const existing = await pool.query(`
       SELECT * FROM bookmarks
@@ -232,7 +232,7 @@ export async function saveBookmark(input) {
             tags: input.tags,
             favicon: input.favicon,
             notes: input.notes,
-        }, userId);
+        }, userId, source);
         if (!updated) {
             throw new Error("Failed to update existing bookmark");
         }
@@ -256,6 +256,9 @@ export async function saveBookmark(input) {
         action: "created",
         user_id: created.user_id,
         bookmark_id: created.id,
+        bookmark_title: created.title,
+        bookmark_url: created.url,
+        source,
         at: new Date().toISOString(),
     });
     return created;
@@ -310,7 +313,7 @@ export async function listBookmarks(input = {}) {
         total: Number(countRows[0]?.total ?? 0),
     };
 }
-export async function updateBookmark(id, fields, userId) {
+export async function updateBookmark(id, fields, userId, source = "portal") {
     const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
     const current = await getBookmarkById(id, effectiveUserId);
     if (!current) {
@@ -359,11 +362,14 @@ export async function updateBookmark(id, fields, userId) {
         action: "updated",
         user_id: effectiveUserId,
         bookmark_id: updated.id,
+        bookmark_title: updated.title,
+        bookmark_url: updated.url,
+        source,
         at: new Date().toISOString(),
     });
     return updated;
 }
-export async function deleteBookmark(id, userId) {
+export async function deleteBookmark(id, userId, source = "portal") {
     const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
     const { rows } = await pool.query(`
       DELETE FROM bookmarks
@@ -378,6 +384,9 @@ export async function deleteBookmark(id, userId) {
         action: "deleted",
         user_id: effectiveUserId,
         bookmark_id: deleted.id,
+        bookmark_title: deleted.title,
+        bookmark_url: deleted.url,
+        source,
         at: new Date().toISOString(),
     });
     return deleted;
