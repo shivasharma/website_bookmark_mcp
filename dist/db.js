@@ -2,7 +2,7 @@ import "dotenv/config";
 import { EventEmitter } from "node:events";
 import { Client, Pool } from "pg";
 import { randomUUID } from "node:crypto";
-const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/bookmark_mcp";
+const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5433/bookmark_mcp";
 const pool = new Pool({ connectionString });
 const realtimeEvents = new EventEmitter();
 realtimeEvents.setMaxListeners(200);

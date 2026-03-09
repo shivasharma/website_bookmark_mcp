@@ -304,6 +304,9 @@ function getBearerToken(req) {
 }
 function getRequestSource(req) {
     const explicitSource = String(req.header("x-bookmark-source") || "").trim().toLowerCase();
+    if (explicitSource === "mcp") {
+        return "mcp";
+    }
     if (explicitSource === "server") {
         return "server";
     }

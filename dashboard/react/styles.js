@@ -529,6 +529,31 @@ pre {
   gap: 8px;
   width: 100%;
 }
+.bm-notification-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.bm-realtime-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.bm-realtime-status.is-connected {
+  color: var(--ok);
+  border-color: rgba(0, 212, 160, 0.35);
+  background: rgba(0, 212, 160, 0.1);
+}
+.bm-realtime-status.is-connecting,
+.bm-realtime-status.is-disconnected {
+  color: var(--warn);
+  border-color: rgba(245, 166, 35, 0.35);
+  background: rgba(245, 166, 35, 0.1);
+}
 .bm-panel-search {
   grid-column: 1 / 2;
   width: 100%;
@@ -659,7 +684,7 @@ pre {
   gap: 8px;
   margin-bottom: 8px;
 }
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   .bm-main { grid-template-columns: 1fr; }
   .bm-sidebar { display: none; }
   .bm-content-grid { grid-template-columns: 1fr; }

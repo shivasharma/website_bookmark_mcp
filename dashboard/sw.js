@@ -1,4 +1,4 @@
-const CACHE_NAME = "markd-shell-v1";
+const CACHE_NAME = "markd-shell-v2";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",
@@ -37,26 +37,46 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+  if (requestUrl.pathname.startsWith("/api/")) {
+    return;
+  }
 
-      return fetch(event.request)
+  const isReactModule = requestUrl.pathname.startsWith("/react/") ||
+    event.request.destination === "script" ||
+    event.request.destination === "style";
+
+  if (isReactModule) {
+    event.respondWith(
+      fetch(event.request)
         .then((response) => {
           if (!response || response.status !== 200) {
             return response;
           }
-
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone).catch(() => {});
           });
-
           return response;
         })
-        .catch(() => caches.match("/react-shell.html"));
-    })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (!response || response.status !== 200) {
+          return response;
+        }
+
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone).catch(() => {});
+        });
+
+        return response;
+      })
+      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/react-shell.html")))
   );
 });

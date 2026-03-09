@@ -7,6 +7,7 @@ const API_TOKEN = process.env.BOOKMARK_API_TOKEN?.trim();
 async function apiRequest(path, init) {
     const headers = new Headers(init?.headers);
     headers.set("Content-Type", "application/json");
+    headers.set("x-bookmark-source", "mcp");
     if (API_TOKEN) {
         headers.set("Authorization", `Bearer ${API_TOKEN}`);
     }

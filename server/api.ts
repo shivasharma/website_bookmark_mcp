@@ -387,6 +387,9 @@ function getBearerToken(req: express.Request): string | null {
 
 function getRequestSource(req: express.Request): "portal" | "mcp" | "server" {
   const explicitSource = String(req.header("x-bookmark-source") || "").trim().toLowerCase();
+  if (explicitSource === "mcp") {
+    return "mcp";
+  }
   if (explicitSource === "server") {
     return "server";
   }

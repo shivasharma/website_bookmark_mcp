@@ -129,6 +129,7 @@ export function BookmarksPage() {
   const [notificationsTotal, setNotificationsTotal] = useState(0);
   const [notificationsUnread, setNotificationsUnread] = useState(0);
   const [notificationsPage, setNotificationsPage] = useState(1);
+  const [realtimeStatus, setRealtimeStatus] = useState("connecting");
   const notificationsPageRef = useRef(1);
   const sectionRef = useRef("bookmarks");
 
@@ -348,6 +349,13 @@ export function BookmarksPage() {
     let isDisposed = false;
     const eventSource = new EventSource("/api/events", { withCredentials: true });
 
+    eventSource.onopen = () => {
+      if (isDisposed) {
+        return;
+      }
+      setRealtimeStatus("connected");
+    };
+
     function onBookmarkEvent(event) {
       if (isDisposed) {
         return;
@@ -361,9 +369,10 @@ export function BookmarksPage() {
       }
 
       const realtimeMessage = getRealtimeMessage(payload);
+      setRealtimeStatus("connected");
       setMessage(realtimeMessage);
       if (sectionRef.current === "notifications") {
-        loadNotifications({ mode: "page", page: notificationsPageRef.current });
+        loadNotifications({ mode: "page", page: 1 });
       } else {
         loadNotifications({ mode: "activity" });
       }
@@ -378,6 +387,7 @@ export function BookmarksPage() {
       if (isDisposed) {
         return;
       }
+      setRealtimeStatus("disconnected");
       setMessage("Realtime notifications disconnected. Retrying...");
     }
 
@@ -620,6 +630,7 @@ export function BookmarksPage() {
           React.createElement(NotificationsPage, {
             items: notifications,
             unreadCount,
+            realtimeStatus,
             page: notificationsPage,
             pageSize: NOTIFICATIONS_PAGE_SIZE,
             total: notificationsTotal,

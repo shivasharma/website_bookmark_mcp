@@ -12,7 +12,7 @@ import type {
   User,
 } from "./types.js";
 
-const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5432/bookmark_mcp";
+const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5433/bookmark_mcp";
 
 const pool = new Pool({ connectionString });
 const realtimeEvents = new EventEmitter();

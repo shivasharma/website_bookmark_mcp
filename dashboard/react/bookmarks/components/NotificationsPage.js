@@ -1,9 +1,21 @@
 import React from "react";
 
-export function NotificationsPage({ items, unreadCount, page = 1, pageSize = 25, total = 0, onPageChange, onMarkAllRead, onMarkRead, onClearAll }) {
+export function NotificationsPage({
+  items,
+  unreadCount,
+  realtimeStatus = "connecting",
+  page = 1,
+  pageSize = 25,
+  total = 0,
+  onPageChange,
+  onMarkAllRead,
+  onMarkRead,
+  onClearAll,
+}) {
   const totalPages = Math.max(1, Math.ceil(Number(total || 0) / Number(pageSize || 25)));
   const canGoPrev = Number(page) > 1;
   const canGoNext = Number(page) < totalPages;
+  const statusLabel = realtimeStatus === "connected" ? "Live" : realtimeStatus === "disconnected" ? "Reconnecting" : "Connecting";
 
   return React.createElement(
     "section",
@@ -11,7 +23,12 @@ export function NotificationsPage({ items, unreadCount, page = 1, pageSize = 25,
     React.createElement(
       "div",
       { className: "bm-panel-head" },
-      React.createElement("h2", null, "Notifications"),
+      React.createElement(
+        "div",
+        { className: "bm-notification-title" },
+        React.createElement("h2", null, "Notifications"),
+        React.createElement("span", { className: `bm-realtime-status is-${realtimeStatus}` }, statusLabel)
+      ),
       React.createElement(
         "div",
         null,
