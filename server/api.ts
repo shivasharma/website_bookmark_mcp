@@ -19,6 +19,7 @@ import {
   getBookmarkById,
   getOrCreateOAuthUser,
   getStats,
+  getTotalUsers,
   getUserById,
   getUserByEmail,
   initRealtimeListener,
@@ -877,6 +878,8 @@ app.get("/api/url-metadata", tokenLimiter, async (req, res) => {
 
 app.get("/api/system-health", async (_req, res) => {
   const db = await getDatabaseHealth();
+  const totalUsers = await getTotalUsers();
+  const sessionMetrics = await getLiveSessionMetrics();
   const memory = process.memoryUsage();
   const [loadAvg1, loadAvg5, loadAvg15] = os.loadavg();
 
@@ -895,6 +898,11 @@ app.get("/api/system-health", async (_req, res) => {
         latencyMs: db.latencyMs,
         serverTime: db.serverTime,
       },
+      users: {
+        totalUsers,
+        liveSessions: sessionMetrics.liveSessions,
+        authenticatedSessions: sessionMetrics.authenticatedSessions,
+      },
       system: {
         platform: process.platform,
         arch: process.arch,
@@ -912,6 +920,53 @@ app.get("/api/system-health", async (_req, res) => {
     },
   });
 });
+
+async function getLiveSessionMetrics(): Promise<{ liveSessions: number; authenticatedSessions: number }> {
+  const sessionStore = (app as unknown as { request?: { sessionStore?: unknown } }).request?.sessionStore as {
+    all?: (callback: (error: unknown, sessions?: Record<string, unknown> | unknown[]) => void) => void;
+  } | undefined;
+
+  if (!sessionStore?.all) {
+    return { liveSessions: 0, authenticatedSessions: 0 };
+  }
+  const allSessions = sessionStore.all;
+
+  return new Promise((resolve) => {
+    allSessions.call(sessionStore, (error, sessions) => {
+      if (error || !sessions) {
+        resolve({ liveSessions: 0, authenticatedSessions: 0 });
+        return;
+      }
+
+      const items = Array.isArray(sessions)
+        ? sessions
+        : Object.values(sessions as Record<string, unknown>);
+      const now = Date.now();
+      let liveSessions = 0;
+      let authenticatedSessions = 0;
+
+      for (const entry of items) {
+        if (!entry || typeof entry !== "object") {
+          continue;
+        }
+        const raw = entry as Record<string, unknown>;
+        const cookie = raw.cookie as Record<string, unknown> | undefined;
+        const expiresAt = cookie?.expires ? Date.parse(String(cookie.expires)) : NaN;
+        if (Number.isFinite(expiresAt) && expiresAt <= now) {
+          continue;
+        }
+        liveSessions += 1;
+
+        const passportData = raw.passport as Record<string, unknown> | undefined;
+        if (passportData && passportData.user !== undefined && passportData.user !== null) {
+          authenticatedSessions += 1;
+        }
+      }
+
+      resolve({ liveSessions, authenticatedSessions });
+    });
+  });
+}
 
 app.get("/api/events", (req, res) => {
   let userId: number;

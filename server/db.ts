@@ -628,6 +628,11 @@ export async function getDatabaseHealth(): Promise<{
   }
 }
 
+export async function getTotalUsers(): Promise<number> {
+  const { rows } = await pool.query(`SELECT COUNT(*)::int AS total FROM users`);
+  return Number(rows[0]?.total ?? 0);
+}
+
 export async function listNotifications(
   userId: number,
   limit = 50,

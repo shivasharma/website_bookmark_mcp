@@ -1912,6 +1912,15 @@ async function renderSystemHealthPanel(container){
       <p class="tp-sub" id="shLastUpdate">Polling every 10s. Last update: --</p>
     </div>
     <div class="tp-card">
+      <div class="tp-card-head"><h3>User Activity</h3></div>
+      <div class="tp-kpis" id="shUserKpis">
+        <div class="tp-kpi"><div class="tp-kpi-label">Total Users</div><div class="tp-kpi-value" id="shUserTotal">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Live Sessions</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Auth Sessions</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Load Avg</div><div class="tp-kpi-value" id="shLoadAvg">--</div></div>
+      </div>
+    </div>
+    <div class="tp-card">
       <div class="tp-card-head"><h3>Services</h3></div>
       <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
     </div>`;
@@ -1940,6 +1949,18 @@ async function renderSystemHealthPanel(container){
       ['API',apiOk?'OK':'Down'],['Database',dbOk?'OK':'Down'],
       ['Uptime',_fmtUptime(d.api?.uptimeSec)],['Memory',_fmtBytes(d.system?.memory?.rss)]
     ].map(([l,v])=>`<div class="tp-kpi"><div class="tp-kpi-label">${l}</div><div class="tp-kpi-value">${v}</div></div>`).join('');
+    const totalUsers=Number(d.users?.totalUsers||0);
+    const liveSessions=Number(d.users?.liveSessions||0);
+    const authSessions=Number(d.users?.authenticatedSessions||0);
+    const loadAvg=Number(d.system?.loadAvg1||0).toFixed(2);
+    const userTotalEl=document.getElementById('shUserTotal');
+    if(userTotalEl)userTotalEl.textContent=String(totalUsers);
+    const liveSessionsEl=document.getElementById('shLiveSessions');
+    if(liveSessionsEl)liveSessionsEl.textContent=String(liveSessions);
+    const authSessionsEl=document.getElementById('shAuthSessions');
+    if(authSessionsEl)authSessionsEl.textContent=String(authSessions);
+    const loadAvgEl=document.getElementById('shLoadAvg');
+    if(loadAvgEl)loadAvgEl.textContent=loadAvg;
     const ts=d.timestamp?new Date(d.timestamp).toLocaleTimeString():'--';
     const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 5s. Last update: ${ts}`;
     const svc=document.getElementById('shServices');
@@ -1965,6 +1986,14 @@ async function renderSystemHealthPanel(container){
     _setCommandState('shDbState','shDbValue','state-red','Critical');
     _setCommandState('shRuntimeState','shRuntimeValue','state-blue','Monitoring');
     _setCommandState('shOverallState','shOverallValue','state-red','Critical');
+    const userTotalEl=document.getElementById('shUserTotal');
+    if(userTotalEl)userTotalEl.textContent='--';
+    const liveSessionsEl=document.getElementById('shLiveSessions');
+    if(liveSessionsEl)liveSessionsEl.textContent='--';
+    const authSessionsEl=document.getElementById('shAuthSessions');
+    if(authSessionsEl)authSessionsEl.textContent='--';
+    const loadAvgEl=document.getElementById('shLoadAvg');
+    if(loadAvgEl)loadAvgEl.textContent='--';
     const svc=document.getElementById('shServices');
     if(svc)svc.innerHTML='<p class="tp-sub">Unable to reach health endpoint. Retrying...</p>';
   }
