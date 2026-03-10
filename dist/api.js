@@ -599,7 +599,7 @@ app.get("/register", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "register.html"));
 });
 app.get("/mcp-setup", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "mcp-setup.html"));
+    res.sendFile(path.join(dashboardDir, "mcpsetup.html"));
 });
 app.get("/syshealth", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "index.html"));
