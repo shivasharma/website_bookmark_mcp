@@ -1766,8 +1766,9 @@ function switchSection(section){
     document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>el.style.display='');
     const bc=document.getElementById('bookmarkContent');if(bc)bc.style.display='';
     if(onboard)onboard.style.display='';
-    if(toolPanel){toolPanel.style.display='none';toolPanel.innerHTML='';}
+    if(toolPanel){if(toolPanel._cleanup)toolPanel._cleanup();toolPanel.style.display='none';toolPanel.innerHTML='';}
     if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+    if(_notifTimer){clearInterval(_notifTimer);_notifTimer=null}
     // if not logged in, show welcome instead of bookmark UI
     if(!currentUser){renderWelcomeExperience();}
     history.pushState(null,'','/');
@@ -1780,6 +1781,9 @@ function switchSection(section){
   const bc=document.getElementById('bookmarkContent');if(bc)bc.style.display='none';
   if(onboard)onboard.style.display='none';
 
+  // cleanup previous tool panel content
+  if(toolPanel&&toolPanel._cleanup){toolPanel._cleanup();toolPanel._cleanup=null}
+
   // show tool panel
   if(toolPanel){
     toolPanel.style.display='';
@@ -1789,6 +1793,9 @@ function switchSection(section){
     }else if(section==='mcp'){
       history.pushState(null,'','/mcp');
       renderMcpSetupPanel(toolPanel);
+    }else if(section==='notifications'){
+      history.pushState(null,'','/notifications');
+      renderNotificationsPanel(toolPanel);
     }
   }
   closeMobileSidebar();
@@ -1802,11 +1809,20 @@ function renderSystemHealthPanel(container){
   if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
   container.innerHTML=`
     <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
-    <div class="tp-card"><div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
-      <div class="tp-kpis" id="shKpis"><div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div></div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
+      <div class="tp-kpis" id="shKpis">
+        <div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
+      </div>
       <p class="tp-sub" id="shLastUpdate">Polling every 10s. Last update: --</p>
     </div>
-    <div class="tp-card"><h3>Services</h3><div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div></div>`;
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Services</h3></div>
+      <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
+    </div>`;
 
   const ctrl=new AbortController();
   async function fetchHealth(){
@@ -1856,14 +1872,32 @@ function renderMcpSetupPanel(container){
 
   container.innerHTML=`
     <div class="tp-header"><h2 class="tp-title">MCP Setup</h2><p class="tp-sub">Configure Model Context Protocol for AI assistants</p></div>
-    <div class="tp-card"><h3>Session</h3>${!currentUser?'<p class="tp-sub">You are not logged in. Login first to generate MCP token.</p><a class="btn-outline" href="/register">Login / Register</a>':'<p class="tp-sub">Logged in as <strong>'+userName+'</strong>.</p>'}</div>
-    <div class="tp-card"><h3>Token</h3><p class="tp-sub">Generate a token and use it in MCP config.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn-outline" type="button" id="mcpGenBtn" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700">Generate Token</button><button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">Copy Token</button></div>
-      <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
-      <pre id="mcpTokenPre">Click Generate Token</pre>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Session</h3></div>
+      ${!currentUser
+        ?'<p class="tp-sub">You are not logged in. Login first to generate MCP token.</p><a class="btn-outline" href="/register" style="margin-top:8px;display:inline-flex">Login / Register</a>'
+        :'<p class="tp-sub">Logged in as <strong>'+esc(userName)+'</strong>.</p>'}
     </div>
-    <div class="tp-card"><h3>Config Template</h3><button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button><pre id="mcpConfigPre">${buildConfig('')}</pre></div>
-    <div class="tp-card"><h3>OAuth Callback</h3><p class="tp-sub">GitHub callback should be set to this URL only:</p><pre>${callbackUrl}</pre></div>`;
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Token</h3></div>
+      <p class="tp-sub">Generate a token and use it in your MCP client configuration.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn-outline" type="button" id="mcpGenBtn" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700">Generate Token</button>
+        <button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">Copy Token</button>
+      </div>
+      <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
+      <pre id="mcpTokenPre">Click "Generate Token" to create an API token</pre>
+    </div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Config Template</h3><button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button></div>
+      <p class="tp-sub">Paste this JSON into your MCP client settings (Claude Desktop, Cursor, VS Code, etc.).</p>
+      <pre id="mcpConfigPre">${buildConfig('')}</pre>
+    </div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>OAuth Callback</h3></div>
+      <p class="tp-sub">If you are self-hosting, set the GitHub OAuth callback URL to:</p>
+      <pre>${esc(callbackUrl)}</pre>
+    </div>`;
 
   let token='';
   document.getElementById('mcpGenBtn')?.addEventListener('click',async()=>{
@@ -1896,16 +1930,112 @@ function renderMcpSetupPanel(container){
   }
 }
 
+// ── Notifications Panel (vanilla JS) ──
+var _notifTimer=null;
+var _notifPage=1;
+const _NOTIF_PAGE_SIZE=25;
+
+function renderNotificationsPanel(container){
+  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  if(_notifTimer){clearInterval(_notifTimer);_notifTimer=null}
+  _notifPage=1;
+
+  container.innerHTML=`
+    <div class="tp-header"><h2 class="tp-title">Notifications</h2><p class="tp-sub">Activity log for bookmark changes</p></div>
+    <div class="tp-card">
+      <div class="tp-card-head">
+        <h3>Activity Feed</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-outline" type="button" id="notifMarkAllBtn">Mark All Read</button>
+          <button class="btn-outline" type="button" id="notifRefreshBtn">Refresh</button>
+        </div>
+      </div>
+      <div id="notifList"><p class="tp-sub">Loading notifications...</p></div>
+      <div id="notifPager" style="display:flex;justify-content:center;gap:10px;margin-top:14px"></div>
+    </div>`;
+
+  const ctrl=new AbortController();
+
+  async function fetchNotifications(page){
+    _notifPage=Math.max(1,page||1);
+    try{
+      const r=await fetch('/api/notifications?page='+_notifPage+'&pageSize='+_NOTIF_PAGE_SIZE,{credentials:'include',signal:ctrl.signal});
+      const p=await r.json().catch(()=>null);
+      if(!r.ok||!p?.success||!Array.isArray(p.data)){throw new Error('Unable to fetch')}
+      _renderNotifList(p.data,Number(p.total||0),Number(p.page||_notifPage),Number(p.unread||0));
+    }catch(e){
+      if(e?.name==='AbortError')return;
+      const el=document.getElementById('notifList');
+      if(el)el.innerHTML='<p class="tp-sub">Unable to load notifications.</p>';
+    }
+  }
+
+  function _fmtAction(a){const v=String(a||'updated').toLowerCase();return v==='created'?'created':v==='deleted'?'deleted':'updated'}
+  function _fmtSource(s){const v=String(s||'portal').toLowerCase();return v==='mcp'?'MCP':v==='server'?'Server':'Portal'}
+
+  function _renderNotifList(items,total,page,unread){
+    const el=document.getElementById('notifList');
+    if(!el)return;
+    if(!items.length){
+      el.innerHTML='<p class="tp-sub">No notifications yet. Activity will appear here when bookmarks are created, updated, or deleted.</p>';
+      document.getElementById('notifPager').innerHTML='';
+      return;
+    }
+    el.innerHTML=items.map(n=>{
+      const action=_fmtAction(n.action);
+      const source=_fmtSource(n.source);
+      const text=String(n.text||'').trim()||'Bookmark '+action;
+      const time=n.created_at?new Date(n.created_at).toLocaleString():'';
+      const read=n.is_read;
+      return `<div class="notif-item${read?' notif-read':''}">
+        <div class="notif-item-head">
+          <span class="notif-source notif-source-${source.toLowerCase()}">${esc(source)}</span>
+          <span class="notif-action notif-action-${action}">${action}</span>
+          <span class="notif-time">${esc(time)}</span>
+        </div>
+        <div class="notif-text">${esc(text)}</div>
+      </div>`;
+    }).join('');
+
+    // pager
+    const totalPages=Math.max(1,Math.ceil(total/_NOTIF_PAGE_SIZE));
+    const pager=document.getElementById('notifPager');
+    if(pager&&totalPages>1){
+      pager.innerHTML=`<button class="btn-outline" ${page<=1?'disabled':''} onclick="event.preventDefault();window._notifGoPage(${page-1})">← Prev</button><span class="tp-sub" style="display:flex;align-items:center">Page ${page} of ${totalPages}</span><button class="btn-outline" ${page>=totalPages?'disabled':''} onclick="event.preventDefault();window._notifGoPage(${page+1})">Next →</button>`;
+    }else if(pager){pager.innerHTML=''}
+  }
+
+  window._notifGoPage=function(p){fetchNotifications(p)};
+
+  document.getElementById('notifMarkAllBtn')?.addEventListener('click',async()=>{
+    try{
+      await fetch('/api/notifications/read-all',{method:'POST',credentials:'include'});
+      fetchNotifications(_notifPage);
+      await loadNotificationSummary();
+    }catch{}
+  });
+
+  document.getElementById('notifRefreshBtn')?.addEventListener('click',()=>fetchNotifications(_notifPage));
+
+  // mark all as read on first visit
+  fetch('/api/notifications/read-all',{method:'POST',credentials:'include'}).catch(()=>{});
+  fetchNotifications(1);
+  _notifTimer=setInterval(()=>fetchNotifications(_notifPage),15000);
+  container._cleanup=()=>{ctrl.abort();if(_notifTimer){clearInterval(_notifTimer);_notifTimer=null}};
+}
+
 // Handle direct URL navigation for tool sections
 function _initSectionFromUrl(){
   const p=window.location.pathname;
   if(p==='/syshealth')switchSection('syshealth');
   else if(p==='/mcp')switchSection('mcp');
+  else if(p==='/notifications')switchSection('notifications');
 }
 window.addEventListener('popstate',()=>{
   const p=window.location.pathname;
   if(p==='/syshealth')switchSection('syshealth');
   else if(p==='/mcp')switchSection('mcp');
+  else if(p==='/notifications')switchSection('notifications');
   else if(currentSection!=='bookmarks')switchSection('bookmarks');
 });
 

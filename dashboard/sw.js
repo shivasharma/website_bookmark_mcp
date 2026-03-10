@@ -1,8 +1,7 @@
-const CACHE_NAME = "markd-shell-v4";
+const CACHE_NAME = "markd-shell-v5";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",
-  "/react-shell.html",
   "/styles.css",
   "/main.js",
   "/manifest.webmanifest",

@@ -730,7 +730,7 @@ app.get("/mcp", (_req, res) => {
 });
 
 app.get("/notifications", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/auth/google", authLimiter, (req, res, next) => {

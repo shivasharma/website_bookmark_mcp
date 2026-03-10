@@ -642,7 +642,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .toast.success .toast-ico{animation:toastCheckPop .35s ease-out}
 
 /* TOOL PANEL (System Health / MCP Setup) */
-.tool-panel{padding:24px 28px 32px;width:100%;max-width:920px}
+.tool-panel{padding:24px 28px 32px;width:100%;max-width:920px;margin:0 auto}
 .tool-panel .tp-header{margin-bottom:18px}
 .tool-panel .tp-title{font-size:clamp(20px,1.2vw+14px,28px);font-weight:800;font-family:'Sora','Segoe UI',sans-serif;margin:0 0 4px}
 .tool-panel .tp-sub{color:var(--text3);font-size:13px;margin:0}
@@ -668,6 +668,21 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .tool-panel .tp-status.danger{color:var(--invalid,#E8875A)}
 .tool-panel pre{margin:8px 0 0;white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:Consolas,'Courier New',monospace;font-size:12px;color:var(--accent);line-height:1.5}
 @media(max-width:600px){.tool-panel .tp-kpis{grid-template-columns:repeat(2,minmax(80px,1fr))}}
+
+/* NOTIFICATION PANEL */
+.notif-item{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;background:var(--card,var(--surface2,#162539));transition:opacity .2s ease}
+.notif-item.notif-read{opacity:.7}
+.notif-item-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.notif-source{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:999px;padding:2px 8px;border:1px solid transparent}
+.notif-source-portal{color:var(--accent);background:rgba(6,192,224,.14);border-color:rgba(6,192,224,.3)}
+.notif-source-mcp{color:#a78bfa;background:rgba(167,139,250,.14);border-color:rgba(167,139,250,.3)}
+.notif-source-server{color:#2f80ed;background:rgba(47,128,237,.14);border-color:rgba(47,128,237,.3)}
+.notif-action{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-radius:999px;padding:2px 8px;border:1px solid transparent}
+.notif-action-created{color:var(--valid,#3ECADB);background:rgba(62,202,219,.14);border-color:rgba(62,202,219,.3)}
+.notif-action-updated{color:#f5a623;background:rgba(245,166,35,.14);border-color:rgba(245,166,35,.3)}
+.notif-action-deleted{color:var(--invalid,#E8875A);background:rgba(232,135,90,.14);border-color:rgba(232,135,90,.3)}
+.notif-time{font-size:11px;color:var(--text3);margin-left:auto}
+.notif-text{font-size:13px;color:var(--text1,var(--text));line-height:1.5}
 
 /* WELCOME PANEL (logged-out) */
 .welcome-shell{padding:0 28px 40px;width:100%}
