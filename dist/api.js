@@ -608,7 +608,7 @@ app.get("/mcp", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/notifications", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/auth/google", authLimiter, (req, res, next) => {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
