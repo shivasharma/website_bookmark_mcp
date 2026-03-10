@@ -15,7 +15,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
   --bg:#080E17;--s1:#0D1620;--s2:#111E2D;--s3:#162539;--s4:#1C2E48;
   --border:#1A3048;--border2:#224060;
   --accent:#06C0E0;--accent2:#2F80ED;--accent3:#00D4A0;--warn:#F5A623;--danger:#F05252;
-  --text1:#EEF5FF;--text2:#7AA3C4;--text3:#3E6282;
+  --text1:#EEF5FF;--text2:#B3C7DD;--text3:#5F85AA;
   --ag:rgba(6,192,224,.12);--a2g:rgba(47,128,237,.12);--a3g:rgba(0,212,160,.12);--wg:rgba(245,166,35,.12);
   --font-d:'Sora',sans-serif;--font-b:'Plus Jakarta Sans',sans-serif;
   --r4:4px;--r8:8px;--r12:12px;--r16:16px;--r20:20px;--r24:24px;--r999:999px;
@@ -24,7 +24,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
   --shadow-lg:0 8px 40px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.3);
   --t:.2s cubic-bezier(.4,0,.2,1);--nav-h:60px;--mob-nav:56px;
 }
-body{background:var(--bg);color:var(--text1);font-family:var(--font-b);font-size:14px;font-weight:400;line-height:1.6;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text1);font-family:var(--font-b);font-size:clamp(16px,1vw + 12px,18px);font-weight:400;line-height:1.6;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
 ::selection{background:rgba(6,192,224,.2);color:var(--text1)}
 a{color:var(--accent2);text-decoration:none}a:hover{color:var(--accent)}
@@ -59,9 +59,9 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .btn-icon .badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--accent);color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);border:2px solid var(--bg);}
 .avatar-btn{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--s4),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:12px;font-weight:700;color:var(--text1);cursor:pointer;border:2px solid var(--border2);transition:var(--t);flex-shrink:0;}
 .avatar-btn:hover{border-color:var(--accent);box-shadow:0 0 12px var(--ag)}
-.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#040C14;border:none;border-radius:var(--r8);padding:0 16px;height:36px;font-family:var(--font-d);font-size:13px;font-weight:700;cursor:pointer;transition:var(--t);letter-spacing:.1px;white-space:nowrap;flex-shrink:0;}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#040C14;border:none;border-radius:var(--r8);padding:0 18px;height:48px;min-width:48px;font-family:var(--font-d);font-size:14px;font-weight:700;cursor:pointer;transition:var(--t);letter-spacing:.1px;white-space:nowrap;flex-shrink:0;}
 .btn-primary:hover{background:#19d0f0;box-shadow:0 4px 20px rgba(6,192,224,.35);transform:translateY(-1px)}.btn-primary:active{transform:translateY(0)}
-.btn-outline{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--r8);padding:0 14px;height:36px;font-family:var(--font-b);font-size:13px;font-weight:500;cursor:pointer;transition:var(--t);white-space:nowrap;flex-shrink:0;}
+.btn-outline{display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text2);border:1px solid var(--border);border-radius:var(--r8);padding:0 14px;height:48px;min-width:48px;font-family:var(--font-b);font-size:14px;font-weight:500;cursor:pointer;transition:var(--t);white-space:nowrap;flex-shrink:0;}
 .btn-outline:hover{background:var(--s3);color:var(--text1);border-color:var(--border2)}
 .hidden{display:none !important}
 
@@ -96,15 +96,15 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 /* MAIN */
 .main{display:flex;flex-direction:column;gap:0;overflow-y:auto;overflow-x:hidden;min-height:0;}
 .dash-header{padding:24px 28px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-.dash-title{font-family:var(--font-d);font-size:24px;font-weight:800;color:var(--text1);letter-spacing:-.5px;line-height:1.2;}
+.dash-title{font-family:var(--font-d);font-size:clamp(24px,1vw + 18px,32px);font-weight:800;color:var(--text1);letter-spacing:-.5px;line-height:1.2;}
 .dash-title span{background:linear-gradient(90deg,var(--accent),var(--accent2) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .dash-sub{font-size:13px;color:var(--text2);margin-top:3px;font-weight:300}
 .dash-actions{display:flex;gap:8px;align-items:center;padding-top:4px}
 .search-nav{padding:14px 28px 4px;display:flex;flex-direction:column;gap:10px}
-.primary-search{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r12);transition:var(--t)}
+.primary-search{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r12);transition:var(--t)}
 .primary-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--ag)}
 .primary-search svg{color:var(--text3);flex-shrink:0}
-.primary-search input{flex:1;background:none;border:none;outline:none;color:var(--text1);font-size:14px;min-width:0}
+.primary-search input{flex:1;background:none;border:none;outline:none;color:var(--text1);font-size:clamp(15px,.45vw + 13px,17px);min-width:0}
 .primary-search input::placeholder{color:var(--text3)}
 .search-chip-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .search-chip-label{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text3);font-family:var(--font-d)}
@@ -128,7 +128,7 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .stat-name{font-size:11.5px;color:var(--text2);margin-top:4px;font-weight:400}
 .stat-badge{position:absolute;top:14px;right:14px;font-size:10px;font-weight:700;font-family:var(--font-d);padding:2px 8px;border-radius:var(--r999);}
 .sb-green{background:var(--a3g);color:var(--accent3)}.sb-blue{background:var(--a2g);color:var(--accent2)}.sb-amber{background:var(--wg);color:var(--warn)}
-.content-area{display:grid;grid-template-columns:1fr 300px;gap:16px;padding:0 28px 28px;align-items:start;}
+.content-area{display:grid;grid-template-columns:1fr;gap:16px;padding:0 28px 28px;align-items:start;max-width:920px;margin:0 auto;}
 .panel{background:var(--s2);border:1px solid var(--border);border-radius:var(--r20);overflow:hidden;}
 .panel-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .panel-head-left{display:flex;align-items:center;gap:8px}
@@ -188,7 +188,14 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .bk-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .empty{padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;}
 .empty-icon{width:72px;height:72px;border-radius:var(--r20);background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;}
-.empty-t{font-family:var(--font-d);font-size:17px;font-weight:700;color:var(--text1)}.empty-s{font-size:13px;color:var(--text2);max-width:240px;line-height:1.5;font-weight:300}
+.empty-t{font-family:var(--font-d);font-size:clamp(18px,.55vw + 16px,24px);font-weight:700;color:var(--text1)}.empty-s{font-size:clamp(14px,.45vw + 12px,16px);color:var(--text2);max-width:460px;line-height:1.5;font-weight:400}
+.tech-term{color:var(--text1);font-weight:700}
+.fallback-toggle-wrap{margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r12);background:var(--s3);width:min(100%,460px)}
+.fallback-toggle-label{font-size:14px;font-weight:700;color:var(--text1);text-align:left}
+.fallback-toggle{appearance:none;width:52px;height:32px;border-radius:999px;border:1px solid var(--border);background:var(--s1);position:relative;cursor:pointer;transition:var(--t)}
+.fallback-toggle::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:999px;background:#d9e6f4;transition:transform .2s ease}
+.fallback-toggle:checked{background:rgba(0,212,160,.22);border-color:rgba(0,212,160,.45)}
+.fallback-toggle:checked::after{transform:translateX(20px)}
 .assist-panel{margin-top:10px;padding:14px;border:1px solid var(--border);border-radius:var(--r12);background:linear-gradient(180deg,var(--s2),var(--s1))}
 .assist-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text1);margin-bottom:10px}
 .suggest-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
@@ -199,16 +206,16 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .mini-tutorial{margin-top:10px;padding:10px;border:1px dashed rgba(6,192,224,.35);border-radius:var(--r8);background:rgba(6,192,224,.05);font-size:12px;color:var(--text2)}
 .right-col{display:flex;flex-direction:column;gap:14px}
 .mini-panel{background:var(--s2);border:1px solid var(--border);border-radius:var(--r16);overflow:hidden;}
-.mp-head{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.mp-head{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
 .mp-title{font-family:var(--font-d);font-size:13px;font-weight:700;color:var(--text1);display:flex;align-items:center;gap:7px;}
-.mp-action{font-size:11.5px;color:var(--accent2);cursor:pointer;font-weight:500;transition:var(--t)}.mp-action:hover{color:var(--accent);text-decoration:underline}
+.mp-action{font-size:13px;color:var(--accent2);cursor:pointer;font-weight:600;transition:var(--t);background:none;border:none;min-height:48px;min-width:48px;padding:0 10px;border-radius:var(--r8)}.mp-action:hover{color:var(--accent);text-decoration:underline;background:var(--s3)}
 .qa-form{padding:16px 18px;display:flex;flex-direction:column;gap:12px}
 .quick-smart{display:flex;flex-direction:column;gap:10px}
-.quick-smart-row{display:flex;gap:8px;align-items:center}
-.quick-smart-input{flex:1;display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r10,10px);padding:0 12px;height:40px;transition:var(--t)}
+.quick-smart-row{display:flex;gap:8px;align-items:stretch;flex-direction:column}
+.quick-smart-input{flex:1;display:flex;align-items:center;gap:8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r10,10px);padding:0 12px;height:48px;transition:var(--t)}
 .quick-smart-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--ag)}
 .quick-smart-input svg{color:var(--text3);flex-shrink:0}
-.quick-smart-input input{flex:1;background:none;border:none;outline:none;color:var(--text1);font-size:13.5px;min-width:0;padding:0}
+.quick-smart-input input{flex:1;background:none;border:none;outline:none;color:var(--text1);font-size:15px;min-width:0;padding:0}
 .quick-smart-input input::placeholder{color:var(--text3)}
 .quick-meta{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r8);background:var(--s1);min-height:44px}
 .quick-favicon{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);background:var(--s2);display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
@@ -474,7 +481,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .ellipsis{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(pointer:coarse){.bk-preview-actions{opacity:1 !important}.ib{width:34px;height:34px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
-@media(max-width:1100px){.stats-strip{grid-template-columns:repeat(2,1fr)}.content-area{grid-template-columns:1fr}.right-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}}
+@media(max-width:1100px){.stats-strip{grid-template-columns:repeat(2,1fr)}.content-area{grid-template-columns:1fr}.right-col{display:flex;flex-direction:column;gap:14px}}
 @media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{display:none}.mob-nav{display:flex}.mob-fab{display:flex}.topbar{padding:0 14px;gap:8px}.logo-text{display:none}.dash-header,.search-nav,.stats-strip,.content-area,.onboard-banner{padding-left:16px;padding-right:16px}.stats-strip{grid-template-columns:repeat(2,1fr);gap:8px}.content-area{padding:0 12px 88px;grid-template-columns:1fr}.right-col{display:flex;flex-direction:column}.main{padding-bottom:var(--mob-nav)}.bk-grid{grid-template-columns:1fr}.form-row2{grid-template-columns:1fr}.dash-header{padding-top:16px}.source-grid{grid-template-columns:repeat(2,1fr)}.im-tab{padding:7px 10px 11px}.panel-head{flex-wrap:wrap}.panel-head-right{width:100%}.suggest-grid{grid-template-columns:1fr}.import-modal,.preview-modal{max-width:100%;max-height:95dvh;border-radius:var(--r16) var(--r16) 0 0;margin:auto 0 0;}}
 @media(max-width:768px){.quick-smart-row{flex-direction:column;align-items:stretch}.quick-meta{align-items:flex-start;flex-wrap:wrap}.quick-tags{margin-left:0}}
 @media(max-width:480px){.stats-strip{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:14px 14px 12px}.stat-val{font-size:24px}.dash-title{font-size:20px}}
@@ -595,16 +602,16 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
       <div class="right-col">
         <!-- Quick Add -->
         <div class="mini-panel">
-          <div class="mp-head"><span class="mp-title"><svg width="13" height="13" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Quick Add</span><span class="mp-action" onclick="openAddModal()">Full form →</span></div>
+          <div class="mp-head"><span class="mp-title"><svg width="13" height="13" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Quick Add Bookmark</span><button class="mp-action" type="button" aria-label="Open full bookmark form" onclick="openAddModal()">Full form →</button></div>
           <div class="qa-form">
             <div class="quick-smart">
               <label class="fl-label" for="quickUrl">One-Click Save URL</label>
               <div class="quick-smart-row">
                 <div class="quick-smart-input">
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  <input class="fi" type="url" id="quickUrl" placeholder="Paste a URL and it saves automatically..." autocomplete="off"/>
+                  <input class="fi" type="url" id="quickUrl" aria-label="Quick add bookmark URL" placeholder="Paste a URL and it saves automatically..." autocomplete="off"/>
                 </div>
-                <button class="btn-outline" type="button" onclick="openQuickDetails()">Add details</button>
+                <button class="btn-outline" type="button" aria-label="Quick Add bookmark details" onclick="openQuickDetails()">Quick Add</button>
               </div>
               <div class="quick-meta" id="quickMeta" aria-live="polite">
                 <span class="quick-favicon"><img id="quickFavicon" alt=""/></span>
@@ -986,11 +993,14 @@ let selectedPreviewIds = new Set();
 let totalImported = 0;
 let editingBookmarkId = null;
 let authBlocked = false;
+let localFallbackEnabled = false;
 let currentUser = null;
 let notificationsUnread = 0;
 const RECENT_SEARCHES_KEY = 'markd_recent_searches_v1';
 const MAX_RECENT_SEARCHES = 6;
 const TUTORIAL_DISMISSED_KEY = 'markd_first_save_tutorial_dismissed_v1';
+const LOCAL_FALLBACK_PREF_KEY = 'markd_local_fallback_pref_v1';
+try{localFallbackEnabled=localStorage.getItem(LOCAL_FALLBACK_PREF_KEY)==='true'}catch(e){localFallbackEnabled=false}
 const SUGGESTED_BOOKMARKS = [
   { title: 'GitHub Trending', url: 'https://github.com/trending', meta: 'Dev' },
   { title: 'MDN Web Docs', url: 'https://developer.mozilla.org/', meta: 'Dev' },
@@ -1033,6 +1043,12 @@ function bookmarkExcerpt(b){
 
 function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function safeDomain(url){try{return new URL(url).hostname.replace('www.','')}catch(e){return ''}}
+
+function toggleLocalFallback(enabled){
+  localFallbackEnabled=!!enabled;
+  try{localStorage.setItem(LOCAL_FALLBACK_PREF_KEY,localFallbackEnabled?'true':'false')}catch(e){}
+  render();
+}
 function fmt(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
 
 async function api(path,options={}){
@@ -1243,7 +1259,7 @@ function render(){
   container.className=currentView==='grid'?'bk-grid':'bk-list';
   if(!list.length){
     if(authBlocked){
-      container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login Is Blocking Local Data</div><div class="empty-s">Enable local fallback on API to read existing DB bookmarks locally: <code>ALLOW_LOCAL_FALLBACK=true</code>.</div></div>`;
+      container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login Is Blocking Local Data</div><div class="empty-s">Use local bookmarks when <span class="tech-term">API</span> authentication is unavailable.</div><label class="fallback-toggle-wrap" for="localFallbackToggle"><span class="fallback-toggle-label">Enable Local Bookmarks Fallback</span><input id="localFallbackToggle" class="fallback-toggle" type="checkbox" role="switch" aria-label="Enable Local Bookmarks Fallback" ${localFallbackEnabled?'checked':''} onchange="toggleLocalFallback(this.checked)"/></label><div class="empty-s">This preference is saved in your browser. Ask your admin to enable <span class="tech-term">local fallback</span> support on the server for signed-out access.</div></div>`;
       return;
     }
     container.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-t">No bookmarks found</div><div class="empty-s">Add your first bookmark or change filters.</div><button class="btn-primary" onclick="openAddModal()" style="margin-top:4px">➕ Add Bookmark</button></div>${renderAssistContent(list)}`;

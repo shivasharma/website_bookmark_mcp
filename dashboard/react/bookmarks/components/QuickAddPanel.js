@@ -48,17 +48,42 @@ export function QuickAddPanel({ onSave }) {
   return React.createElement(
     "section",
     { className: "card" },
-    React.createElement("h2", null, "Quick Add"),
-    React.createElement("input", { className: "bm-input", placeholder: "https://example.com", value: url, onChange: (e) => setUrl(e.target.value) }),
-    React.createElement("input", { className: "bm-input", placeholder: "Title", value: title, onChange: (e) => setTitle(e.target.value) }),
-    React.createElement("input", { className: "bm-input", placeholder: "Description", value: description, onChange: (e) => setDescription(e.target.value) }),
-    React.createElement("input", { className: "bm-input", placeholder: "Tags (ai, dev, tools)", value: tags, onChange: (e) => setTags(e.target.value) }),
-    React.createElement("textarea", { className: "bm-input", placeholder: "Notes", value: notes, onChange: (e) => setNotes(e.target.value), rows: 3 }),
+    React.createElement("h2", null, "Quick Add Bookmark"),
+    React.createElement("input", {
+      className: "bm-input",
+      placeholder: "https://example.com",
+      value: url,
+      onChange: (e) => setUrl(e.target.value),
+      "aria-label": "Bookmark URL"
+    }),
+    React.createElement("input", { className: "bm-input", placeholder: "Title", value: title, onChange: (e) => setTitle(e.target.value), "aria-label": "Bookmark title" }),
+    React.createElement("input", {
+      className: "bm-input",
+      placeholder: "Description",
+      value: description,
+      onChange: (e) => setDescription(e.target.value),
+      "aria-label": "Bookmark description"
+    }),
+    React.createElement("input", {
+      className: "bm-input",
+      placeholder: "Tags (ai, dev, tools)",
+      value: tags,
+      onChange: (e) => setTags(e.target.value),
+      "aria-label": "Bookmark tags"
+    }),
+    React.createElement("textarea", {
+      className: "bm-input",
+      placeholder: "Notes",
+      value: notes,
+      onChange: (e) => setNotes(e.target.value),
+      rows: 3,
+      "aria-label": "Bookmark notes"
+    }),
     React.createElement(
       "div",
-      null,
+      { className: "bm-quick-actions" },
       React.createElement("button", { className: "btn", type: "button", onClick: clearForm }, "Clear"),
-      React.createElement("button", { className: "btn primary", type: "button", onClick: submit }, "Save")
+      React.createElement("button", { className: "btn primary", type: "button", onClick: submit, "aria-label": "Quick add bookmark" }, "Quick Add")
     )
   );
 }

@@ -121,6 +121,7 @@ export function BookmarksPage() {
   const [view, setView] = useState("list");
   const [search, setSearch] = useState("");
   const [authBlocked, setAuthBlocked] = useState(false);
+  const [localFallbackPromptEnabled, setLocalFallbackPromptEnabled] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState(null);
@@ -245,6 +246,23 @@ export function BookmarksPage() {
   useEffect(() => {
     Promise.all([loadCurrentUser(), loadStats(), loadNotifications()]);
   }, []);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("bm-local-fallback-toggle");
+      setLocalFallbackPromptEnabled(stored === "true");
+    } catch {
+      setLocalFallbackPromptEnabled(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("bm-local-fallback-toggle", localFallbackPromptEnabled ? "true" : "false");
+    } catch {
+      return;
+    }
+  }, [localFallbackPromptEnabled]);
 
   useEffect(() => {
     function onPopState() {
@@ -610,6 +628,8 @@ export function BookmarksPage() {
                 onDelete: handleDelete,
                 onToggleFavorite: handleToggleFavorite,
                 authBlocked,
+                localFallbackPromptEnabled,
+                onLocalFallbackPromptChange: setLocalFallbackPromptEnabled,
                 onAddClick: () => {
                   setEditingBookmark(null);
                   setModalOpen(true);

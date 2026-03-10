@@ -158,6 +158,8 @@ export function BookmarkPanel({
   onDelete,
   onToggleFavorite,
   authBlocked,
+  localFallbackPromptEnabled,
+  onLocalFallbackPromptChange,
   onAddClick
 }) {
   if (!items.length) {
@@ -166,7 +168,37 @@ export function BookmarkPanel({
         "div",
         { className: "card" },
         React.createElement("h2", null, "Login Is Blocking Local Data"),
-        React.createElement("p", { className: "sub" }, "Enable local fallback on API to read existing DB bookmarks locally: ", React.createElement("span", { className: "code-inline" }, "ALLOW_LOCAL_FALLBACK=true"), ".")
+        React.createElement(
+          "p",
+          { className: "sub" },
+          "Use local bookmarks when signed-out access is blocked."
+        ),
+        React.createElement(
+          "label",
+          { className: "bm-toggle-row", htmlFor: "local-fallback-toggle" },
+          React.createElement("span", { className: "bm-toggle-label" }, "Enable Local Bookmarks Fallback"),
+          React.createElement("input", {
+            id: "local-fallback-toggle",
+            className: "bm-toggle-input",
+            type: "checkbox",
+            role: "switch",
+            checked: !!localFallbackPromptEnabled,
+            onChange: (event) => onLocalFallbackPromptChange(!!event.target.checked),
+            "aria-label": "Enable Local Bookmarks Fallback"
+          })
+        ),
+        React.createElement(
+          "p",
+          { className: "sub" },
+          localFallbackPromptEnabled
+            ? "Fallback request saved for this browser. To fully enable signed-out access, configure the API server with local fallback support and restart it."
+            : "Turn this on to remember your fallback preference in this browser."
+        ),
+        React.createElement(
+          "p",
+          { className: "sub" },
+          "Need help? Ask your admin to enable local fallback support on the API server."
+        )
       );
     }
 
@@ -196,7 +228,8 @@ export function BookmarkPanel({
           React.createElement("input", {
             value: search,
             onChange: (event) => onSearchChange(event.target.value),
-            placeholder: "Search bookmarks..."
+            placeholder: "Search bookmarks...",
+            "aria-label": "Search bookmarks"
           })
         ),
         React.createElement(
