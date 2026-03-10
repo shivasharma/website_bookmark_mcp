@@ -11,6 +11,39 @@
 </div>
 
 <div class="tp-grid tp-grid-health">
+  <section class="tp-card">
+    <div class="tp-card-head">
+      <h3>
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 3"/>
+          </svg>
+        </span>
+        Command Center
+      </h3>
+      <span class="tp-sub">Green = healthy, Red = critical, Blue = monitoring</span>
+    </div>
+    <div class="tp-command-grid" id="shCommandGrid">
+      <div class="tp-command-item state-blue" id="shOverallState">
+        <div class="tp-command-label">Overall</div>
+        <div class="tp-command-value" id="shOverallValue">Checking</div>
+      </div>
+      <div class="tp-command-item state-blue" id="shApiState">
+        <div class="tp-command-label">API</div>
+        <div class="tp-command-value" id="shApiValue">Checking</div>
+      </div>
+      <div class="tp-command-item state-blue" id="shDbState">
+        <div class="tp-command-label">Database</div>
+        <div class="tp-command-value" id="shDbValue">Checking</div>
+      </div>
+      <div class="tp-command-item state-blue" id="shRuntimeState">
+        <div class="tp-command-label">Runtime</div>
+        <div class="tp-command-value" id="shRuntimeValue">Live</div>
+      </div>
+    </div>
+  </section>
+
   <section class="tp-card tp-card-runtime">
     <div class="tp-card-head">
       <h3>

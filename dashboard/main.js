@@ -1926,13 +1926,19 @@ async function renderSystemHealthPanel(container){
 
   function _renderHealthData(d){
     const apiOk=d.api?.status==='ok',dbOk=d.database?.status==='ok';
+    const overallOk=apiOk&&dbOk;
+    _setCommandState('shApiState','shApiValue',apiOk?'state-green':'state-red',apiOk?'Healthy':'Critical');
+    _setCommandState('shDbState','shDbValue',dbOk?'state-green':'state-red',dbOk?'Healthy':'Critical');
+    _setCommandState('shRuntimeState','shRuntimeValue','state-blue','Monitoring');
+    _setCommandState('shOverallState','shOverallValue',overallOk?'state-green':'state-red',overallOk?'Healthy':'Critical');
+
     const kpis=document.getElementById('shKpis');
     if(kpis)kpis.innerHTML=[
       ['API',apiOk?'OK':'Down'],['Database',dbOk?'OK':'Down'],
       ['Uptime',_fmtUptime(d.api?.uptimeSec)],['Memory',_fmtBytes(d.system?.memory?.rss)]
     ].map(([l,v])=>`<div class="tp-kpi"><div class="tp-kpi-label">${l}</div><div class="tp-kpi-value">${v}</div></div>`).join('');
     const ts=d.timestamp?new Date(d.timestamp).toLocaleTimeString():'--';
-    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 10s. Last update: ${ts}`;
+    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 5s. Last update: ${ts}`;
     const svc=document.getElementById('shServices');
     if(svc)svc.innerHTML=[
       {name:'Application API',status:apiOk?'ok':'down',detail:d.api?`PID ${d.api.pid} • Node ${d.api.nodeVersion} • Uptime ${_fmtUptime(d.api.uptimeSec)}`:'Collecting...'},
@@ -1940,14 +1946,29 @@ async function renderSystemHealthPanel(container){
       {name:'Host Runtime',status:'ok',detail:d.system?`${d.system.platform}/${d.system.arch} • CPU ${d.system.cpuCount} • Load ${Number(d.system.loadAvg1||0).toFixed(2)}`:'Collecting...'}
     ].map(s=>`<div class="tp-service"><div class="tp-service-head"><h4 class="tp-service-name">${s.name}</h4><span class="tp-pill ${s.status}">${s.status}</span></div><div class="tp-service-meta">${s.detail}</div></div>`).join('');
   }
+
+  function _setCommandState(boxId,valId,stateClass,value){
+    const box=document.getElementById(boxId);
+    const val=document.getElementById(valId);
+    if(box){
+      box.classList.remove('state-green','state-red','state-blue');
+      box.classList.add(stateClass);
+    }
+    if(val)val.textContent=value;
+  }
+
   function _renderHealthError(){
+    _setCommandState('shApiState','shApiValue','state-red','Critical');
+    _setCommandState('shDbState','shDbValue','state-red','Critical');
+    _setCommandState('shRuntimeState','shRuntimeValue','state-blue','Monitoring');
+    _setCommandState('shOverallState','shOverallValue','state-red','Critical');
     const svc=document.getElementById('shServices');
     if(svc)svc.innerHTML='<p class="tp-sub">Unable to reach health endpoint. Retrying...</p>';
   }
 
   document.getElementById('shRefreshBtn')?.addEventListener('click',()=>fetchHealth());
   fetchHealth();
-  _healthTimer=setInterval(fetchHealth,10000);
+  _healthTimer=setInterval(fetchHealth,5000);
   // cleanup when section changes
   container._cleanup=()=>{ctrl.abort();if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}};
 }
