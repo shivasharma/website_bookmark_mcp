@@ -1791,10 +1791,10 @@ async function switchSection(section){
     toolPanel.style.display='';
     if(section==='syshealth'){
       history.pushState(null,'','/syshealth');
-      renderSystemHealthPanel(toolPanel);
+      await renderSystemHealthPanel(toolPanel);
     }else if(section==='mcp'){
       history.pushState(null,'','/mcp');
-      renderMcpSetupPanel(toolPanel);
+      await renderMcpSetupPanel(toolPanel);
     }else if(section==='notifications'){
       history.pushState(null,'','/notifications');
       renderNotificationsPanel(toolPanel);
@@ -1807,9 +1807,21 @@ async function switchSection(section){
 function _fmtBytes(v){const b=Number(v||0);if(!isFinite(b)||b<=0)return'0 B';const u=['B','KB','MB','GB','TB'];const i=Math.min(Math.floor(Math.log(b)/Math.log(1024)),u.length-1);return `${(b/1024**i).toFixed(i===0?0:1)} ${u[i]}`}
 function _fmtUptime(s){const t=Math.max(0,Number(s||0));const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sec=Math.floor(t%60);if(h>0)return`${h}h ${m}m`;if(m>0)return`${m}m ${sec}s`;return`${sec}s`}
 
-function renderSystemHealthPanel(container){
+async function loadToolPanelTemplate(container,path,fallbackHtml){
+  try{
+    const res=await fetch(path,{cache:'no-store'});
+    if(res.ok){
+      container.innerHTML=await res.text();
+      return true;
+    }
+  }catch(e){}
+  container.innerHTML=fallbackHtml;
+  return false;
+}
+
+async function renderSystemHealthPanel(container){
   if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
-  container.innerHTML=`
+  const fallbackHtml=`
     <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
     <div class="tp-card">
       <div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
@@ -1825,6 +1837,7 @@ function renderSystemHealthPanel(container){
       <div class="tp-card-head"><h3>Services</h3></div>
       <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
     </div>`;
+  await loadToolPanelTemplate(container,'/health.html',fallbackHtml);
 
   const ctrl=new AbortController();
   async function fetchHealth(){
@@ -1865,14 +1878,14 @@ function renderSystemHealthPanel(container){
 }
 
 // ── MCP Setup Panel (vanilla JS) ──
-function renderMcpSetupPanel(container){
+async function renderMcpSetupPanel(container){
   if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
   const userName=currentUser?(currentUser.name||currentUser.email||'User'):'';
   const callbackUrl=`${window.location.origin}/auth/github/callback`;
   const tokenPlaceholder='paste-token-here';
   function buildConfig(tok){return JSON.stringify({mcpServers:{bookmark:{command:'npx',args:['-y','github:shivasharma/website_bookmark_mcp'],env:{BOOKMARK_API_BASE_URL:window.location.origin,BOOKMARK_API_TOKEN:tok||tokenPlaceholder}}}},null,2)}
 
-  container.innerHTML=`
+  const fallbackHtml=`
     <div class="tp-header"><h2 class="tp-title">MCP Setup</h2><p class="tp-sub">Configure Model Context Protocol for AI assistants</p></div>
     <div class="tp-card">
       <div class="tp-card-head"><h3>Session</h3></div>
@@ -1900,6 +1913,18 @@ function renderMcpSetupPanel(container){
       <p class="tp-sub">If you are self-hosting, set the GitHub OAuth callback URL to:</p>
       <pre>${esc(callbackUrl)}</pre>
     </div>`;
+  await loadToolPanelTemplate(container,'/mcpsetup.html',fallbackHtml);
+
+  const sessionState=document.getElementById('mcpSessionState');
+  if(sessionState){
+    sessionState.innerHTML=!currentUser
+      ?'<p class="tp-sub">You are not logged in. Login first to generate MCP token.</p><a class="btn-outline" href="/register" style="margin-top:8px;display:inline-flex">Login / Register</a>'
+      :'<p class="tp-sub">Logged in as <strong>'+esc(userName)+'</strong>.</p>';
+  }
+  const callbackPre=document.getElementById('mcpCallbackPre');
+  if(callbackPre)callbackPre.textContent=callbackUrl;
+  const configPre=document.getElementById('mcpConfigPre');
+  if(configPre)configPre.textContent=buildConfig('');
 
   let token='';
   document.getElementById('mcpGenBtn')?.addEventListener('click',async()=>{

@@ -1,0 +1,37 @@
+<div class="tp-header">
+  <h2 class="tp-title">MCP Setup</h2>
+  <p class="tp-sub">Configure Model Context Protocol for AI assistants</p>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head"><h3>Session</h3></div>
+  <div id="mcpSessionState">
+    <p class="tp-sub">Checking login session...</p>
+  </div>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head"><h3>Token</h3></div>
+  <p class="tp-sub">Generate a token and use it in your MCP client configuration.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+    <button class="btn-outline" type="button" id="mcpGenBtn" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700">Generate Token</button>
+    <button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">Copy Token</button>
+  </div>
+  <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
+  <pre id="mcpTokenPre">Click "Generate Token" to create an API token</pre>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head">
+    <h3>Config Template</h3>
+    <button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button>
+  </div>
+  <p class="tp-sub">Paste this JSON into your MCP client settings (Claude Desktop, Cursor, VS Code, etc.).</p>
+  <pre id="mcpConfigPre">Loading config template...</pre>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head"><h3>OAuth Callback</h3></div>
+  <p class="tp-sub">If you are self-hosting, set the GitHub OAuth callback URL to:</p>
+  <pre id="mcpCallbackPre"></pre>
+</div>

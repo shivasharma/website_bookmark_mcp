@@ -1,0 +1,25 @@
+<div class="tp-header">
+  <h2 class="tp-title">System Health</h2>
+  <p class="tp-sub">Real-time server and database monitoring</p>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head">
+    <h3>Runtime Overview</h3>
+    <button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button>
+  </div>
+  <div class="tp-kpis" id="shKpis">
+    <div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div>
+    <div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div>
+    <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
+    <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
+  </div>
+  <p class="tp-sub" id="shLastUpdate">Polling every 10s. Last update: --</p>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head"><h3>Services</h3></div>
+  <div class="tp-services" id="shServices">
+    <p class="tp-sub">Loading health telemetry...</p>
+  </div>
+</div>

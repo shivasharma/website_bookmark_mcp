@@ -1,8 +1,10 @@
-const CACHE_NAME = "markd-shell-v6";
+const CACHE_NAME = "markd-shell-v7";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",
   "/intro.html",
+  "/health.html",
+  "/mcpsetup.html",
   "/styles.css",
   "/main.js",
   "/manifest.webmanifest",

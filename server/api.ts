@@ -718,7 +718,7 @@ app.get("/register", (_req, res) => {
 });
 
 app.get("/mcp-setup", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "mcp-setup.html"));
+  res.sendFile(path.join(dashboardDir, "mcpsetup.html"));
 });
 
 app.get("/syshealth", (_req, res) => {
