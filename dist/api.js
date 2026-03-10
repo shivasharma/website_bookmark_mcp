@@ -11,7 +11,7 @@ import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { clearNotifications, deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getUserById, initRealtimeListener, initDb, listBookmarks, listNotifications, markAllNotificationsRead, markNotificationRead, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
+import { clearNotifications, deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getTotalUsers, getUserById, initRealtimeListener, initDb, listBookmarks, listNotifications, markAllNotificationsRead, markNotificationRead, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
 import { z } from "zod";
 const app = express();
 const PORT = Number(process.env.PORT ?? 3001);
@@ -736,6 +736,8 @@ app.get("/api/url-metadata", tokenLimiter, async (req, res) => {
 });
 app.get("/api/system-health", async (_req, res) => {
     const db = await getDatabaseHealth();
+    const totalUsers = await getTotalUsers();
+    const sessionMetrics = await getLiveSessionMetrics();
     const memory = process.memoryUsage();
     const [loadAvg1, loadAvg5, loadAvg15] = os.loadavg();
     res.json({
@@ -752,6 +754,11 @@ app.get("/api/system-health", async (_req, res) => {
                 status: db.ok ? "ok" : "down",
                 latencyMs: db.latencyMs,
                 serverTime: db.serverTime,
+            },
+            users: {
+                totalUsers,
+                liveSessions: sessionMetrics.liveSessions,
+                authenticatedSessions: sessionMetrics.authenticatedSessions,
             },
             system: {
                 platform: process.platform,
@@ -770,6 +777,44 @@ app.get("/api/system-health", async (_req, res) => {
         },
     });
 });
+async function getLiveSessionMetrics() {
+    const sessionStore = app.request?.sessionStore;
+    if (!sessionStore?.all) {
+        return { liveSessions: 0, authenticatedSessions: 0 };
+    }
+    const allSessions = sessionStore.all;
+    return new Promise((resolve) => {
+        allSessions.call(sessionStore, (error, sessions) => {
+            if (error || !sessions) {
+                resolve({ liveSessions: 0, authenticatedSessions: 0 });
+                return;
+            }
+            const items = Array.isArray(sessions)
+                ? sessions
+                : Object.values(sessions);
+            const now = Date.now();
+            let liveSessions = 0;
+            let authenticatedSessions = 0;
+            for (const entry of items) {
+                if (!entry || typeof entry !== "object") {
+                    continue;
+                }
+                const raw = entry;
+                const cookie = raw.cookie;
+                const expiresAt = cookie?.expires ? Date.parse(String(cookie.expires)) : NaN;
+                if (Number.isFinite(expiresAt) && expiresAt <= now) {
+                    continue;
+                }
+                liveSessions += 1;
+                const passportData = raw.passport;
+                if (passportData && passportData.user !== undefined && passportData.user !== null) {
+                    authenticatedSessions += 1;
+                }
+            }
+            resolve({ liveSessions, authenticatedSessions });
+        });
+    });
+}
 app.get("/api/events", (req, res) => {
     let userId;
     try {

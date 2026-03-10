@@ -482,6 +482,10 @@ export async function getDatabaseHealth() {
         };
     }
 }
+export async function getTotalUsers() {
+    const { rows } = await pool.query(`SELECT COUNT(*)::int AS total FROM users`);
+    return Number(rows[0]?.total ?? 0);
+}
 export async function listNotifications(userId, limit = 50, offset = 0) {
     const boundedLimit = Math.max(1, Math.min(200, Number(limit || 50)));
     const boundedOffset = Math.max(0, Number(offset || 0));
