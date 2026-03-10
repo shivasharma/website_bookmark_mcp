@@ -458,6 +458,31 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .modal-tags{display:flex;flex-wrap:wrap;gap:6px;padding-top:4px}
 .modal-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r999);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--s3);color:var(--text2);transition:var(--t);font-family:var(--font-d);}
 .modal-tag:hover,.modal-tag.sel{border-color:var(--accent);color:var(--accent);background:var(--ag)}
+
+/* TAG INPUT SECTION */
+.modal-tag-section{display:flex;flex-direction:column;gap:8px}
+.modal-tag-input-row{display:flex;gap:6px;align-items:center}
+.modal-tag-input-wrap{position:relative;flex:1}
+.modal-tag-input{width:100%;font-size:13px;padding-right:8px}
+.modal-tag-dropdown{position:absolute;top:100%;left:0;right:0;z-index:20;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r8);max-height:160px;overflow-y:auto;display:none;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.modal-tag-dropdown.open{display:block}
+.modal-tag-dd-item{padding:7px 12px;font-size:12px;cursor:pointer;color:var(--text2);transition:var(--t);display:flex;justify-content:space-between;align-items:center}
+.modal-tag-dd-item:hover,.modal-tag-dd-item.active{background:var(--s3);color:var(--text1)}
+.modal-tag-dd-item .dd-count{font-size:10px;color:var(--text3);margin-left:8px}
+.modal-tag-dd-item .dd-exists{font-size:10px;color:var(--accent2);font-style:italic}
+.modal-tag-add-btn{height:36px;padding:0 12px;flex-shrink:0;background:var(--s3);border:1px solid var(--border2);border-radius:var(--r8);color:var(--accent2);font-family:var(--font-d);font-size:12px;font-weight:600;cursor:pointer;transition:var(--t);white-space:nowrap}
+.modal-tag-add-btn:hover{background:var(--accent2);color:var(--bg);border-color:var(--accent2)}
+.modal-tag-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:0}
+.modal-tag-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:var(--r999);font-size:11px;font-weight:600;border:1px solid var(--accent);background:var(--ag);color:var(--accent);font-family:var(--font-d);animation:fadeUp .2s ease both}
+.modal-tag-chip .chip-x{cursor:pointer;opacity:.6;font-size:13px;line-height:1;margin-left:2px;transition:var(--t)}
+.modal-tag-chip .chip-x:hover{opacity:1}
+.modal-tag-presets{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.modal-tag-presets-label{font-size:11px;color:var(--text3);font-weight:600;white-space:nowrap}
+.modal-popular-tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.modal-popular-tags:empty{display:none}
+.popular-label{font-size:11px;color:var(--text3);font-weight:600;margin-right:2px}
+.popular-tag-btn{padding:3px 9px;border-radius:var(--r999);font-size:10.5px;font-weight:600;cursor:pointer;border:1px dashed var(--border2);background:transparent;color:var(--text3);font-family:var(--font-d);transition:var(--t)}
+.popular-tag-btn:hover{border-color:var(--accent);color:var(--accent);border-style:solid}
 .modal-btns{display:flex;gap:10px;padding-top:6px}
 .modal-btns .btn-primary{flex:1;justify-content:center;height:42px;font-size:14px}
 
@@ -658,6 +683,9 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
   .more-filters-btn{min-height:44px}
   .vbtn{min-width:44px;min-height:44px}
   .modal-tag{min-height:44px}
+  .modal-tag-add-btn{min-height:44px}
+  .modal-tag-chip{min-height:36px}
+  .popular-tag-btn{min-height:36px}
   .sort-select{min-height:44px}
   .btn-outline{min-height:48px}
   .btn-primary{min-height:48px}
