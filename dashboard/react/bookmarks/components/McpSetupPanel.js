@@ -120,12 +120,5 @@ export function McpSetupPanel({ currentUser, onMessage }) {
       React.createElement("button", { className: "btn", type: "button", onClick: copyConfig }, "Copy Config"),
       React.createElement("pre", null, configText)
     ),
-    React.createElement(
-      "section",
-      { className: "card" },
-      React.createElement("h2", null, "OAuth Callback"),
-      React.createElement("p", { className: "sub" }, "GitHub callback should be set to this URL only:"),
-      React.createElement("pre", null, callbackUrl)
-    )
   );
 }

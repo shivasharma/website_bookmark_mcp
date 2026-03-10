@@ -184,6 +184,8 @@ function renderAuthUi(){
   authEls.userAvatarBtn.classList.remove('hidden');
   authEls.userAvatarBtn.textContent=initial;
   authEls.userAvatarBtn.title=`Logged in as ${label}`;
+  // when user logs in, hide welcome and restore bookmark UI
+  if(typeof hideWelcomeExperience==='function')hideWelcomeExperience();
 }
 
 async function loadNotificationSummary(){
@@ -445,6 +447,7 @@ async function performLogout(){
   notificationsUnread=0;
   renderAuthUi();
   await refreshBookmarks();
+  renderWelcomeExperience();
   showToast('Logged out','info');
 }
 
@@ -1747,6 +1750,8 @@ function switchSection(section){
   document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>{if(!bookmarkEls.includes(el))bookmarkEls.push(el)});
   const toolPanel=document.getElementById('toolPanel');
   const onboard=document.getElementById('onboardBanner');
+  // hide welcome panel when switching sections
+  const wp=document.getElementById('welcomePanel');if(wp)wp.style.display='none';
 
   // update sidebar active states
   document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
@@ -1763,6 +1768,8 @@ function switchSection(section){
     if(onboard)onboard.style.display='';
     if(toolPanel){toolPanel.style.display='none';toolPanel.innerHTML='';}
     if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+    // if not logged in, show welcome instead of bookmark UI
+    if(!currentUser){renderWelcomeExperience();}
     history.pushState(null,'','/');
     closeMobileSidebar();
     return;
@@ -1902,6 +1909,85 @@ window.addEventListener('popstate',()=>{
   else if(currentSection!=='bookmarks')switchSection('bookmarks');
 });
 
+// ══════════════════════════════════════════════
+// WELCOME PANEL (logged-out experience)
+// ══════════════════════════════════════════════
+function renderWelcomeExperience(){
+  if(currentUser)return; // logged in, nothing to do
+
+  // hide search/filters/right-col/action-bar — show a welcome page instead
+  document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>el.style.display='none');
+  const bc=document.getElementById('bookmarkContent');
+  if(bc)bc.style.display='none';
+  const onboard=document.getElementById('onboardBanner');
+  if(onboard)onboard.style.display='none';
+
+  // create welcome panel
+  let wp=document.getElementById('welcomePanel');
+  if(!wp){
+    wp=document.createElement('div');
+    wp.id='welcomePanel';
+    wp.className='welcome-shell';
+    document.getElementById('mainArea').appendChild(wp);
+  }
+  wp.style.display='';
+  wp.innerHTML=`
+    <div class="welcome-hero">
+      <div class="welcome-hero-icon">🔖</div>
+      <h1>Welcome to <span>BookMark Manager</span></h1>
+      <p>Your AI-powered bookmark hub. Save, organize, and rediscover links with smart auto-tagging, full-text search, and integrations for AI assistants via MCP.</p>
+    </div>
+    <div class="welcome-grid">
+      <div>
+        <div class="welcome-card">
+          <h2>🚀 Getting Started</h2>
+          <ol class="welcome-steps">
+            <li><strong>Paste a link</strong> — AI auto-fills the title, description, and tags for you.</li>
+            <li><strong>Click "Save"</strong> — Your bookmark is securely stored and indexed.</li>
+            <li><strong>Organize later</strong> — Use filters, tags, and categories to find anything instantly.</li>
+          </ol>
+        </div>
+        <div class="welcome-card">
+          <h2>✨ Features</h2>
+          <div class="welcome-feat"><span class="welcome-feat-icon">🤖</span><div><h3>AI Auto-Detection</h3><p>Paste any URL and the AI extracts title, description, favicon, and suggests relevant tags automatically.</p></div></div>
+          <div class="welcome-feat"><span class="welcome-feat-icon">⭐</span><div><h3>Star &amp; Filter</h3><p>Star your favorites, filter by tags, time, or search across all bookmarks with full-text search.</p></div></div>
+          <div class="welcome-feat"><span class="welcome-feat-icon">📥</span><div><h3>Import from Anywhere</h3><p>Bring bookmarks from Chrome, Firefox, Pocket, Raindrop, Pinboard, Notion, and more.</p></div></div>
+          <div class="welcome-feat"><span class="welcome-feat-icon">📱</span><div><h3>Works Everywhere</h3><p>Progressive Web App — install on your phone, use the bookmarklet, or save via API.</p></div></div>
+        </div>
+        <div class="welcome-card">
+          <h2>🔌 MCP Integration <span class="welcome-mcp-badge">NEW</span></h2>
+          <div class="welcome-feat"><span class="welcome-feat-icon">🧠</span><div><h3>Model Context Protocol</h3><p>Connect your bookmarks to AI assistants like Claude, Cursor, and VS Code Copilot. Your bookmarks become searchable context for AI.</p></div></div>
+          <div class="welcome-feat"><span class="welcome-feat-icon">🔑</span><div><h3>Secure Token Auth</h3><p>Generate API tokens from the MCP Setup page. Your data stays private — only you control access.</p></div></div>
+          <div class="welcome-feat"><span class="welcome-feat-icon">⚡</span><div><h3>Real-time Sync</h3><p>Bookmarks saved via MCP appear instantly in the dashboard. Create, search, and manage bookmarks from any AI assistant.</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="welcome-login-card">
+          <h2>Get Started</h2>
+          <p>Sign in with GitHub or Google to save bookmarks, generate MCP tokens, and unlock all features.</p>
+          <a class="btn-register" href="/register"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Login / Register</a>
+        </div>
+        <div class="welcome-card" style="margin-top:14px">
+          <h2>🛡️ System Health</h2>
+          <p style="color:var(--text3);font-size:13px;margin:0 0 10px;line-height:1.5">Monitor API status, database connectivity, and server uptime in real time.</p>
+          <button class="btn-outline" type="button" onclick="switchSection('syshealth')" style="width:100%;justify-content:center">View System Health →</button>
+        </div>
+        <div class="welcome-card" style="margin-top:14px">
+          <h2>🔌 MCP Setup</h2>
+          <p style="color:var(--text3);font-size:13px;margin:0 0 10px;line-height:1.5">Configure AI assistant integration. Generate tokens and copy config snippets.</p>
+          <button class="btn-outline" type="button" onclick="switchSection('mcp')" style="width:100%;justify-content:center">Open MCP Setup →</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function hideWelcomeExperience(){
+  const wp=document.getElementById('welcomePanel');
+  if(wp)wp.style.display='none';
+  document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>el.style.display='');
+  const bc=document.getElementById('bookmarkContent');if(bc)bc.style.display='';
+}
+
 async function initDashboard(){
   if(authEls.menuLogoutBtn){
     authEls.menuLogoutBtn.addEventListener('click',async()=>{toggleSettingsMenu(false);await performLogout()});
@@ -1927,6 +2013,7 @@ async function initDashboard(){
   await loadNotificationSummary();
   await loadBookmarks();
   render();
+  if(!currentUser){renderWelcomeExperience();}
   setupTagManager();
   _initSectionFromUrl();
 }
