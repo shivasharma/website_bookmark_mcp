@@ -499,8 +499,8 @@ function updateDashboardHeading(){
     return;
   }
   if(currentFilter==='unread'){
-    titleEl.innerHTML='Read Later <span>Bookmarks</span>';
-    subEl.textContent='Bookmarks tagged for reading later';
+    titleEl.innerHTML='Remind Me Later <span>Bookmarks</span>';
+    subEl.textContent='Bookmarks saved for follow-up and reminder';
     return;
   }
 

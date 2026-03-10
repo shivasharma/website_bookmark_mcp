@@ -52,7 +52,7 @@
         <a class="nav-link active" href="#" data-view="all"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-link-text">All Bookmarks</span><span class="nav-count" id="snAll">3</span></a>
         <a class="nav-link" href="#" data-view="starred"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span class="nav-link-text">Starred</span><span class="nav-count" id="snStar">1</span></a>
         <a class="nav-link" href="#" data-view="recent"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nav-link-text">Recent</span><span class="nav-count" id="snRecent">0</span></a>
-        <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="nav-link-text">Read Later</span><span class="nav-count" id="snReadLater">0</span></a>
+        <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="nav-link-text">Remind Me Later</span><span class="nav-count" id="snReadLater">0</span></a>
       </div>
       <div class="sidebar-divider"></div>
       <div>
@@ -117,13 +117,14 @@
         <option value="az">A → Z</option>
         <option value="za">Z → A</option>
       </select>
-      <button class="btn-primary btn-add-compact" type="button" onclick="openAddModal()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add</button>
+      <button class="btn-primary btn-add-compact" type="button" onclick="openAddModal()"><span class="add-plus-wrap"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span>Add Bookmark</span><span class="add-spark">✦</span></button>
     </div>
 
     <div class="filter-bar au d3">
       <div class="filter-bar-left">
         <button class="fpill on" data-filter="all">All</button>
         <button class="fpill" data-filter="starred">⭐ Starred</button>
+        <button class="fpill" data-filter="unread">⏰ Remind Me Later</button>
         <button class="more-filters-btn" type="button" onclick="toggleAdvancedFilters()" id="moreFiltersBtn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg> More Filters <svg class="more-filters-chevron" id="moreFiltersChevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
       <div class="filter-bar-right">
