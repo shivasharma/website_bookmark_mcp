@@ -1870,6 +1870,9 @@ async function switchSection(section){
     }else if(section==='mcp'){
       history.pushState(null,'','/mcp');
       await renderMcpSetupPanel(toolPanel);
+    }else if(section==='chat'){
+      history.pushState(null,'','/chat');
+      await renderChatPanel(toolPanel);
     }else if(section==='notifications'){
       history.pushState(null,'','/notifications');
       renderNotificationsPanel(toolPanel);
@@ -2147,17 +2150,145 @@ function renderNotificationsPanel(container){
   container._cleanup=()=>{ctrl.abort();if(_notifTimer){clearInterval(_notifTimer);_notifTimer=null}};
 }
 
+// ── Bookmark Chat Panel (vanilla JS) ──
+async function renderChatPanel(container){
+  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  if(_notifTimer){clearInterval(_notifTimer);_notifTimer=null}
+
+  const fallbackHtml=`
+    <div class="tp-header tp-header-modern">
+      <div class="tp-title-row"><span class="tp-title-icon">💬</span><h2 class="tp-title">Bookmark Chat</h2></div>
+      <p class="tp-sub">Ask friendly questions about your bookmarks.</p>
+    </div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Ask About Your Bookmarks</h3></div>
+      <div class="chat-shell" id="chatShell">
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input-row"><input class="fi" id="chatInput" type="text" placeholder="Ask about your bookmarks..." /><button class="btn-primary" id="chatSendBtn" type="button">Ask</button></div>
+        <p class="tp-sub" id="chatStatus">Powered by your bookmark API and MCP-ready data.</p>
+      </div>
+    </div>`;
+  await loadToolPanelTemplate(container,'/chat.html',fallbackHtml);
+
+  const logEl=document.getElementById('chatLog');
+  const inputEl=document.getElementById('chatInput');
+  const sendBtn=document.getElementById('chatSendBtn');
+  const statusEl=document.getElementById('chatStatus');
+
+  function setStatus(msg){if(statusEl)statusEl.textContent=msg}
+  function addMessage(role,text,links){
+    if(!logEl)return;
+    const wrap=document.createElement('div');
+    wrap.className='chat-msg '+(role==='user'?'user':'bot');
+    const body=document.createElement('div');
+    body.textContent=text;
+    wrap.appendChild(body);
+    if(Array.isArray(links)&&links.length){
+      const list=document.createElement('div');
+      list.className='chat-result-list';
+      links.slice(0,5).forEach((b)=>{
+        const item=document.createElement('a');
+        item.className='chat-result-link';
+        item.href=b.url;
+        item.target='_blank';
+        item.rel='noopener noreferrer';
+        item.textContent=b.title||b.url;
+        list.appendChild(item);
+      });
+      wrap.appendChild(list);
+    }
+    logEl.appendChild(wrap);
+    logEl.scrollTop=logEl.scrollHeight;
+  }
+
+  function normalizeTags(tags){
+    if(Array.isArray(tags))return tags.map(t=>String(t||'').toLowerCase());
+    if(typeof tags==='string')return tags.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+    return [];
+  }
+
+  function toDateMs(value){
+    const n=Date.parse(String(value||''));
+    return Number.isFinite(n)?n:0;
+  }
+
+  async function getBookmarks(params){
+    const qs=new URLSearchParams(params||{}).toString();
+    const url='/api/bookmarks?page=1&pageSize=100'+(qs?'&'+qs:'');
+    const r=await fetch(url,{credentials:'include',cache:'no-store'});
+    const p=await r.json().catch(()=>null);
+    if(!r.ok||!p?.success||!Array.isArray(p.data))throw new Error(p?.error||'Unable to load bookmarks.');
+    return p.data;
+  }
+
+  function getSearchTerm(question){
+    const q=question.toLowerCase().trim();
+    const m=q.match(/(?:about|for|on|related to|find)\s+(.+)/i);
+    if(m&&m[1])return m[1].replace(/[?.!]+$/g,'').trim();
+    return '';
+  }
+
+  async function ask(question){
+    const q=String(question||'').trim();
+    if(!q)return;
+    addMessage('user',q);
+    if(inputEl)inputEl.value='';
+    setStatus('Thinking...');
+    if(sendBtn)sendBtn.disabled=true;
+
+    try{
+      const lower=q.toLowerCase();
+      const weekAgo=Date.now()-7*24*60*60*1000;
+
+      if(/(how many|count|total).*(bookmark)/.test(lower)){
+        const all=await getBookmarks();
+        addMessage('bot',`You have ${all.length} bookmarks in total.`);
+      }else if(/(starred|favorite|favourite)/.test(lower)){
+        const fav=await getBookmarks({favorite:'true'});
+        addMessage('bot',fav.length?`You have ${fav.length} starred bookmarks.`:'You do not have any starred bookmarks yet.',fav);
+      }else if(/(recent|latest|newest)/.test(lower)){
+        const all=await getBookmarks();
+        const recent=all.filter(b=>toDateMs(b.created_at||b.createdAt||b.updated_at||b.updatedAt)>=weekAgo)
+          .sort((a,b)=>toDateMs(b.created_at||b.createdAt||b.updated_at||b.updatedAt)-toDateMs(a.created_at||a.createdAt||a.updated_at||a.updatedAt));
+        addMessage('bot',recent.length?`I found ${recent.length} recent bookmarks from the last 7 days.`:'No bookmarks were added in the last 7 days.',recent);
+      }else if(/(read later|remind me later|unread)/.test(lower)){
+        const all=await getBookmarks();
+        const rl=all.filter((b)=>normalizeTags(b.tags).some(t=>t==='read-later'||t==='read later'||t==='remind-later'||t==='remind me later'));
+        addMessage('bot',rl.length?`You have ${rl.length} bookmarks in Remind Me Later.`:'No Remind Me Later bookmarks found.',rl);
+      }else{
+        const term=getSearchTerm(q) || q.replace(/[?.!]+$/g,'').trim();
+        const matches=await getBookmarks({search:term});
+        addMessage('bot',matches.length?`I found ${matches.length} bookmarks related to "${term}".`:`I could not find bookmarks related to "${term}". Try another keyword.`,matches);
+      }
+      setStatus('Powered by your bookmark API and MCP-ready data.');
+    }catch(e){
+      addMessage('bot','I could not answer right now. Please make sure you are logged in and try again.');
+      setStatus(e?.message||'Unable to process request.');
+    }finally{
+      if(sendBtn)sendBtn.disabled=false;
+    }
+  }
+
+  window.askBookmarkChat=(question)=>ask(question);
+  sendBtn?.addEventListener('click',()=>ask(inputEl?.value||''));
+  inputEl?.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();ask(inputEl?.value||'')}});
+
+  container._cleanup=()=>{delete window.askBookmarkChat};
+}
+
 // Handle direct URL navigation for tool sections
 function _initSectionFromUrl(){
   const p=window.location.pathname;
   if(p==='/syshealth')switchSection('syshealth');
   else if(p==='/mcp')switchSection('mcp');
+  else if(p==='/chat')switchSection('chat');
   else if(p==='/notifications')switchSection('notifications');
 }
 window.addEventListener('popstate',()=>{
   const p=window.location.pathname;
   if(p==='/syshealth')switchSection('syshealth');
   else if(p==='/mcp')switchSection('mcp');
+  else if(p==='/chat')switchSection('chat');
   else if(p==='/notifications')switchSection('notifications');
   else if(currentSection!=='bookmarks')switchSection('bookmarks');
 });

@@ -723,11 +723,22 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .tool-panel .tp-btn-accent{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
 .tool-panel .tp-btn-accent:hover{background:#19d0f0;border-color:#19d0f0}
 .tool-panel pre{margin:10px 0 0;white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.26);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:Consolas,'Courier New',monospace;font-size:12px;color:var(--accent);line-height:1.5;max-width:100%;overflow-x:auto}
+.tool-panel .chat-shell{display:flex;flex-direction:column;gap:10px}
+.tool-panel .chat-log{min-height:300px;max-height:52vh;overflow:auto;padding:10px;border:1px solid var(--border);border-radius:10px;background:linear-gradient(180deg,var(--s3),var(--s2));display:flex;flex-direction:column;gap:8px}
+.tool-panel .chat-msg{max-width:min(90%,680px);padding:10px 12px;border-radius:10px;font-size:13px;line-height:1.5;border:1px solid transparent}
+.tool-panel .chat-msg.user{margin-left:auto;background:rgba(6,192,224,.12);border-color:rgba(6,192,224,.3);color:var(--text1)}
+.tool-panel .chat-msg.bot{margin-right:auto;background:rgba(47,128,237,.12);border-color:rgba(47,128,237,.3);color:var(--text1)}
+.tool-panel .chat-input-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.tool-panel .chat-actions{display:flex;flex-wrap:wrap;gap:8px}
+.tool-panel .chat-result-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.tool-panel .chat-result-link{color:var(--accent);text-decoration:none;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tool-panel .chat-result-link:hover{text-decoration:underline}
 @media(max-width:860px){
   .tool-panel .tp-command-grid{grid-template-columns:repeat(2,minmax(120px,1fr))}
   .tool-panel .mcp-steps-grid{grid-template-columns:1fr}
   .tool-panel .tp-grid-mcp{grid-template-columns:1fr}
   .tool-panel .tp-span-2{grid-column:auto}
+  .tool-panel .chat-input-row{grid-template-columns:1fr}
 }
 @media(max-width:600px){
   .tool-panel{padding:14px 12px calc(82px + env(safe-area-inset-bottom))}
