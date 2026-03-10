@@ -1899,6 +1899,7 @@ async function loadToolPanelTemplate(container,path,fallbackHtml){
 
 async function renderSystemHealthPanel(container){
   if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  const HEALTH_POLL_MS=60*60*1000;
   const fallbackHtml=`
     <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
     <div class="tp-card">
@@ -1909,14 +1910,14 @@ async function renderSystemHealthPanel(container){
         <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
         <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
       </div>
-      <p class="tp-sub" id="shLastUpdate">Polling every 10s. Last update: --</p>
+      <p class="tp-sub" id="shLastUpdate">Polling every 1 hour. Last update: --</p>
     </div>
     <div class="tp-card">
       <div class="tp-card-head"><h3>User Activity</h3></div>
       <div class="tp-kpis" id="shUserKpis">
         <div class="tp-kpi"><div class="tp-kpi-label">Total Users</div><div class="tp-kpi-value" id="shUserTotal">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Live Sessions</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Auth Sessions</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Live Users</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Authenticated Users</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
         <div class="tp-kpi"><div class="tp-kpi-label">Load Avg</div><div class="tp-kpi-value" id="shLoadAvg">--</div></div>
       </div>
     </div>
@@ -1962,7 +1963,7 @@ async function renderSystemHealthPanel(container){
     const loadAvgEl=document.getElementById('shLoadAvg');
     if(loadAvgEl)loadAvgEl.textContent=loadAvg;
     const ts=d.timestamp?new Date(d.timestamp).toLocaleTimeString():'--';
-    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 5s. Last update: ${ts}`;
+    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 1 hour. Last update: ${ts}`;
     const svc=document.getElementById('shServices');
     if(svc)svc.innerHTML=[
       {name:'Application API',status:apiOk?'ok':'down',detail:d.api?`PID ${d.api.pid} • Node ${d.api.nodeVersion} • Uptime ${_fmtUptime(d.api.uptimeSec)}`:'Collecting...'},
@@ -2000,7 +2001,7 @@ async function renderSystemHealthPanel(container){
 
   document.getElementById('shRefreshBtn')?.addEventListener('click',()=>fetchHealth());
   fetchHealth();
-  _healthTimer=setInterval(fetchHealth,5000);
+  _healthTimer=setInterval(fetchHealth,HEALTH_POLL_MS);
   // cleanup when section changes
   container._cleanup=()=>{ctrl.abort();if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}};
 }
