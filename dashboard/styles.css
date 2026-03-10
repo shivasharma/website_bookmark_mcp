@@ -178,6 +178,8 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .primary-search svg{color:var(--text3);flex-shrink:0}
 .primary-search input{flex:1;background:none;border:none;outline:none;color:var(--text1);font-size:clamp(15px,.45vw + 13px,17px);min-width:0}
 .primary-search input::placeholder{color:var(--text3)}
+.search-clear-btn{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:none;background:var(--s3,rgba(22,37,57,.5));border-radius:50%;color:var(--text3);cursor:pointer;flex-shrink:0;transition:var(--t);padding:0}
+.search-clear-btn:hover{background:var(--s4,rgba(30,50,75,.7));color:var(--text1)}
 .search-chip-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .search-chip-label{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--text3);font-family:var(--font-d)}
 .search-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;border:1px solid var(--border);background:var(--s1);color:var(--text2);font-size:11.5px;cursor:pointer;transition:var(--t)}
@@ -684,33 +686,8 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .notif-time{font-size:11px;color:var(--text3);margin-left:auto}
 .notif-text{font-size:13px;color:var(--text1,var(--text));line-height:1.5}
 
-/* WELCOME PANEL (logged-out) */
-.welcome-shell{padding:0 28px 40px;width:100%}
-.welcome-hero{text-align:center;padding:40px 16px 28px}
-.welcome-hero-icon{font-size:48px;margin-bottom:12px}
-.welcome-hero h1{font-family:var(--font-d);font-size:clamp(26px,1.5vw+16px,38px);font-weight:800;letter-spacing:-.5px;margin:0 0 8px}
-.welcome-hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.welcome-hero p{color:var(--text3);font-size:14px;max-width:520px;margin:0 auto;line-height:1.6}
-.welcome-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;max-width:920px}
-.welcome-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r16,12px);padding:clamp(18px,1.2vw+12px,28px);margin-bottom:14px}
-.welcome-card h2{margin:0 0 14px;font-size:clamp(16px,0.6vw+12px,20px);font-family:var(--font-d);font-weight:700;display:flex;align-items:center;gap:8px}
-.welcome-steps{list-style:none;padding:0;margin:0;counter-reset:ws}
-.welcome-steps li{counter-increment:ws;position:relative;padding:12px 12px 12px 44px;border:1px solid var(--border);border-radius:10px;background:var(--s3,rgba(22,37,57,.5));margin-bottom:8px;font-size:13.5px;line-height:1.5}
-.welcome-steps li::before{content:counter(ws);position:absolute;left:12px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--ag,rgba(6,192,224,.12));color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-d)}
-.welcome-steps li strong{color:var(--text1)}
-.welcome-feat{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.welcome-feat:last-child{border-bottom:none}
-.welcome-feat-icon{font-size:20px;flex-shrink:0;margin-top:2px}
-.welcome-feat h3{margin:0 0 2px;font-size:13px;font-weight:700;color:var(--text1)}
-.welcome-feat p{margin:0;font-size:12px;color:var(--text3);line-height:1.5}
-.welcome-login-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r16,12px);padding:clamp(20px,1.2vw+14px,28px);text-align:center}
-.welcome-login-card h2{margin:0 0 8px;font-size:clamp(16px,.6vw+12px,20px);font-family:var(--font-d);font-weight:700}
-.welcome-login-card p{color:var(--text3);font-size:13px;margin:0 0 16px;line-height:1.5}
-.welcome-login-card .btn-register{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--accent);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:var(--t)}
-.welcome-login-card .btn-register:hover{background:var(--accent2);transform:translateY(-1px)}
-.welcome-login-card .btn-register svg{flex-shrink:0}
-.welcome-mcp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;background:rgba(167,139,250,.14);color:#a78bfa;border:1px solid rgba(167,139,250,.3);margin-left:6px}
-@media(max-width:768px){.welcome-grid{grid-template-columns:1fr}}
+/* WELCOME PANEL — styles live in intro.html (self-contained) */
+.welcome-shell{padding:0 28px 40px;width:100%;max-width:780px;margin:0 auto}
 
 /* RESPONSIVE */
 @media(pointer:coarse){.bk-preview-actions{opacity:1 !important}.ib{width:34px;height:34px}}

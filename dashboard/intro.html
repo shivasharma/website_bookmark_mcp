@@ -1,0 +1,133 @@
+<!-- intro.html — Self-contained welcome page for non-logged-in users -->
+<!-- Loaded into #welcomePanel by main.js via fetch('/intro.html') -->
+<style>
+  .welcome-shell{padding:0 28px 40px;width:100%;max-width:780px;margin:0 auto}
+
+  /* Hero */
+  .welcome-hero{text-align:center;padding:40px 16px 32px}
+  .welcome-hero-icon{font-size:48px;margin-bottom:12px}
+  .welcome-hero h1{font-family:var(--font-d);font-size:clamp(26px,1.5vw+16px,38px);font-weight:800;letter-spacing:-.5px;margin:0 0 8px}
+  .welcome-hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .welcome-hero p{color:var(--text3);font-size:14px;max-width:520px;margin:0 auto;line-height:1.6}
+
+  /* Steps timeline */
+  .welcome-steps-container{display:flex;flex-direction:column;gap:0;position:relative;padding-left:56px}
+  .welcome-steps-container::before{content:'';position:absolute;left:27px;top:32px;bottom:32px;width:2px;background:linear-gradient(180deg,var(--accent) 0%,var(--accent2) 100%);opacity:.25;border-radius:2px}
+
+  .ws-step{display:flex;align-items:flex-start;gap:20px;position:relative;padding:18px 0}
+  .ws-number{position:absolute;left:-56px;top:18px;width:54px;height:54px;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1}
+  .ws-number span{font-family:var(--font-d);font-size:26px;font-weight:800;color:var(--accent);opacity:.85}
+
+  .ws-body{background:var(--s2);border:1px solid var(--border);border-radius:var(--r16,12px);padding:clamp(18px,1.2vw+12px,26px);flex:1;transition:border-color .2s}
+  .ws-body:hover{border-color:rgba(6,192,224,.35)}
+  .ws-body h3{margin:0 0 8px;font-size:clamp(15px,.5vw+12px,18px);font-family:var(--font-d);font-weight:700;color:var(--text1);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .ws-body p{margin:0;font-size:13px;color:var(--text3);line-height:1.6}
+
+  /* Login button inside intro */
+  .ws-body .btn-register{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--accent);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:var(--t);margin-top:14px}
+  .ws-body .btn-register:hover{background:var(--accent2);transform:translateY(-1px)}
+  .ws-body .btn-register svg{flex-shrink:0}
+
+  /* Outline button override inside intro */
+  .ws-body .btn-outline{margin-top:12px}
+
+  /* Highlight rows */
+  .ws-highlight{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .ws-highlight-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--s3,rgba(22,37,57,.5));border:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.4}
+  .ws-hi-icon{font-size:18px;flex-shrink:0}
+
+  /* Feature grid */
+  .ws-feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .ws-feat-card{display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:10px;background:var(--s3,rgba(22,37,57,.5));border:1px solid var(--border)}
+  .ws-feat-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+  .ws-feat-card strong{display:block;font-size:13px;color:var(--text1);margin-bottom:2px}
+  .ws-feat-card p{margin:0;font-size:11.5px;color:var(--text3);line-height:1.4}
+
+  /* MCP badge */
+  .welcome-mcp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:700;background:rgba(167,139,250,.14);color:#a78bfa;border:1px solid rgba(167,139,250,.3);margin-left:6px}
+
+  /* Responsive */
+  @media(max-width:640px){
+    .welcome-steps-container{padding-left:44px}
+    .ws-number{left:-44px;width:40px;height:40px}
+    .ws-number span{font-size:20px}
+    .ws-feature-grid{grid-template-columns:1fr}
+  }
+</style>
+
+<div class="welcome-hero">
+  <div class="welcome-hero-icon">🔖</div>
+  <h1>Welcome to <span>BookMark Manager</span></h1>
+  <p>Your AI-powered bookmark hub. Save, organize, and rediscover links with smart auto-tagging, full-text search, and integrations for AI assistants via MCP.</p>
+</div>
+
+<div class="welcome-steps-container">
+
+  <!-- Step 01 — Sign In -->
+  <div class="ws-step">
+    <div class="ws-number"><span>01</span></div>
+    <div class="ws-body">
+      <h3>Sign In to Get Started</h3>
+      <p>Login with GitHub or Google to save bookmarks, generate MCP tokens, and unlock all features. Your data is encrypted and private.</p>
+      <a class="btn-register" href="/register">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Login / Register
+      </a>
+    </div>
+  </div>
+
+  <!-- Step 02 — Add Bookmark -->
+  <div class="ws-step">
+    <div class="ws-number"><span>02</span></div>
+    <div class="ws-body">
+      <h3>Save Your First Bookmark</h3>
+      <p>Paste any URL into the <strong>Quick Add</strong> panel. The AI auto-detects the title, description, favicon, and suggests relevant tags instantly.</p>
+      <div class="ws-highlight">
+        <div class="ws-highlight-item"><span class="ws-hi-icon">🔗</span><span>Paste a link — AI fills everything</span></div>
+        <div class="ws-highlight-item"><span class="ws-hi-icon">💾</span><span>Click Save — stored and indexed</span></div>
+        <div class="ws-highlight-item"><span class="ws-hi-icon">🏷️</span><span>Tags auto-suggested from content</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 03 — Organize -->
+  <div class="ws-step">
+    <div class="ws-number"><span>03</span></div>
+    <div class="ws-body">
+      <h3>Organize &amp; Discover</h3>
+      <p>Use filters, tags, full-text search, and categories to find anything instantly. Star your favorites, mark items for later, and group by category.</p>
+      <div class="ws-feature-grid">
+        <div class="ws-feat-card"><span class="ws-feat-icon">⭐</span><div><strong>Star &amp; Filter</strong><p>Favorite links and filter by tags, time, or keyword</p></div></div>
+        <div class="ws-feat-card"><span class="ws-feat-icon">📥</span><div><strong>Import</strong><p>Chrome, Firefox, Pocket, Raindrop, Notion, and more</p></div></div>
+        <div class="ws-feat-card"><span class="ws-feat-icon">📱</span><div><strong>PWA</strong><p>Install on your phone or use the bookmarklet</p></div></div>
+        <div class="ws-feat-card"><span class="ws-feat-icon">🔍</span><div><strong>Full-Text Search</strong><p>Search across titles, URLs, tags, and notes</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 04 — MCP -->
+  <div class="ws-step">
+    <div class="ws-number"><span>04</span></div>
+    <div class="ws-body">
+      <h3>Connect AI Assistants via MCP <span class="welcome-mcp-badge">NEW</span></h3>
+      <p>Connect your bookmarks to AI assistants like Claude, Cursor, and VS Code Copilot using the <strong>Model Context Protocol</strong>. Your bookmarks become searchable context for AI.</p>
+      <div class="ws-highlight">
+        <div class="ws-highlight-item"><span class="ws-hi-icon">🧠</span><span>AI reads your bookmarks as context</span></div>
+        <div class="ws-highlight-item"><span class="ws-hi-icon">🔑</span><span>Secure token auth — you control access</span></div>
+        <div class="ws-highlight-item"><span class="ws-hi-icon">⚡</span><span>Real-time sync between dashboard and AI</span></div>
+      </div>
+      <button class="btn-outline" type="button" onclick="switchSection('mcp')">Open MCP Setup →</button>
+    </div>
+  </div>
+
+  <!-- Step 05 — System Health -->
+  <div class="ws-step">
+    <div class="ws-number"><span>05</span></div>
+    <div class="ws-body">
+      <h3>Monitor System Health</h3>
+      <p>Check API status, database connectivity, server uptime, and memory usage in real time — all from the dashboard.</p>
+      <button class="btn-outline" type="button" onclick="switchSection('syshealth')">View System Health →</button>
+    </div>
+  </div>
+
+</div>
