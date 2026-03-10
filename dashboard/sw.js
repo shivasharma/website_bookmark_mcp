@@ -1,8 +1,10 @@
-const CACHE_NAME = "markd-shell-v2";
+const CACHE_NAME = "markd-shell-v3";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",
   "/react-shell.html",
+  "/styles.css",
+  "/main.js",
   "/manifest.webmanifest",
   "/react/app.js",
   "/react/styles.js",
@@ -77,6 +79,6 @@ self.addEventListener("fetch", (event) => {
 
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/react-shell.html")))
+      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("/")))
   );
 });
