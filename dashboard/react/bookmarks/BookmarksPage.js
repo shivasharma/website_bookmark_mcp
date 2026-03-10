@@ -638,7 +638,26 @@ export function BookmarksPage() {
               React.createElement(QuickAddPanel, {
                 onSave: async (payload) => {
                   await handleSave(payload, null);
-                }
+                },
+                tagFrequency: React.useMemo(() => {
+                  const freq = {};
+                  for (const bm of bookmarks) {
+                    for (const t of (bm.tags || [])) {
+                      const key = String(t).toLowerCase().trim();
+                      if (key) freq[key] = (freq[key] || 0) + 1;
+                    }
+                  }
+                  return freq;
+                }, [bookmarks]),
+                existingUrls: React.useMemo(() => {
+                  const s = new Set();
+                  for (const bm of bookmarks) {
+                    if (bm.url) {
+                      try { s.add(new URL(bm.url.startsWith("http") ? bm.url : "https://" + bm.url).href.replace(/\/+$/, "").toLowerCase()); } catch {}
+                    }
+                  }
+                  return s;
+                }, [bookmarks])
               })
             )
           ),
