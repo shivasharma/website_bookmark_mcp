@@ -641,6 +641,34 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 @keyframes toastCheckPop{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
 .toast.success .toast-ico{animation:toastCheckPop .35s ease-out}
 
+/* TOOL PANEL (System Health / MCP Setup) */
+.tool-panel{padding:0 0 32px;max-width:920px}
+.tool-panel .tp-header{margin-bottom:18px}
+.tool-panel .tp-title{font-size:clamp(20px,1.2vw+14px,28px);font-weight:800;font-family:'Sora','Segoe UI',sans-serif;margin:0 0 4px}
+.tool-panel .tp-sub{color:var(--text3);font-size:13px;margin:0}
+.tool-panel .tp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius,12px);padding:clamp(16px,1.2vw+10px,24px);margin-bottom:12px}
+.tool-panel .tp-card h3{margin:0 0 10px;font-size:clamp(16px,0.6vw+12px,20px);font-family:'Sora','Segoe UI',sans-serif}
+.tool-panel .tp-card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tool-panel .tp-kpis{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:10px;margin-bottom:12px}
+.tool-panel .tp-kpi{background:var(--card,var(--surface2,#162539));border:1px solid var(--border);border-radius:10px;padding:12px}
+.tool-panel .tp-kpi-label{text-transform:uppercase;letter-spacing:.7px;font-size:10px;color:var(--text3);margin-bottom:4px}
+.tool-panel .tp-kpi-value{font-size:24px;font-weight:800;font-family:'Sora','Segoe UI',sans-serif}
+.tool-panel .tp-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.tool-panel .tp-service{background:var(--card,var(--surface2,#162539));border:1px solid var(--border);border-radius:10px;padding:12px}
+.tool-panel .tp-service-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.tool-panel .tp-service-name{margin:0;font-size:13px}
+.tool-panel .tp-service-meta{color:var(--text3);font-size:12px;line-height:1.45}
+.tool-panel .tp-pill{border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700;text-transform:capitalize;border:1px solid transparent}
+.tool-panel .tp-pill.ok{background:rgba(62,202,219,.14);color:var(--valid,#3ECADB);border-color:rgba(62,202,219,.3)}
+.tool-panel .tp-pill.down{background:rgba(232,135,90,.14);color:var(--invalid,#E8875A);border-color:rgba(232,135,90,.3)}
+.tool-panel .tp-pill.checking{background:rgba(245,166,35,.14);color:#f5a623;border-color:rgba(245,166,35,.3)}
+.tool-panel .tp-status{font-size:13px;color:var(--text3);margin-top:8px}
+.tool-panel .tp-status.ok{color:var(--valid,#3ECADB)}
+.tool-panel .tp-status.warn{color:#f5a623}
+.tool-panel .tp-status.danger{color:var(--invalid,#E8875A)}
+.tool-panel pre{margin:8px 0 0;white-space:pre-wrap;word-break:break-word;background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:Consolas,'Courier New',monospace;font-size:12px;color:var(--accent);line-height:1.5}
+@media(max-width:600px){.tool-panel .tp-kpis{grid-template-columns:repeat(2,minmax(80px,1fr))}}
+
 /* RESPONSIVE */
 @media(pointer:coarse){.bk-preview-actions{opacity:1 !important}.ib{width:34px;height:34px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}

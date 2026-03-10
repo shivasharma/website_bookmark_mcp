@@ -61,8 +61,8 @@
           <svg class="section-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="sidebar-section" id="toolsSection">
-          <a class="nav-link" href="/syshealth"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="nav-link-text">System Health</span></a>
-          <a class="nav-link" href="/mcp"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg><span class="nav-link-text">MCP Setup</span></a>
+          <a class="nav-link" href="#" data-section="syshealth" onclick="event.preventDefault();switchSection('syshealth')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="nav-link-text">System Health</span></a>
+          <a class="nav-link" href="#" data-section="mcp" onclick="event.preventDefault();switchSection('mcp')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg><span class="nav-link-text">MCP Setup</span></a>
         </div>
       </div>
       <div class="sidebar-divider"></div>
@@ -151,7 +151,10 @@
       </div>
     </div>
 
-    <div class="content-area au d4">
+    <!-- TOOL PANEL (System Health / MCP Setup) -->
+    <div id="toolPanel" class="tool-panel" style="display:none"></div>
+
+    <div class="content-area au d4" id="bookmarkContent">
       <div>
         <div class="panel">
           <div class="bk-list" id="bookmarkContainer"></div>
@@ -196,18 +199,7 @@
                 <button class="qa-expand-btn" type="button" onclick="toggleQuickDetails()" aria-expanded="false" id="quickExpandBtn">+ Add description &amp; notes</button>
               </div>
             </div>
-            <!-- Section 3: Tags -->
-            <div class="qa-section">
-              <div class="qa-section-label">Tags</div>
-              <div class="tag-manager" id="tagManager">
-                <input class="fi tag-search-input" id="tagSearchInput" placeholder="Search tags..." autocomplete="off" aria-label="Filter suggested tags" style="display:none"/>
-                <div class="tag-scroll" id="tagScroll" aria-label="Tag suggestions"></div>
-                <div class="custom-tag-row">
-                  <input class="fi custom-tag-fi" id="customTagInput" placeholder="New tag name" aria-label="Custom tag name"/>
-                  <button class="btn-outline add-tag-btn" type="button" onclick="addCustomQuickTag()">+ Add tag</button>
-                </div>
-              </div>
-            </div>
+
           </div>
           <div class="qa-saved-banner" id="quickSavedBanner" role="status" style="display:none"><span>&#10003; Bookmark saved!</span><button class="qa-undo-btn" type="button" onclick="undoQuickSave()">Undo</button></div>
           <div class="qa-btn-row">

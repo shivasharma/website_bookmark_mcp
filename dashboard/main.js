@@ -35,6 +35,8 @@ let authBlocked = false;
 let localFallbackEnabled = false;
 let currentUser = null;
 let notificationsUnread = 0;
+let currentSection = 'bookmarks';
+let _healthTimer = null;
 const RECENT_SEARCHES_KEY = 'markd_recent_searches_v1';
 const MAX_RECENT_SEARCHES = 6;
 const TUTORIAL_DISMISSED_KEY = 'markd_first_save_tutorial_dismissed_v1';
@@ -690,7 +692,7 @@ function filterByTag(t){currentFilter=t;document.querySelectorAll('.fpill').forE
 function setView(v){currentView=v;document.getElementById('vList').classList.toggle('on',v==='list');document.getElementById('vGrid').classList.toggle('on',v==='grid');render()}
 
 document.querySelectorAll('.fpill').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');currentFilter=btn.dataset.filter;document.querySelectorAll('.nav-link[data-view]').forEach(l=>l.classList.remove('active'));if(currentFilter==='all')document.querySelector('.nav-link[data-view=\"all\"]')?.classList.add('active');render()})});
-document.querySelectorAll('.nav-link[data-view]').forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));link.classList.add('active');currentFilter=link.dataset.view;document.querySelectorAll('.fpill').forEach(b=>b.classList.toggle('on',b.dataset.filter===currentFilter||(!['all','starred'].includes(currentFilter)&&b.dataset.filter==='all')));closeMobileSidebar();render()})});
+document.querySelectorAll('.nav-link[data-view]').forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();if(currentSection!=='bookmarks')switchSection('bookmarks');document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));link.classList.add('active');currentFilter=link.dataset.view;document.querySelectorAll('.fpill').forEach(b=>b.classList.toggle('on',b.dataset.filter===currentFilter||(!['all','starred'].includes(currentFilter)&&b.dataset.filter==='all')));closeMobileSidebar();render()})});
 document.querySelectorAll('.smart-chip').forEach(chip=>{chip.addEventListener('click',()=>setTimeFilter(chip.dataset.time||'all'))});
 document.getElementById('searchInput').addEventListener('input',render);
 document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addRecentSearch(e.target.value)}});
@@ -1735,6 +1737,171 @@ function highlightSavedCard(savedUrl){
 }
 
 // INIT
+// ══════════════════════════════════════════════
+// SECTION SWITCHING (Bookmarks / System Health / MCP Setup)
+// ══════════════════════════════════════════════
+function switchSection(section){
+  currentSection=section;
+  const bookmarkEls=['onboardBanner','dash-header','action-bar','filter-bar','advancedFilters','bookmarkContent'].map(id=>document.getElementById(id)).filter(Boolean);
+  // also grab elements by class that don't have ids
+  document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>{if(!bookmarkEls.includes(el))bookmarkEls.push(el)});
+  const toolPanel=document.getElementById('toolPanel');
+  const onboard=document.getElementById('onboardBanner');
+
+  // update sidebar active states
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  if(section==='bookmarks'){
+    document.querySelector('.nav-link[data-view="all"]')?.classList.add('active');
+  }else{
+    document.querySelector(`.nav-link[data-section="${section}"]`)?.classList.add('active');
+  }
+
+  if(section==='bookmarks'){
+    // show bookmark UI, hide tool panel
+    document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>el.style.display='');
+    const bc=document.getElementById('bookmarkContent');if(bc)bc.style.display='';
+    if(onboard)onboard.style.display='';
+    if(toolPanel){toolPanel.style.display='none';toolPanel.innerHTML='';}
+    if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+    history.pushState(null,'','/');
+    closeMobileSidebar();
+    return;
+  }
+
+  // hide bookmark UI
+  document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach(el=>el.style.display='none');
+  const bc=document.getElementById('bookmarkContent');if(bc)bc.style.display='none';
+  if(onboard)onboard.style.display='none';
+
+  // show tool panel
+  if(toolPanel){
+    toolPanel.style.display='';
+    if(section==='syshealth'){
+      history.pushState(null,'','/syshealth');
+      renderSystemHealthPanel(toolPanel);
+    }else if(section==='mcp'){
+      history.pushState(null,'','/mcp');
+      renderMcpSetupPanel(toolPanel);
+    }
+  }
+  closeMobileSidebar();
+}
+
+// ── System Health Panel (vanilla JS) ──
+function _fmtBytes(v){const b=Number(v||0);if(!isFinite(b)||b<=0)return'0 B';const u=['B','KB','MB','GB','TB'];const i=Math.min(Math.floor(Math.log(b)/Math.log(1024)),u.length-1);return `${(b/1024**i).toFixed(i===0?0:1)} ${u[i]}`}
+function _fmtUptime(s){const t=Math.max(0,Number(s||0));const h=Math.floor(t/3600),m=Math.floor((t%3600)/60),sec=Math.floor(t%60);if(h>0)return`${h}h ${m}m`;if(m>0)return`${m}m ${sec}s`;return`${sec}s`}
+
+function renderSystemHealthPanel(container){
+  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  container.innerHTML=`
+    <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
+    <div class="tp-card"><div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
+      <div class="tp-kpis" id="shKpis"><div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div><div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div></div>
+      <p class="tp-sub" id="shLastUpdate">Polling every 10s. Last update: --</p>
+    </div>
+    <div class="tp-card"><h3>Services</h3><div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div></div>`;
+
+  const ctrl=new AbortController();
+  async function fetchHealth(){
+    try{
+      const r=await fetch('/api/system-health',{credentials:'include',cache:'no-store',signal:ctrl.signal});
+      const p=await r.json().catch(()=>null);
+      if(!r.ok||!p?.success||!p.data)throw new Error('Unable to fetch');
+      _renderHealthData(p.data);
+    }catch(e){if(e?.name==='AbortError')return;_renderHealthError()}
+  }
+
+  function _renderHealthData(d){
+    const apiOk=d.api?.status==='ok',dbOk=d.database?.status==='ok';
+    const kpis=document.getElementById('shKpis');
+    if(kpis)kpis.innerHTML=[
+      ['API',apiOk?'OK':'Down'],['Database',dbOk?'OK':'Down'],
+      ['Uptime',_fmtUptime(d.api?.uptimeSec)],['Memory',_fmtBytes(d.system?.memory?.rss)]
+    ].map(([l,v])=>`<div class="tp-kpi"><div class="tp-kpi-label">${l}</div><div class="tp-kpi-value">${v}</div></div>`).join('');
+    const ts=d.timestamp?new Date(d.timestamp).toLocaleTimeString():'--';
+    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 10s. Last update: ${ts}`;
+    const svc=document.getElementById('shServices');
+    if(svc)svc.innerHTML=[
+      {name:'Application API',status:apiOk?'ok':'down',detail:d.api?`PID ${d.api.pid} • Node ${d.api.nodeVersion} • Uptime ${_fmtUptime(d.api.uptimeSec)}`:'Collecting...'},
+      {name:'PostgreSQL',status:dbOk?'ok':'down',detail:d.database?`Latency ${d.database.latencyMs??'--'} ms${d.database.serverTime?' • DB time '+new Date(d.database.serverTime).toLocaleTimeString():''}`:'Collecting...'},
+      {name:'Host Runtime',status:'ok',detail:d.system?`${d.system.platform}/${d.system.arch} • CPU ${d.system.cpuCount} • Load ${Number(d.system.loadAvg1||0).toFixed(2)}`:'Collecting...'}
+    ].map(s=>`<div class="tp-service"><div class="tp-service-head"><h4 class="tp-service-name">${s.name}</h4><span class="tp-pill ${s.status}">${s.status}</span></div><div class="tp-service-meta">${s.detail}</div></div>`).join('');
+  }
+  function _renderHealthError(){
+    const svc=document.getElementById('shServices');
+    if(svc)svc.innerHTML='<p class="tp-sub">Unable to reach health endpoint. Retrying...</p>';
+  }
+
+  document.getElementById('shRefreshBtn')?.addEventListener('click',()=>fetchHealth());
+  fetchHealth();
+  _healthTimer=setInterval(fetchHealth,10000);
+  // cleanup when section changes
+  container._cleanup=()=>{ctrl.abort();if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}};
+}
+
+// ── MCP Setup Panel (vanilla JS) ──
+function renderMcpSetupPanel(container){
+  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  const userName=currentUser?(currentUser.name||currentUser.email||'User'):'';
+  const callbackUrl=`${window.location.origin}/auth/github/callback`;
+  const tokenPlaceholder='paste-token-here';
+  function buildConfig(tok){return JSON.stringify({mcpServers:{bookmark:{command:'npx',args:['-y','github:shivasharma/website_bookmark_mcp'],env:{BOOKMARK_API_BASE_URL:window.location.origin,BOOKMARK_API_TOKEN:tok||tokenPlaceholder}}}},null,2)}
+
+  container.innerHTML=`
+    <div class="tp-header"><h2 class="tp-title">MCP Setup</h2><p class="tp-sub">Configure Model Context Protocol for AI assistants</p></div>
+    <div class="tp-card"><h3>Session</h3>${!currentUser?'<p class="tp-sub">You are not logged in. Login first to generate MCP token.</p><a class="btn-outline" href="/register">Login / Register</a>':'<p class="tp-sub">Logged in as <strong>'+userName+'</strong>.</p>'}</div>
+    <div class="tp-card"><h3>Token</h3><p class="tp-sub">Generate a token and use it in MCP config.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn-outline" type="button" id="mcpGenBtn" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700">Generate Token</button><button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">Copy Token</button></div>
+      <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
+      <pre id="mcpTokenPre">Click Generate Token</pre>
+    </div>
+    <div class="tp-card"><h3>Config Template</h3><button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button><pre id="mcpConfigPre">${buildConfig('')}</pre></div>
+    <div class="tp-card"><h3>OAuth Callback</h3><p class="tp-sub">GitHub callback should be set to this URL only:</p><pre>${callbackUrl}</pre></div>`;
+
+  let token='';
+  document.getElementById('mcpGenBtn')?.addEventListener('click',async()=>{
+    if(!currentUser){_mcpStatus('Login required before generating token.','warn');return}
+    _mcpStatus('Generating token...','');
+    try{
+      const r=await fetch('/api/mcp-token?expires_in_days=30',{credentials:'include'});
+      const p=await r.json().catch(()=>null);
+      if(!r.ok||!p?.success||!p.data?.token)throw new Error(p?.error||'Could not generate token.');
+      token=p.data.token;
+      document.getElementById('mcpTokenPre').textContent=token;
+      document.getElementById('mcpConfigPre').textContent=buildConfig(token);
+      document.getElementById('mcpCopyTokBtn').style.display='';
+      _mcpStatus('Token generated.','ok');
+    }catch(e){_mcpStatus(e.message||'Could not generate token.','danger')}
+  });
+  document.getElementById('mcpCopyTokBtn')?.addEventListener('click',()=>{
+    navigator.clipboard.writeText(token).then(()=>_mcpStatus('Token copied.','ok')).catch(()=>_mcpStatus('Unable to copy.','danger'));
+  });
+  document.getElementById('mcpCopyCfgBtn')?.addEventListener('click',()=>{
+    const cfg=document.getElementById('mcpConfigPre')?.textContent||'';
+    navigator.clipboard.writeText(cfg).then(()=>_mcpStatus('Config copied.','ok')).catch(()=>_mcpStatus('Unable to copy.','danger'));
+  });
+
+  function _mcpStatus(msg,cls){
+    const el=document.getElementById('mcpStatus');
+    if(!el)return;
+    el.textContent=msg;
+    el.className='tp-status'+(cls?' '+cls:'');
+  }
+}
+
+// Handle direct URL navigation for tool sections
+function _initSectionFromUrl(){
+  const p=window.location.pathname;
+  if(p==='/syshealth')switchSection('syshealth');
+  else if(p==='/mcp')switchSection('mcp');
+}
+window.addEventListener('popstate',()=>{
+  const p=window.location.pathname;
+  if(p==='/syshealth')switchSection('syshealth');
+  else if(p==='/mcp')switchSection('mcp');
+  else if(currentSection!=='bookmarks')switchSection('bookmarks');
+});
+
 async function initDashboard(){
   if(authEls.menuLogoutBtn){
     authEls.menuLogoutBtn.addEventListener('click',async()=>{toggleSettingsMenu(false);await performLogout()});
@@ -1761,6 +1928,7 @@ async function initDashboard(){
   await loadBookmarks();
   render();
   setupTagManager();
+  _initSectionFromUrl();
 }
 
 initDashboard();

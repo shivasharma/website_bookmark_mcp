@@ -722,11 +722,11 @@ app.get("/mcp-setup", (_req, res) => {
 });
 
 app.get("/syshealth", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/mcp", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/notifications", (_req, res) => {
