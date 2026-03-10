@@ -578,22 +578,22 @@ function safeHost(value) {
     }
 }
 app.get("/", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/dashboard", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/dashboard/:section", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/bookmarks", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/projects/:slug", (_req, res) => {
-    res.sendFile(path.join(dashboardDir, "react-shell.html"));
+    res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/app", (_req, res) => {
-    res.redirect("/bookmarks");
+    res.redirect("/");
 });
 app.get("/register", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "register.html"));
@@ -618,7 +618,7 @@ app.get("/auth/google", authLimiter, (req, res, next) => {
     passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 app.get("/auth/google/callback", passport.authenticate("google", { failureRedirect: "/register?error=google_auth_failed" }), (_req, res) => {
-    res.redirect("/dashboard/index.html");
+    res.redirect("/");
 });
 app.get("/auth/github", authLimiter, (req, res, next) => {
     if (!CLIENT_ID_GITHUB || !CLIENT_SECRET_GITHUB) {
@@ -644,7 +644,7 @@ app.get("/auth/github/callback", (req, res, next) => {
                 res.redirect("/register?error=github_session_error");
                 return;
             }
-            res.redirect("/dashboard/index.html");
+            res.redirect("/");
         });
     })(req, res, next);
 });
