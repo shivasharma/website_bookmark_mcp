@@ -609,7 +609,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
               <div class="quick-smart-row">
                 <div class="quick-smart-input">
                   <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  <input class="fi" type="url" id="quickUrl" aria-label="Quick add bookmark URL" placeholder="Paste a URL and it saves automatically..." autocomplete="off"/>
+                  <input class="fi" type="url" id="quickUrl" aria-label="Quick add bookmark URL" placeholder="Paste a domain like github.com and it auto-fills details..." autocomplete="off"/>
                 </div>
                 <button class="btn-outline" type="button" aria-label="Quick Add bookmark details" onclick="openQuickDetails()">Quick Add</button>
               </div>
@@ -618,7 +618,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
                 <span class="quick-meta-text" id="quickMetaText">Paste a link to auto-detect title, favicon, and tags.</span>
                 <span class="quick-tags" id="quickTagList"></span>
               </div>
-              <div class="quick-helper">Tip: press Enter to save typed URL instantly.</div>
+              <div class="quick-helper">Tip: enter a domain or full URL, then press Enter to auto-save with fetched title, description, and tags.</div>
             </div>
           </div>
         </div>
@@ -1450,15 +1450,17 @@ function normalizeQuickUrl(input){
   }catch(e){return''}
 }
 
-function suggestQuickTags(url,title){
-  const value=`${url} ${title}`.toLowerCase();
+function suggestQuickTags(url,title,description=''){
+  const value=`${url} ${title} ${description}`.toLowerCase();
   const tags=[];
   if(/github|gitlab|bitbucket|docs|developer|api/.test(value))tags.push('dev');
   if(/figma|dribbble|behance|design|ui|ux/.test(value))tags.push('design');
   if(/openai|ai|llm|ml|huggingface/.test(value))tags.push('ai');
+  if(/documentation|guide|reference/.test(value))tags.push('docs');
+  if(/youtube|video|podcast/.test(value))tags.push('video');
   if(/tools?|app|productivity|extension/.test(value))tags.push('tools');
   if(tags.length===0)tags.push('read-later');
-  return tags.slice(0,3);
+  return [...new Set(tags)].slice(0,4);
 }
 
 function buildQuickDraft(url){
@@ -1467,7 +1469,7 @@ function buildQuickDraft(url){
   const pathLabel=url.split('/').filter(Boolean).slice(1,2).join(' ').replace(/[-_]/g,' ').trim();
   const titleBase=(hostLabel.charAt(0).toUpperCase()+hostLabel.slice(1))+(pathLabel?` - ${pathLabel}`:'');
   const title=titleBase.length>70?`${titleBase.slice(0,67)}...`:titleBase;
-  const tags=suggestQuickTags(url,title);
+  const tags=suggestQuickTags(url,title,`Saved from ${domain}`);
   return {
     url,
     title,
@@ -1476,6 +1478,31 @@ function buildQuickDraft(url){
     tags,
     favicon:`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=32`
   };
+}
+
+async function enrichQuickDraft(rawUrl){
+  const normalized=normalizeQuickUrl(rawUrl);
+  if(!normalized)return null;
+  const fallback=buildQuickDraft(normalized);
+  try{
+    const {response,payload}=await api(`/url-metadata?url=${encodeURIComponent(normalized)}`,{method:'GET'});
+    if(!response.ok||!payload?.success||!payload?.data){
+      return fallback;
+    }
+    const resolvedUrl=String(payload.data.url||normalized);
+    const resolvedTitle=String(payload.data.title||'').trim()||fallback.title;
+    const resolvedDescription=String(payload.data.description||'').trim()||fallback.description;
+    return {
+      ...fallback,
+      url:resolvedUrl,
+      title:resolvedTitle,
+      description:resolvedDescription,
+      tags:suggestQuickTags(resolvedUrl,resolvedTitle,resolvedDescription),
+      favicon:`https://www.google.com/s2/favicons?domain=${encodeURIComponent(safeDomain(resolvedUrl))}&sz=32`
+    };
+  }catch(e){
+    return fallback;
+  }
 }
 
 function renderQuickMeta(draft,message){
@@ -1504,7 +1531,12 @@ async function smartQuickSave(rawInput){
     return;
   }
   quickSaving=true;
-  quickDraft=buildQuickDraft(url);
+  quickDraft=await enrichQuickDraft(url);
+  if(!quickDraft){
+    quickSaving=false;
+    showToast('Paste a valid URL to save','warn');
+    return;
+  }
   renderQuickMeta(quickDraft,`Ready: ${quickDraft.title}`);
   showToast('Saving...','info');
   try{
