@@ -2305,6 +2305,228 @@ async function renderChatPanel(container){
   container._cleanup=()=>{delete window.askBookmarkChat};
 }
 
+const _bmChatStopWords=new Set(['the','a','an','to','for','of','in','on','about','show','find','list','my','me','please','are','is','do','does','have','has','what','which','where','when','how','many','all','any','with','and','or','from','that','this','those','these','related']);
+
+function _bmNormalizeTags(tags){
+  if(Array.isArray(tags))return tags.map((t)=>String(t||'').toLowerCase().trim()).filter(Boolean);
+  if(typeof tags==='string')return tags.split(',').map((t)=>t.toLowerCase().trim()).filter(Boolean);
+  return [];
+}
+
+function _bmDateMs(value){
+  const n=Date.parse(String(value||''));
+  return Number.isFinite(n)?n:0;
+}
+
+function _bmDomain(url){
+  try{return new URL(String(url||'')).hostname.replace(/^www\./,'').toLowerCase()}catch{return ''}
+}
+
+function _bmText(blob){
+  return String(blob||'').toLowerCase();
+}
+
+function _bmTokens(question){
+  return _bmText(question)
+    .replace(/[^a-z0-9\s-]/g,' ')
+    .split(/\s+/)
+    .map((w)=>w.trim())
+    .filter((w)=>w.length>1&&!_bmChatStopWords.has(w));
+}
+
+async function _fetchAllBookmarksForChat(){
+  const all=[];
+  let page=1;
+  const pageSize=100;
+  while(page<=20){
+    const r=await fetch(`/api/bookmarks?page=${page}&pageSize=${pageSize}`,{credentials:'include',cache:'no-store'});
+    const p=await r.json().catch(()=>null);
+    if(!r.ok||!p?.success||!Array.isArray(p.data))throw new Error(p?.error||'Unable to load bookmarks.');
+    all.push(...p.data);
+    if(!p.hasMore||p.data.length<pageSize)break;
+    page+=1;
+  }
+  return all;
+}
+
+function _rankBookmarksForQuestion(bookmarks,question){
+  const tokens=_bmTokens(question);
+  if(!tokens.length)return [];
+  return bookmarks
+    .map((b)=>{
+      const tags=_bmNormalizeTags(b.tags);
+      const hay=[b.title,b.description,b.notes,b.url,tags.join(' ')].map(_bmText).join(' ');
+      let score=0;
+      for(const t of tokens){
+        if(hay.includes(t))score+=1;
+        if(_bmDomain(b.url).includes(t))score+=2;
+        if(tags.some((tag)=>tag===t||tag.includes(t)))score+=2;
+      }
+      return {bookmark:b,score};
+    })
+    .filter((x)=>x.score>0)
+    .sort((a,b)=>b.score-a.score||_bmDateMs(b.bookmark.created_at||b.bookmark.updated_at)-_bmDateMs(a.bookmark.created_at||a.bookmark.updated_at))
+    .map((x)=>x.bookmark);
+}
+
+function _countBy(items,selector){
+  const m=new Map();
+  for(const item of items){
+    const key=selector(item);
+    if(!key)continue;
+    m.set(key,(m.get(key)||0)+1);
+  }
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]);
+}
+
+async function answerBookmarkQuestion(question){
+  const q=String(question||'').trim();
+  const lower=q.toLowerCase();
+  const all=await _fetchAllBookmarksForChat();
+  const weekAgo=Date.now()-7*24*60*60*1000;
+  const monthAgo=Date.now()-30*24*60*60*1000;
+
+  if(/(total|count|how many).*(bookmark)/.test(lower)){
+    return {text:`You currently have ${all.length} bookmarks.`,links:[]};
+  }
+
+  if(/(starred|favorite|favourite)/.test(lower)){
+    const starred=all.filter((b)=>Boolean(b.is_favorite||b.isFavorite));
+    return {
+      text:starred.length?`You have ${starred.length} starred bookmarks.`:'You do not have any starred bookmarks yet.',
+      links:starred,
+    };
+  }
+
+  if(/(read later|remind me later|unread)/.test(lower)){
+    const later=all.filter((b)=>_bmNormalizeTags(b.tags).some((t)=>t==='read-later'||t==='read later'||t==='remind-later'||t==='remind me later'));
+    return {
+      text:later.length?`I found ${later.length} Remind Me Later bookmarks.`:'No Remind Me Later bookmarks found.',
+      links:later,
+    };
+  }
+
+  if(/(recent|latest|newest|this week|today|this month)/.test(lower)){
+    const since=/today/.test(lower)?Date.now()-24*60*60*1000:/this month/.test(lower)?monthAgo:weekAgo;
+    const recent=all
+      .filter((b)=>_bmDateMs(b.created_at||b.createdAt||b.updated_at||b.updatedAt)>=since)
+      .sort((a,b)=>_bmDateMs(b.created_at||b.createdAt||b.updated_at||b.updatedAt)-_bmDateMs(a.created_at||a.createdAt||a.updated_at||a.updatedAt));
+    return {
+      text:recent.length?`I found ${recent.length} recent bookmarks in that time window.`:'No bookmarks found for that recent time window.',
+      links:recent,
+    };
+  }
+
+  if(/(top tags|popular tags|most used tags|tags summary)/.test(lower)){
+    const tags=[];
+    all.forEach((b)=>tags.push(..._bmNormalizeTags(b.tags)));
+    const top=_countBy(tags,(t)=>t).slice(0,6);
+    const summary=top.length?top.map(([tag,count])=>`${tag} (${count})`).join(', '):'No tags found yet.';
+    return {text:`Top tags: ${summary}`,links:[]};
+  }
+
+  if(/(top domains|popular sites|most saved sites|domains)/.test(lower)){
+    const top=_countBy(all,(b)=>_bmDomain(b.url)).slice(0,6);
+    const summary=top.length?top.map(([domain,count])=>`${domain} (${count})`).join(', '):'No domains found yet.';
+    return {text:`Top domains: ${summary}`,links:[]};
+  }
+
+  const fromMatch=lower.match(/from\s+([a-z0-9.-]+\.[a-z]{2,})/i);
+  if(fromMatch&&fromMatch[1]){
+    const target=fromMatch[1].toLowerCase().replace(/^www\./,'');
+    const matches=all.filter((b)=>_bmDomain(b.url).includes(target));
+    return {
+      text:matches.length?`I found ${matches.length} bookmarks from ${target}.`:`I could not find bookmarks from ${target}.`,
+      links:matches,
+    };
+  }
+
+  const scored=_rankBookmarksForQuestion(all,q);
+  if(scored.length){
+    const shown=scored.slice(0,8);
+    return {
+      text:`I found ${scored.length} bookmark${scored.length===1?'':'s'} related to your question. Here are the most relevant ones:`,
+      links:shown,
+    };
+  }
+
+  return {
+    text:'I could not find a strong match for that question yet. Try asking by keyword, tag, domain, or timeframe.',
+    links:[],
+  };
+}
+
+function initFloatingChatbot(){
+  const fab=document.getElementById('aiChatFab');
+  const drawer=document.getElementById('aiChatDrawer');
+  const closeBtn=document.getElementById('aiChatClose');
+  const logEl=document.getElementById('aiChatLog');
+  const inputEl=document.getElementById('aiChatInput');
+  const sendBtn=document.getElementById('aiChatSend');
+  const statusEl=document.getElementById('aiChatStatus');
+  const quickWrap=document.getElementById('aiChatQuick');
+  if(!fab||!drawer||!logEl||!inputEl||!sendBtn||!statusEl)return;
+
+  function setStatus(msg){statusEl.textContent=msg}
+  function setOpen(open){
+    drawer.classList.toggle('open',open);
+    drawer.setAttribute('aria-hidden',open?'false':'true');
+    if(open){setTimeout(()=>inputEl.focus(),60)}
+  }
+  function addMessage(role,text,links){
+    const wrap=document.createElement('div');
+    wrap.className='ai-chat-msg '+(role==='user'?'user':'bot');
+    const body=document.createElement('div');
+    body.textContent=text;
+    wrap.appendChild(body);
+    if(Array.isArray(links)&&links.length){
+      const list=document.createElement('div');
+      list.className='ai-chat-links';
+      links.slice(0,6).forEach((b)=>{
+        const a=document.createElement('a');
+        a.className='ai-chat-link';
+        a.href=b.url;
+        a.target='_blank';
+        a.rel='noopener noreferrer';
+        a.textContent=b.title||b.url;
+        list.appendChild(a);
+      });
+      wrap.appendChild(list);
+    }
+    logEl.appendChild(wrap);
+    logEl.scrollTop=logEl.scrollHeight;
+  }
+
+  async function ask(question){
+    const q=String(question||'').trim();
+    if(!q)return;
+    addMessage('user',q);
+    inputEl.value='';
+    sendBtn.disabled=true;
+    setStatus('Thinking...');
+    try{
+      const result=await answerBookmarkQuestion(q);
+      addMessage('bot',result.text,result.links||[]);
+      setStatus('Using your bookmark data from this account.');
+    }catch(e){
+      addMessage('bot','I could not answer right now. Please make sure you are logged in and try again.');
+      setStatus(e?.message||'Unable to process request.');
+    }finally{sendBtn.disabled=false}
+  }
+
+  fab.addEventListener('click',()=>setOpen(!drawer.classList.contains('open')));
+  closeBtn?.addEventListener('click',()=>setOpen(false));
+  sendBtn.addEventListener('click',()=>ask(inputEl.value));
+  inputEl.addEventListener('keydown',(e)=>{if(e.key==='Enter'){e.preventDefault();ask(inputEl.value)}});
+  quickWrap?.addEventListener('click',(e)=>{
+    const t=e.target;
+    if(!(t instanceof HTMLElement))return;
+    const q=t.getAttribute('data-q');
+    if(q){ask(q)}
+  });
+  document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&drawer.classList.contains('open'))setOpen(false)});
+}
+
 // Handle direct URL navigation for tool sections
 function _initSectionFromUrl(){
   const p=window.location.pathname;
@@ -2384,6 +2606,7 @@ async function initDashboard(){
   await loadNotificationSummary();
   await loadBookmarks();
   render();
+  initFloatingChatbot();
   if(!currentUser){await renderWelcomeExperience();}
   setupTagManager();
   _initSectionFromUrl();
