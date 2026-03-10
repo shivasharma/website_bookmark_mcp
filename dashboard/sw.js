@@ -1,4 +1,4 @@
-const CACHE_NAME = "markd-shell-v3";
+const CACHE_NAME = "markd-shell-v4";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",

@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/styles.css">
+<script>/* prevent flash of wrong theme */(function(){var t=localStorage.getItem('bmark-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t)})()</script>
 </head>
 <body>
 
@@ -21,8 +22,10 @@
 
   <!-- TOP BAR -->
   <header class="topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Open navigation menu" onclick="toggleMobileSidebar()"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <a class="logo" href="#"><div class="logo-mark">🔖</div><span class="logo-text">BookMark<em>Manager</em></span></a>
     <div class="topbar-actions">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light/dark mode" title="Toggle theme" onclick="toggleTheme()"><svg class="ico-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg><svg class="ico-sun" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
       <button class="btn-primary" type="button" onclick="openAddModal()">+ Add</button>
       <button class="btn-icon hidden" id="topNotifyBtn" type="button" title="Notifications" onclick="window.location.assign('/notifications')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge hidden" id="topNotifyBadge">0</span></button>
       <a class="btn-outline" id="signInBtn" href="/register">Login</a>
@@ -30,6 +33,7 @@
       <div class="top-menu-wrap">
         <button class="btn-icon" id="settingsMenuBtn" type="button" title="Settings menu"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01A1.65 1.65 0 0 0 9.91 3H10a2 2 0 1 1 4 0h.09a1.65 1.65 0 0 0 1.51 1h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01A1.65 1.65 0 0 0 21 9.91V10a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
         <div class="top-menu" id="topSettingsMenu">
+          <button class="top-menu-item" type="button" onclick="toggleTheme();toggleSettingsMenu(false)">Toggle Theme</button>
           <button class="top-menu-item" type="button" onclick="openImport();toggleSettingsMenu(false)">Import Bookmarks</button>
           <button class="top-menu-item" type="button" onclick="openCmd();toggleSettingsMenu(false)">Command Palette</button>
           <div class="top-menu-divider"></div>
@@ -41,16 +45,36 @@
   </header>
 
   <!-- SIDEBAR -->
-  <nav class="sidebar">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+  <nav class="sidebar" id="sidebarNav">
     <div class="sidebar-inner">
       <div>
         <div class="section-label">Library</div>
-        <a class="nav-link active" href="#" data-view="all"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>All Bookmarks<span class="nav-count" id="snAll">3</span></a>
-        <a class="nav-link" href="#" data-view="starred"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Starred<span class="nav-count" id="snStar">1</span></a>
-        <a class="nav-link" href="#" data-view="recent"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Recent</a>
-        <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Read Later<span class="nav-count">0</span></a>
-        <a class="nav-link" href="/syshealth"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>System Health</a>
-        <a class="nav-link" href="/mcp"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>MCP Setup</a>
+        <a class="nav-link active" href="#" data-view="all"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span class="nav-link-text">All Bookmarks</span><span class="nav-count" id="snAll">3</span></a>
+        <a class="nav-link" href="#" data-view="starred"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><span class="nav-link-text">Starred</span><span class="nav-count" id="snStar">1</span></a>
+        <a class="nav-link" href="#" data-view="recent"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nav-link-text">Recent</span><span class="nav-count" id="snRecent">0</span></a>
+        <a class="nav-link" href="#" data-view="unread"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="nav-link-text">Read Later</span><span class="nav-count" id="snReadLater">0</span></a>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div>
+        <button class="section-label section-toggle" type="button" onclick="toggleSidebarSection('toolsSection')">
+          <span>Tools</span>
+          <svg class="section-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="sidebar-section" id="toolsSection">
+          <a class="nav-link" href="/syshealth"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="nav-link-text">System Health</span></a>
+          <a class="nav-link" href="/mcp"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg><span class="nav-link-text">MCP Setup</span></a>
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div>
+        <button class="section-label section-toggle" type="button" onclick="toggleSidebarSection('catSection')">
+          <span>Categories</span>
+          <svg class="section-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="sidebar-section" id="catSection">
+          <div id="sidebarCategories"></div>
+        </div>
       </div>
     </div>
   </nav>
@@ -70,54 +94,67 @@
     <div class="dash-header au d2">
       <div>
         <h1 class="dash-title">All <span>Bookmarks</span></h1>
-        <p class="dash-sub">Portfolio view for your saved links and resources</p>
+        <p class="dash-sub">Your saved links and resources</p>
       </div>
-      <div class="dash-actions">
-        <button class="btn-primary" onclick="openAddModal()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add New
-        </button>
+      <div class="stats-inline">
+        <span class="stat-inline"><strong id="totalCount">3</strong> saved</span>
+        <span class="stat-inline-dot">·</span>
+        <span class="stat-inline"><strong id="starCount">1</strong> starred</span>
+        <span class="stat-inline-dot">·</span>
+        <span class="stat-inline"><strong id="importCount">0</strong> imported</span>
       </div>
     </div>
 
-    <div class="search-nav au d3">
+    <div class="action-bar au d3">
       <div class="primary-search">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" placeholder="Search all bookmarks, notes, and tags..." id="searchInput" autocomplete="off"/>
+        <input type="text" placeholder="Search bookmarks, notes, tags..." id="searchInput" autocomplete="off"/>
       </div>
-      <div class="search-chip-row">
-        <span class="search-chip-label">Smart filters</span>
-        <button class="search-chip smart-chip active" type="button" data-time="all">Any time</button>
-        <button class="search-chip smart-chip" type="button" data-time="today">Saved today</button>
-        <button class="search-chip smart-chip" type="button" data-time="week">Saved this week</button>
+      <select class="sort-select" id="sortSelect" onchange="setSort(this.value)" aria-label="Sort bookmarks">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="az">A → Z</option>
+        <option value="za">Z → A</option>
+      </select>
+      <button class="btn-primary btn-add-compact" type="button" onclick="openAddModal()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add</button>
+    </div>
+
+    <div class="filter-bar au d3">
+      <div class="filter-bar-left">
+        <button class="fpill on" data-filter="all">All</button>
+        <button class="fpill" data-filter="starred">⭐ Starred</button>
+        <button class="more-filters-btn" type="button" onclick="toggleAdvancedFilters()" id="moreFiltersBtn"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg> More Filters <svg class="more-filters-chevron" id="moreFiltersChevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
       </div>
-      <div class="search-chip-row recent-search-wrap" id="recentSearchWrap">
-        <span class="search-chip-label">Recent searches</span>
-        <div id="recentSearchChips"></div>
+      <div class="filter-bar-right">
+        <span class="list-count-badge" id="listCount">3</span>
+        <button class="vbtn" id="vGroupCat" onclick="toggleGroupByCategory()" title="Group by category"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></button>
+        <button class="vbtn on" id="vList" onclick="setView('list')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1" fill="currentColor" stroke="none"/></svg></button>
+        <button class="vbtn" id="vGrid" onclick="setView('grid')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
       </div>
     </div>
 
-    <div class="stats-strip au d4">
-      <div class="stat"><div class="stat-top-line"></div><div class="stat-ico">🔖</div><div class="stat-val" id="totalCount">3</div><div class="stat-name">Total Saved</div><span class="stat-badge sb-blue">Demo</span></div>
-      <div class="stat"><div class="stat-top-line"></div><div class="stat-ico">⭐</div><div class="stat-val" id="starCount">1</div><div class="stat-name">Starred</div></div>
-      <div class="stat"><div class="stat-top-line"></div><div class="stat-ico">🏷</div><div class="stat-val">5</div><div class="stat-name">Tags Active</div><span class="stat-badge sb-green">Live</span></div>
-      <div class="stat"><div class="stat-top-line"></div><div class="stat-ico">📥</div><div class="stat-val" id="importCount">0</div><div class="stat-name">Imported</div><span class="stat-badge sb-amber">Ready</span></div>
+    <div class="advanced-filters" id="advancedFilters">
+      <div class="adv-filters-inner">
+        <div class="adv-row">
+          <span class="search-chip-label">Time</span>
+          <button class="search-chip smart-chip active" type="button" data-time="all">Any time</button>
+          <button class="search-chip smart-chip" type="button" data-time="today">Saved today</button>
+          <button class="search-chip smart-chip" type="button" data-time="week">Saved this week</button>
+        </div>
+        <div class="adv-row recent-search-wrap" id="recentSearchWrap">
+          <span class="search-chip-label">Recent</span>
+          <div id="recentSearchChips"></div>
+        </div>
+        <div class="adv-row">
+          <span class="search-chip-label">Tags</span>
+          <div id="dynamicTagPills"></div>
+        </div>
+      </div>
     </div>
 
     <div class="content-area au d4">
       <div>
         <div class="panel">
-          <div class="panel-head">
-            <div class="panel-head-left"><div class="live-dot"></div><span class="panel-title">Saved Links</span><span style="font-size:11px;color:var(--text3);background:var(--s4);padding:1px 7px;border-radius:99px;font-family:var(--font-d);font-weight:600" id="listCount">3</span></div>
-          </div>
-          <div class="filter-row">
-            <button class="fpill on" data-filter="all">All</button>
-            <button class="fpill" data-filter="starred">⭐ Starred</button>
-            <div class="filter-right">
-              <button class="vbtn on" id="vList" onclick="setView('list')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="3" cy="18" r="1" fill="currentColor" stroke="none"/></svg></button>
-              <button class="vbtn" id="vGrid" onclick="setView('grid')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></button>
-            </div>
-          </div>
           <div class="bk-list" id="bookmarkContainer"></div>
         </div>
       </div>
@@ -134,14 +171,16 @@
                 <div class="quick-smart-row">
                   <div class="quick-smart-input" id="quickSmartInput">
                     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input class="fi" type="url" id="quickUrl" aria-label="Quick add bookmark URL" placeholder="e.g., github.com or https://example.com" autocomplete="off"/>
+                    <input class="fi" type="url" id="quickUrl" aria-label="Quick add bookmark URL" aria-describedby="quickUrlError" placeholder="https://github.com/brave/brave-browser" autocomplete="off"/>
                     <span class="quick-url-actions">
-                      <button class="quick-paste-btn" type="button" aria-label="Paste URL from clipboard" title="Paste from clipboard" onclick="pasteQuickUrl()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                      <button class="quick-paste-btn" type="button" aria-label="Paste URL from clipboard (Ctrl+V)" title="Paste from clipboard" onclick="pasteQuickUrl()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                      <kbd class="qa-kbd-hint" aria-hidden="true">Ctrl+V</kbd>
                       <span class="quick-url-check" id="quickUrlCheck" aria-live="polite"></span>
                     </span>
                   </div>
                   <button class="btn-outline" type="button" aria-label="Quick Add bookmark details" onclick="openQuickDetails()">Quick Add</button>
                 </div>
+                <p class="qa-url-error" id="quickUrlError" role="alert" style="display:none">Please enter a valid URL</p>
                 <p class="qa-dup-warning" id="quickDupWarning" role="alert" style="display:none"></p>
                 <div class="quick-meta" id="quickMeta" aria-live="polite">
                   <span class="quick-favicon"><img id="quickFavicon" alt=""/></span>
@@ -173,9 +212,9 @@
           </div>
           <div class="qa-saved-banner" id="quickSavedBanner" role="status" style="display:none"><span>&#10003; Bookmark saved!</span><button class="qa-undo-btn" type="button" onclick="undoQuickSave()">Undo</button></div>
           <div class="qa-btn-row">
-            <button class="btn-outline" type="button" onclick="clearQuickForm()">Clear</button>
-            <button class="btn-outline" type="button" onclick="quickSaveAndAnother()">Save &amp; Add Another</button>
-            <button class="btn-outline" type="button" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700" onclick="quickSaveAndClose()">Save</button>
+            <button class="btn-outline" type="button" aria-label="Clear form" onclick="clearQuickForm()">Clear</button>
+            <button class="btn-outline" type="button" aria-label="Save bookmark and add another" onclick="quickSaveAndAnother()">Save &amp; Add Another</button>
+            <button class="btn-outline" type="button" aria-label="Save bookmark" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700" onclick="quickSaveAndClose()">Save</button>
           </div>
         </div>
       </div>
@@ -192,7 +231,7 @@
   <button class="mob-nav-btn" onclick="openCmd()"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span class="mob-nav-label">Search</span></button>
   <button class="mob-nav-btn" onclick="showToast('Sign in to view profile','info')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="mob-nav-label">Profile</span></button>
 </nav>
-<button class="mob-fab" onclick="openAddModal()">+</button>
+<button class="mob-fab" id="mobFab" aria-label="Add bookmark" onclick="openAddModal()"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
 
 <!-- ════════════════════════════════════════════
      ADD BOOKMARK MODAL
