@@ -607,6 +607,9 @@ app.get("/syshealth", (_req, res) => {
 app.get("/mcp", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "index.html"));
 });
+app.get("/chat", (_req, res) => {
+    res.sendFile(path.join(dashboardDir, "index.html"));
+});
 app.get("/notifications", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "index.html"));
 });
