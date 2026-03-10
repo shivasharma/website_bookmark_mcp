@@ -1,0 +1,33 @@
+<div class="tp-header tp-header-modern">
+  <div class="tp-title-row">
+    <span class="tp-title-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </span>
+    <h2 class="tp-title">Bookmark Chat</h2>
+  </div>
+  <p class="tp-sub">Ask friendly questions about your bookmarks using your existing MCP-ready data.</p>
+</div>
+
+<div class="tp-card">
+  <div class="tp-card-head">
+    <h3>Ask About Your Bookmarks</h3>
+  </div>
+  <div class="chat-shell" id="chatShell">
+    <div class="chat-log" id="chatLog" aria-live="polite">
+      <div class="chat-msg bot">Hi! Ask things like "How many starred bookmarks do I have?" or "Find bookmarks about React".</div>
+    </div>
+    <div class="chat-actions" id="chatActions">
+      <button class="search-chip" type="button" onclick="askBookmarkChat('How many bookmarks do I have?')">Total count</button>
+      <button class="search-chip" type="button" onclick="askBookmarkChat('Show my starred bookmarks')">Starred</button>
+      <button class="search-chip" type="button" onclick="askBookmarkChat('Show recent bookmarks')">Recent</button>
+      <button class="search-chip" type="button" onclick="askBookmarkChat('Show remind me later bookmarks')">Remind me later</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="fi" id="chatInput" type="text" placeholder="Ask about your bookmarks..." autocomplete="off" />
+      <button class="btn-primary" id="chatSendBtn" type="button">Ask</button>
+    </div>
+    <p class="tp-sub" id="chatStatus">Powered by your bookmark API and MCP-ready data.</p>
+  </div>
+</div>
