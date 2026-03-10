@@ -465,11 +465,48 @@ function getFiltered(){
     const startOfToday=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
     const startOfWeek=new Date(now.getFullYear(),now.getMonth(),now.getDate()-6).getTime();
     const matchTime=currentTimeFilter==='all'||(Number.isFinite(createdAt)&&(currentTimeFilter==='today'?createdAt>=startOfToday:createdAt>=startOfWeek));
-    const matchFilter=currentFilter==='all'||(currentFilter==='starred'&&b.starred)||(currentFilter==='recent')||(currentFilter==='unread')||tags.map(t=>String(t).toLowerCase()).some(t=>t.includes(currentFilter));
+    const isRecent=Number.isFinite(createdAt)&&(Date.now()-createdAt)<7*864e5;
+    const isReadLater=tags.map(t=>String(t).toLowerCase().replace(/\s+/g,'')).some(t=>t==='readlater');
+    const matchFilter=currentFilter==='all'
+      ||(currentFilter==='starred'&&b.starred)
+      ||(currentFilter==='recent'&&isRecent)
+      ||(currentFilter==='unread'&&isReadLater)
+      ||tags.map(t=>String(t).toLowerCase()).some(t=>t.includes(currentFilter));
     const matchQ=!q||String(b.title||'').toLowerCase().includes(q)||String(b.url||'').toLowerCase().includes(q)||tags.join(' ').toLowerCase().includes(q)||String(b.notes||'').toLowerCase().includes(q)||String(b.description||'').toLowerCase().includes(q);
     return matchFilter&&matchQ&&matchTime;
   });
   return sortBookmarks(filtered);
+}
+
+function updateDashboardHeading(){
+  const titleEl=document.querySelector('.dash-title');
+  const subEl=document.querySelector('.dash-sub');
+  if(!titleEl||!subEl)return;
+
+  if(currentFilter==='all'){
+    titleEl.innerHTML='All <span>Bookmarks</span>';
+    subEl.textContent='Your saved links and resources';
+    return;
+  }
+  if(currentFilter==='starred'){
+    titleEl.innerHTML='Starred <span>Bookmarks</span>';
+    subEl.textContent='Only your favorite saved links';
+    return;
+  }
+  if(currentFilter==='recent'){
+    titleEl.innerHTML='Recent <span>Bookmarks</span>';
+    subEl.textContent='Bookmarks saved in the last 7 days';
+    return;
+  }
+  if(currentFilter==='unread'){
+    titleEl.innerHTML='Read Later <span>Bookmarks</span>';
+    subEl.textContent='Bookmarks tagged for reading later';
+    return;
+  }
+
+  const label=String(currentFilter||'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  titleEl.innerHTML=`${esc(label)} <span>Bookmarks</span>`;
+  subEl.textContent=`Bookmarks filtered by ${label}`;
 }
 
 function sortBookmarks(list){
@@ -609,6 +646,7 @@ function setTimeFilter(next){
 function render(){
   const container=document.getElementById('bookmarkContainer');
   const list=getFiltered();
+  updateDashboardHeading();
   document.getElementById('listCount').textContent=list.length;
   document.getElementById('totalCount').textContent=bookmarks.length;
   document.getElementById('starCount').textContent=bookmarks.filter(b=>b.starred).length;
@@ -618,7 +656,7 @@ function render(){
   const recentCount=bookmarks.filter(b=>{const d=new Date(b.created_at||0);return(Date.now()-d.getTime())<7*864e5}).length;
   document.getElementById('snRecent').textContent=recentCount;
   document.getElementById('snReadLater').textContent=bookmarks.filter(b=>(b.tags||[]).some(t=>String(t).toLowerCase()==='read later')).length;
-  container.className=currentView==='grid'?'bk-grid':'bk-list';
+  container.className=currentView==='grid'?'bk-grid':currentView==='table'?'bk-table-wrap':'bk-list';
   renderDynamicTagPills();
   renderSidebarCategories();
   if(!list.length){
@@ -632,6 +670,15 @@ function render(){
       container.innerHTML=renderFilterEmptyState(q);
     }else{
       container.innerHTML=renderZeroBookmarksState();
+    }
+    return;
+  }
+  if(currentView==='table'){
+    if(groupByCategory){
+      const groups=groupByCategories(list);
+      container.innerHTML=groups.map(g=>`<div class="cat-section"><div class="cat-header"><span class="cat-dot ${tagDotClass(g.category)}"></span><span class="cat-label">${esc(g.category)}</span><span class="cat-count">${g.items.length}</span></div>${renderTableView(g.items)}</div>`).join('')+renderAssistContent(list);
+    } else {
+      container.innerHTML=renderTableView(list)+renderAssistContent(list);
     }
     return;
   }
@@ -658,6 +705,27 @@ function renderGridCard(b){
 
 function renderListCard(b){
   return `<div class="bk-preview-card" data-id="${b.id}" onclick="openBookmarkById(${b.id})"><div class="bk-preview-main"><div class="bk-preview-fav"><img src="https://www.google.com/s2/favicons?domain=${esc(b.domain)}&sz=32" onerror="this.style.display='none'"/></div><div class="bk-preview-body"><div class="bk-preview-top"><div class="bk-preview-title">${esc(b.title)}</div>${b.starred?'<span title="Starred" style="color:var(--warn);font-size:12px">★</span>':''}</div><div class="bk-preview-url">${esc(b.domain||b.url)}</div><div class="bk-preview-excerpt">${esc(bookmarkExcerpt(b))}</div><div class="bk-preview-meta"><div class="tag-dots">${(b.tags||[]).slice(0,5).map(t=>`<span class="tag-dot ${tagDotClass(t)}" title="${esc(String(t))}" aria-label="${esc(String(t))}"></span>`).join('')}</div>${b.imported?'<span class="ai-badge">📥 Imported</span>':b.ai?'<span class="ai-badge">✦ AI</span>':''}<span class="bk-preview-date">${esc(b.date)}</span></div></div></div><div class="bk-preview-actions"><button class="ib star" title="Star" onclick="toggleStar(event,${b.id})">${b.starred?'⭐':'☆'}</button><button class="ib" title="Edit" onclick="editBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ib del" title="Delete" onclick="deleteBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div>`;
+}
+
+function renderTableView(items){
+  const titleSort=currentSort==='az'?'asc':currentSort==='za'?'desc':'none';
+  const dateSort=currentSort==='newest'?'desc':currentSort==='oldest'?'asc':'none';
+  const titleIcon=titleSort==='asc'?'↑':titleSort==='desc'?'↓':'↕';
+  const dateIcon=dateSort==='asc'?'↑':dateSort==='desc'?'↓':'↕';
+  return `<table class="bk-table"><thead><tr><th><button class="bk-th-btn ${titleSort!=='none'?'on':''}" type="button" onclick="setTableSort('title')">Title <span class="bk-th-icon">${titleIcon}</span></button></th><th>Domain</th><th>Tags</th><th><button class="bk-th-btn ${dateSort!=='none'?'on':''}" type="button" onclick="setTableSort('date')">Date <span class="bk-th-icon">${dateIcon}</span></button></th><th class="ta-right">Actions</th></tr></thead><tbody>${items.map(b=>renderTableRow(b)).join('')}</tbody></table>`;
+}
+
+function setTableSort(kind){
+  if(kind==='title')currentSort=currentSort==='az'?'za':'az';
+  if(kind==='date')currentSort=currentSort==='newest'?'oldest':'newest';
+  const sortSelect=document.getElementById('sortSelect');
+  if(sortSelect)sortSelect.value=currentSort;
+  render();
+}
+
+function renderTableRow(b){
+  const tags=(b.tags||[]).slice(0,3).map(t=>`<span class="mtag ${tagClass(String(t))}">${esc(t)}</span>`).join('');
+  return `<tr onclick="openBookmarkById(${b.id})"><td><div class="bk-table-title">${esc(b.title)}</div>${b.starred?'<span class="bk-table-star" title="Starred">★</span>':''}</td><td class="bk-table-domain">${esc(b.domain||b.url)}</td><td><div class="bk-table-tags">${tags||'<span class="bk-table-empty">-</span>'}</div></td><td class="bk-table-date">${esc(b.date)}</td><td class="ta-right"><div class="bk-table-actions"><button class="ib star" title="Star" onclick="toggleStar(event,${b.id})">${b.starred?'⭐':'☆'}</button><button class="ib" title="Edit" onclick="editBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ib del" title="Delete" onclick="deleteBk(event,${b.id})"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></td></tr>`;
 }
 
 async function toggleStar(e,id){
@@ -692,7 +760,13 @@ function editBk(e,id){
 }
 
 function filterByTag(t){currentFilter=t;document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));render();showToast(`Filtered by "${t}"`, 'info')}
-function setView(v){currentView=v;document.getElementById('vList').classList.toggle('on',v==='list');document.getElementById('vGrid').classList.toggle('on',v==='grid');render()}
+function setView(v){
+  currentView=v;
+  document.getElementById('vList')?.classList.toggle('on',v==='list');
+  document.getElementById('vGrid')?.classList.toggle('on',v==='grid');
+  document.getElementById('vTable')?.classList.toggle('on',v==='table');
+  render();
+}
 
 document.querySelectorAll('.fpill').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));btn.classList.add('on');currentFilter=btn.dataset.filter;document.querySelectorAll('.nav-link[data-view]').forEach(l=>l.classList.remove('active'));if(currentFilter==='all')document.querySelector('.nav-link[data-view=\"all\"]')?.classList.add('active');render()})});
 document.querySelectorAll('.nav-link[data-view]').forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();if(currentSection!=='bookmarks')switchSection('bookmarks');document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));link.classList.add('active');currentFilter=link.dataset.view;document.querySelectorAll('.fpill').forEach(b=>b.classList.toggle('on',b.dataset.filter===currentFilter||(!['all','starred'].includes(currentFilter)&&b.dataset.filter==='all')));closeMobileSidebar();render()})});
@@ -1646,6 +1720,7 @@ const CMDS=[
   {name:'Mobile / PWA setup',sub:'',ico:'📱',act:()=>openImport('pwa')},
   {name:'Switch to grid view',sub:'',ico:'▦',act:()=>setView('grid')},
   {name:'Switch to list view',sub:'',ico:'≡',act:()=>setView('list')},
+  {name:'Switch to table view',sub:'',ico:'☷',act:()=>setView('table')},
   {name:'Export bookmarks',sub:'',ico:'📤',act:()=>{const all=JSON.stringify(bookmarks,null,2);downloadFile('markd-export.json',all,'application/json');showToast('Exported all bookmarks','info')}},
   {name:'Show starred',sub:'',ico:'⭐',act:()=>{currentFilter='starred';document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));render()}},
   {name:'Sort A → Z',sub:'',ico:'🔤',act:()=>{currentSort='az';document.getElementById('sortSelect').value='az';render()}},

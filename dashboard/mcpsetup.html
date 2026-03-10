@@ -1,37 +1,108 @@
-<div class="tp-header">
-  <h2 class="tp-title">MCP Setup</h2>
-  <p class="tp-sub">Configure Model Context Protocol for AI assistants</p>
-</div>
-
-<div class="tp-card">
-  <div class="tp-card-head"><h3>Session</h3></div>
-  <div id="mcpSessionState">
-    <p class="tp-sub">Checking login session...</p>
+<div class="tp-header tp-header-modern">
+  <div class="tp-title-row">
+    <span class="tp-title-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
+        <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+        <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
+        <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+        <rect x="8" y="8" width="8" height="8" rx="2"/>
+      </svg>
+    </span>
+    <h2 class="tp-title">MCP Setup</h2>
   </div>
+  <p class="tp-sub">Connect AI clients securely with token-based Model Context Protocol configuration</p>
 </div>
 
-<div class="tp-card">
-  <div class="tp-card-head"><h3>Token</h3></div>
-  <p class="tp-sub">Generate a token and use it in your MCP client configuration.</p>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-    <button class="btn-outline" type="button" id="mcpGenBtn" style="background:var(--accent);color:#000;border-color:var(--accent);font-weight:700">Generate Token</button>
-    <button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">Copy Token</button>
-  </div>
-  <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
-  <pre id="mcpTokenPre">Click "Generate Token" to create an API token</pre>
-</div>
+<div class="tp-grid tp-grid-mcp">
+  <section class="tp-card">
+    <div class="tp-card-head">
+      <h3>
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+            <path d="M4 20a8 8 0 0 1 16 0"/>
+          </svg>
+        </span>
+        Session
+      </h3>
+    </div>
+    <div id="mcpSessionState">
+      <p class="tp-sub">Checking login session...</p>
+    </div>
+  </section>
 
-<div class="tp-card">
-  <div class="tp-card-head">
-    <h3>Config Template</h3>
-    <button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button>
-  </div>
-  <p class="tp-sub">Paste this JSON into your MCP client settings (Claude Desktop, Cursor, VS Code, etc.).</p>
-  <pre id="mcpConfigPre">Loading config template...</pre>
-</div>
+  <section class="tp-card tp-span-2">
+    <div class="tp-card-head">
+      <h3>
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </span>
+        Token
+      </h3>
+    </div>
+    <p class="tp-sub">Generate a token and add it to your MCP client configuration.</p>
+    <div class="tp-btn-row">
+      <button class="btn-outline tp-btn-accent" type="button" id="mcpGenBtn">
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="15" r="3"/>
+            <path d="M10.6 13.4 20 4"/>
+            <path d="m18 2 4 4"/>
+          </svg>
+        </span>
+        Generate Token
+      </button>
+      <button class="btn-outline" type="button" id="mcpCopyTokBtn" style="display:none">
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </span>
+        Copy Token
+      </button>
+    </div>
+    <div class="tp-status" id="mcpStatus">Token not generated yet.</div>
+    <pre id="mcpTokenPre">Click "Generate Token" to create an API token</pre>
+  </section>
 
-<div class="tp-card">
-  <div class="tp-card-head"><h3>OAuth Callback</h3></div>
-  <p class="tp-sub">If you are self-hosting, set the GitHub OAuth callback URL to:</p>
-  <pre id="mcpCallbackPre"></pre>
+  <section class="tp-card tp-span-2">
+    <div class="tp-card-head">
+      <h3>
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3h8"/>
+            <path d="M8 21h8"/>
+            <path d="M12 3v18"/>
+            <path d="M4 8h8"/>
+            <path d="M12 16h8"/>
+          </svg>
+        </span>
+        Config Template
+      </h3>
+      <button class="btn-outline" type="button" id="mcpCopyCfgBtn">Copy Config</button>
+    </div>
+    <p class="tp-sub">Paste this JSON into your MCP client settings (Claude Desktop, Cursor, VS Code, etc.).</p>
+    <pre id="mcpConfigPre">Loading config template...</pre>
+  </section>
+
+  <section class="tp-card">
+    <div class="tp-card-head">
+      <h3>
+        <span class="tp-inline-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 3"/>
+          </svg>
+        </span>
+        OAuth Callback
+      </h3>
+    </div>
+    <p class="tp-sub">If you are self-hosting, set the GitHub OAuth callback URL to:</p>
+    <pre id="mcpCallbackPre"></pre>
+  </section>
 </div>
