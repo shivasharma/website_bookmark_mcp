@@ -690,27 +690,27 @@ function safeHost(value: string): string {
 }
 
 app.get("/", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/dashboard", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/dashboard/:section", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/bookmarks", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/projects/:slug", (_req, res) => {
-  res.sendFile(path.join(dashboardDir, "react-shell.html"));
+  res.sendFile(path.join(dashboardDir, "index.html"));
 });
 
 app.get("/app", (_req, res) => {
-  res.redirect("/bookmarks");
+  res.redirect("/");
 });
 
 app.get("/register", (_req, res) => {
@@ -745,7 +745,7 @@ app.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/register?error=google_auth_failed" }),
   (_req, res) => {
-    res.redirect("/dashboard/index.html");
+    res.redirect("/");
   },
 );
 
@@ -776,7 +776,7 @@ app.get(
           res.redirect("/register?error=github_session_error");
           return;
         }
-        res.redirect("/dashboard/index.html");
+        res.redirect("/");
       });
     })(req, res, next);
   },

@@ -1,6 +1,6 @@
 {
-  "name": "Markd",
-  "short_name": "Markd",
+  "name": "BookMarkManager",
+  "short_name": "BMark",
   "description": "Save and organize bookmarks quickly.",
   "start_url": "/bookmarks",
   "scope": "/",

@@ -732,7 +732,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
     <div class="im-header">
       <div class="im-title-row">
-        <div><div class="im-title">📥 Import Hub</div><div class="im-sub">9 ways to bring your bookmarks into Markd — choose your source below.</div></div>
+        <div><div class="im-title">📥 Import Hub</div><div class="im-sub">9 ways to bring your bookmarks into BMark — choose your source below.</div></div>
         <button class="modal-x" onclick="closeModal('importModal')" style="margin-top:0">✕</button>
       </div>
     </div>
@@ -793,7 +793,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
       <!-- ── CSV / JSON ── -->
       <div class="im-section" id="tab-csv">
-        <div class="info-banner"><div class="info-banner-ico">📊</div><div class="info-banner-text">Upload any <strong>CSV or JSON</strong> file. Markd auto-detects URL, title, tags, and notes columns. For JSON, provide an array of objects with <code style="color:var(--accent);font-size:11px">url</code>, <code style="color:var(--accent);font-size:11px">title</code>, <code style="color:var(--accent);font-size:11px">tags</code> fields.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">📊</div><div class="info-banner-text">Upload any <strong>CSV or JSON</strong> file. BMark auto-detects URL, title, tags, and notes columns. For JSON, provide an array of objects with <code style="color:var(--accent);font-size:11px">url</code>, <code style="color:var(--accent);font-size:11px">title</code>, <code style="color:var(--accent);font-size:11px">tags</code> fields.</div></div>
         <div class="drop-zone" id="csvDrop">
           <input type="file" accept=".csv,.json" id="csvFile" onchange="handleCSVFile(event)"/>
           <div class="dz-icon">📋</div>
@@ -842,15 +842,15 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
       <!-- ── BOOKMARKLET ── -->
       <div class="im-section" id="tab-bookmarklet">
-        <div class="info-banner"><div class="info-banner-ico">🔗</div><div class="info-banner-text"><strong>Drag the button below</strong> to your bookmarks bar. Then click it on any webpage to instantly save to Markd — pre-filled with page title and URL.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">🔗</div><div class="info-banner-text"><strong>Drag the button below</strong> to your bookmarks bar. Then click it on any webpage to instantly save to BMark — pre-filled with page title and URL.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text">Make sure your browser <strong>bookmarks bar is visible</strong> (Ctrl+Shift+B / Cmd+Shift+B)</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Drag</strong> the green button below onto your bookmarks bar</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Navigate to any page and click <strong>"+ Save to Markd"</strong> in your bookmarks bar</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Navigate to any page and click <strong>"+ Save to BMark"</strong> in your bookmarks bar</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 0">
           <a class="bookmarklet-drag" id="bookmarkletLink" href="#" onclick="return false;" draggable="true">
-            🔖 + Save to Markd
+            🔖 + Save to BMark
           </a>
           <div style="flex:1;min-width:160px">
             <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px;font-family:var(--font-d);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Or copy the code:</div>
@@ -865,12 +865,12 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
       <!-- ── EMAIL ── -->
       <div class="im-section" id="tab-email">
-        <div class="info-banner"><div class="info-banner-ico">✉️</div><div class="info-banner-text">Forward or email any link to your <strong>unique Markd inbox address</strong>. The URL in the email body is saved as a bookmark instantly. Great for mobile sharing.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">✉️</div><div class="info-banner-text">Forward or email any link to your <strong>unique BMark inbox address</strong>. The URL in the email body is saved as a bookmark instantly. Great for mobile sharing.</div></div>
         <div class="how-steps">
-          <div class="how-step"><div class="how-num">1</div><div class="how-text">Copy your personal <strong>Markd inbox address</strong> below</div></div>
+          <div class="how-step"><div class="how-num">1</div><div class="how-text">Copy your personal <strong>BMark inbox address</strong> below</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text">On any phone/desktop, use <strong>Share → Mail</strong> and send to this address</div></div>
           <div class="how-step"><div class="how-num">3</div><div class="how-text">Or <strong>forward newsletter emails</strong> — every URL in the body gets saved</div></div>
-          <div class="how-step"><div class="how-num">4</div><div class="how-text">Add it to your <strong>contacts as "Markd"</strong> for fast mobile access</div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">Add it to your <strong>contacts as "BMark"</strong> for fast mobile access</div></div>
         </div>
         <div class="fl">
           <div class="fl-label">Your personal inbox address</div>
@@ -931,20 +931,20 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
       <!-- ── ZAPIER ── -->
       <div class="im-section" id="tab-zapier">
-        <div class="info-banner"><div class="info-banner-ico">🔌</div><div class="info-banner-text">Connect Markd to <strong>6,000+ apps</strong> via Zapier or Make (formerly Integromat). Automatically save bookmarks from Twitter/X likes, Slack messages, Gmail, Notion and more.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">🔌</div><div class="info-banner-text">Connect BMark to <strong>6,000+ apps</strong> via Zapier or Make (formerly Integromat). Automatically save bookmarks from Twitter/X likes, Slack messages, Gmail, Notion and more.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text">Go to <strong>zapier.com</strong> or <strong>make.com</strong> and create a new Zap/Scenario</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text">Set your <strong>trigger</strong> (e.g. "New liked Tweet", "New starred email in Gmail")</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Set the <strong>action</strong> to "Webhooks by Zapier → POST" using your Markd API endpoint</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Set the <strong>action</strong> to "Webhooks by Zapier → POST" using your BMark API endpoint</div></div>
           <div class="how-step"><div class="how-num">4</div><div class="how-text">Map the URL and title fields, then <strong>test and enable</strong> your Zap</div></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-          <div class="source-card" onclick="showToast('Twitter/X → Markd template coming soon','info')"><div class="source-ico">🐦</div><div class="source-name">Twitter/X Likes</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Gmail → Markd template coming soon','info')"><div class="source-ico">📧</div><div class="source-name">Gmail Stars</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Slack → Markd template coming soon','info')"><div class="source-ico">💬</div><div class="source-name">Slack Links</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Notion → Markd template coming soon','info')"><div class="source-ico">🗒</div><div class="source-name">Notion DB</div><div class="source-fmt">via Make</div></div>
-          <div class="source-card" onclick="showToast('IFTTT → Markd template coming soon','info')"><div class="source-ico">⚡</div><div class="source-name">IFTTT</div><div class="source-fmt">Applet</div></div>
-          <div class="source-card" onclick="showToast('n8n → Markd template coming soon','info')"><div class="source-ico">🔄</div><div class="source-name">n8n</div><div class="source-fmt">Self-hosted</div></div>
+          <div class="source-card" onclick="showToast('Twitter/X → BMark template coming soon','info')"><div class="source-ico">🐦</div><div class="source-name">Twitter/X Likes</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Gmail → BMark template coming soon','info')"><div class="source-ico">📧</div><div class="source-name">Gmail Stars</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Slack → BMark template coming soon','info')"><div class="source-ico">💬</div><div class="source-name">Slack Links</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Notion → BMark template coming soon','info')"><div class="source-ico">🗒</div><div class="source-name">Notion DB</div><div class="source-fmt">via Make</div></div>
+          <div class="source-card" onclick="showToast('IFTTT → BMark template coming soon','info')"><div class="source-ico">⚡</div><div class="source-name">IFTTT</div><div class="source-fmt">Applet</div></div>
+          <div class="source-card" onclick="showToast('n8n → BMark template coming soon','info')"><div class="source-ico">🔄</div><div class="source-name">n8n</div><div class="source-fmt">Self-hosted</div></div>
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">Zapier Webhook URL</div>
@@ -954,18 +954,18 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
       <!-- ── PWA / MOBILE ── -->
       <div class="im-section" id="tab-pwa">
-        <div class="info-banner"><div class="info-banner-ico">📱</div><div class="info-banner-text">Install Markd as a <strong>PWA</strong> to get native share sheet integration on iOS and Android — save any link from any app in 2 taps.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">📱</div><div class="info-banner-text">Install BMark as a <strong>PWA</strong> to get native share sheet integration on iOS and Android — save any link from any app in 2 taps.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>iOS Safari:</strong> Tap Share → Add to Home Screen → Tap "Add"</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Android Chrome:</strong> Menu → Add to Home screen → Install</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Now open any link in any app, tap <strong>Share → Markd</strong></div></div>
-          <div class="how-step"><div class="how-num">4</div><div class="how-text">Markd appears as <strong>"Save to Markd"</strong> in your native share sheet</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Now open any link in any app, tap <strong>Share → BMark</strong></div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">BMark appears as <strong>"Save to BMark"</strong> in your native share sheet</div></div>
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">manifest.json — Share Target Config</div>
           <div class="pwa-manifest"><span class="kw">{
-  "name"</span>: <span class="str">"Markd"</span>,
-  <span class="kw">"short_name"</span>: <span class="str">"Markd"</span>,
+  "name"</span>: <span class="str">"BookMarkManager"</span>,
+  <span class="kw">"short_name"</span>: <span class="str">"BMark"</span>,
   <span class="kw">"display"</span>: <span class="str">"standalone"</span>,
   <span class="kw">"share_target"</span>: {
     <span class="kw">"action"</span>: <span class="str">"/save"</span>,

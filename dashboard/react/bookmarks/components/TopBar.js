@@ -12,7 +12,8 @@ export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUse
       "div",
       { className: "bm-brand" },
       React.createElement(IconBookmark, { className: "bm-icon" }),
-      React.createElement("span", null, "Markd")
+      React.createElement("span", null, "BookMark"),
+      React.createElement("em", { style: { color: "var(--accent, #06c0e0)", fontStyle: "normal" } }, "Manager")
     ),
     React.createElement(
       "div",
