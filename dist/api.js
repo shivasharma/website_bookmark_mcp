@@ -619,7 +619,7 @@ app.get("/notifications", (_req, res) => {
     res.sendFile(path.join(dashboardDir, "index.html"));
 });
 app.get("/auth/google", authLimiter, (req, res, next) => {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    if (!CLIENT_ID_GOOGLE || !CLIENT_SECRET_GOOGLE) {
         res.status(400).json({ success: false, error: "Google OAuth is not configured" });
         return;
     }
