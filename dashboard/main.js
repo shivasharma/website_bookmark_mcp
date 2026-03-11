@@ -672,7 +672,7 @@ function render(){
   renderSidebarCategories();
   if(!list.length){
     if(authBlocked){
-      container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login Is Blocking Local Data</div><div class="empty-s">Use local bookmarks when <span class="tech-term">API</span> authentication is unavailable.</div><label class="fallback-toggle-wrap" for="localFallbackToggle"><span class="fallback-toggle-label">Enable Local Bookmarks Fallback</span><input id="localFallbackToggle" class="fallback-toggle" type="checkbox" role="switch" aria-label="Enable Local Bookmarks Fallback" ${localFallbackEnabled?'checked':''} onchange="toggleLocalFallback(this.checked)"/></label><div class="empty-s">This preference is saved in your browser. Ask your admin to enable <span class="tech-term">local fallback</span> support on the server for signed-out access.</div></div>`;
+        container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login to explore more features and also suggest best ideas</div><a class="btn-outline" href="/register" style="margin-top:10px;display:inline-flex">Login</a></div>`;
       return;
     }
     const hasBookmarks=bookmarks.length>0;
@@ -831,6 +831,12 @@ function openFeedbackModal(){
   if(!modal)return;
   modal.classList.add('open');
   setTimeout(()=>{ if(input) input.focus(); },100);
+}
+
+function openShareModal(){
+  const modal=document.getElementById('shareModal');
+  if(!modal)return;
+  modal.classList.add('open');
 }
 
 function submitFeedbackModal(){
@@ -1824,7 +1830,7 @@ function setMobNav(btn,view){
 // KEYBOARD
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmd()}
-  if(e.key==='Escape'){['addModal','importModal','previewModal','feedbackModal'].forEach(id=>closeModal(id));closeCmd();closeMobileSidebar()}
+  if(e.key==='Escape'){['addModal','importModal','previewModal','feedbackModal','shareModal'].forEach(id=>closeModal(id));closeCmd();closeMobileSidebar()}
   if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();openAddModal()}
   if(e.key==='?'&&!e.target.matches('input,textarea')){showToast('Shortcuts: ⌘K search  ⌘N add  Esc close','info')}
 });
