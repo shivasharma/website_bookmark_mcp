@@ -1,3 +1,5 @@
+import { facebookIcon, xIcon, linkedinIcon } from "./social-icons.js";
+
 class SocialShare extends HTMLElement {
   connectedCallback() {
     const shareUrl = this.getAttribute("url") || window.location.href;
@@ -5,10 +7,23 @@ class SocialShare extends HTMLElement {
     const shareTitle = this.getAttribute("title") || document.title || "Shared from LinkSync AI";
 
     this.innerHTML = `
-      <div class="social-share">
-        <button type="button" class="share-btn fb" data-platform="facebook" aria-label="Share on Facebook">Facebook</button>
-        <button type="button" class="share-btn x" data-platform="x" aria-label="Share on X">X</button>
-        <button type="button" class="share-btn in" data-platform="linkedin" aria-label="Share on LinkedIn">LinkedIn</button>
+      <div class="social-share-ui">
+        <div class="share-title">Share LinkSync AI</div>
+        <div class="share-btn-row">
+          <button type="button" class="share-btn fb" data-platform="facebook" aria-label="Share on Facebook">
+            <span class="share-ico">${facebookIcon}</span>
+            <span class="share-label">Facebook</span>
+          </button>
+          <button type="button" class="share-btn x" data-platform="x" aria-label="Share on X">
+            <span class="share-ico">${xIcon}</span>
+            <span class="share-label">X</span>
+          </button>
+          <button type="button" class="share-btn in" data-platform="linkedin" aria-label="Share on LinkedIn">
+            <span class="share-ico">${linkedinIcon}</span>
+            <span class="share-label">LinkedIn</span>
+          </button>
+        </div>
+        <button type="button" class="btn-outline share-back-btn" id="shareBackBtn">Back to Dashboard</button>
       </div>
     `;
 
@@ -43,6 +58,11 @@ class SocialShare extends HTMLElement {
           openPopup(`https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedText}`);
         }
       });
+    });
+
+    // Back to Dashboard button
+    this.querySelector("#shareBackBtn").addEventListener("click", () => {
+      window.location.href = "/";
     });
   }
 }
