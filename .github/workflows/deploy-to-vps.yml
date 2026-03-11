@@ -139,8 +139,8 @@ jobs:
             PUBLIC_BASE_URL=https://ai.shivaprogramming.com
             CORS_ORIGINS=https://ai.shivaprogramming.com,http://localhost:3001,http://127.0.0.1:3001
             ALLOW_LOCAL_FALLBACK=false
-            GOOGLE_CLIENT_ID=
-            GOOGLE_CLIENT_SECRET=
+            GOOGLE_CLIENT_ID=${{ secrets.CLIENT_ID_GOOGLE }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.CLIENT_SECRET_GOOGLE }}
             GOOGLE_CALLBACK_URL=https://ai.shivaprogramming.com/auth/google/callback
             CLIENT_ID_GITHUB=${{ secrets.CLIENT_ID_GITHUB }}
             CLIENT_SECRET_GITHUB=${{ secrets.CLIENT_SECRET_GITHUB }}
