@@ -9,6 +9,7 @@
   .welcome-hero h1{font-family:var(--font-d);font-size:clamp(26px,1.2vw + 18px,38px);font-weight:800;letter-spacing:-.5px;margin:0 0 8px}
   .welcome-hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2) 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
   .welcome-hero p{color:var(--text3);font-size:14px;max-width:720px;margin:0 auto;line-height:1.65}
+  .welcome-hero-actions{display:flex;justify-content:center;margin-top:16px}
 
   .welcome-steps-grid{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:16px;align-items:stretch}
   .ws-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r16,12px);padding:20px;display:flex;flex-direction:column;min-height:100%;transition:border-color .2s,transform .2s,box-shadow .2s}
@@ -53,6 +54,9 @@
     <div class="welcome-hero-icon"><img src="/icons/linksync-hero.svg" alt="LinkSync AI"/></div>
     <h1>Welcome to <span>LinkSync AI Beta Release 1.0</span></h1>
     <p>Coming Soon import from Chrome, Firefox, Pocket, Raindrop and more — or save links via email, API, or bookmarklet.</p>
+    <div class="welcome-hero-actions">
+      <button class="btn-outline" type="button" onclick="openFeedbackModal()">Share Feedback</button>
+    </div>
   </div>
 
   <div class="welcome-steps-grid">
@@ -150,6 +154,21 @@
       </div>
       <div class="ws-card-actions">
         <button class="btn-outline" type="button" disabled aria-disabled="true">Coming Soon</button>
+      </div>
+    </div>
+
+    <div class="ws-card">
+      <div class="ws-card-content">
+        <div class="ws-card-top"><span class="ws-number">06</span></div>
+        <h3>Feedback</h3>
+        <p>Tell us what should be improved in LinkSync AI. Your input helps us prioritize the right features.</p>
+        <div class="ws-highlight">
+          <div class="ws-highlight-item"><span class="ws-hi-icon">📝</span><span>Share suggestions or issues quickly</span></div>
+          <div class="ws-highlight-item"><span class="ws-hi-icon">⚡</span><span>Open feedback as an in-app popup</span></div>
+        </div>
+      </div>
+      <div class="ws-card-actions">
+        <button class="btn-outline" type="button" onclick="openFeedbackModal()">Open Feedback →</button>
       </div>
     </div>
 

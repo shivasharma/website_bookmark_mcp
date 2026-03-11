@@ -814,10 +814,40 @@ function openAddModal(bookmark){
 }
 
 function closeModal(id){
-  document.getElementById(id).classList.remove('open');
+  const modal=document.getElementById(id);
+  if(!modal)return;
+  modal.classList.remove('open');
   if(id==='addModal'){
     editingBookmarkId=null;
   }
+}
+
+function openFeedbackModal(){
+  const input=document.getElementById('feedbackTextModal');
+  const submitBtn=document.getElementById('feedbackSubmitBtn');
+  if(input)input.value='';
+  if(submitBtn)submitBtn.disabled=false;
+  const modal=document.getElementById('feedbackModal');
+  if(!modal)return;
+  modal.classList.add('open');
+  setTimeout(()=>{ if(input) input.focus(); },100);
+}
+
+function submitFeedbackModal(){
+  const input=document.getElementById('feedbackTextModal');
+  const submitBtn=document.getElementById('feedbackSubmitBtn');
+  const text=String(input?.value||'').trim();
+  if(!text){
+    showToast('Please add your feedback first','warn');
+    if(input)input.focus();
+    return;
+  }
+  if(submitBtn)submitBtn.disabled=true;
+  const subject=encodeURIComponent('LinkSync AI Feedback');
+  const body=encodeURIComponent(text);
+  window.location.href='mailto:shivathebravo@gmail.com?subject='+subject+'&body='+body;
+  closeModal('feedbackModal');
+  setTimeout(()=>{ if(submitBtn)submitBtn.disabled=false; },400);
 }
 
 function openImport(tab){
@@ -1794,7 +1824,7 @@ function setMobNav(btn,view){
 // KEYBOARD
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmd()}
-  if(e.key==='Escape'){['addModal','importModal','previewModal'].forEach(id=>closeModal(id));closeCmd();closeMobileSidebar()}
+  if(e.key==='Escape'){['addModal','importModal','previewModal','feedbackModal'].forEach(id=>closeModal(id));closeCmd();closeMobileSidebar()}
   if((e.metaKey||e.ctrlKey)&&e.key==='n'){e.preventDefault();openAddModal()}
   if(e.key==='?'&&!e.target.matches('input,textarea')){showToast('Shortcuts: ⌘K search  ⌘N add  Esc close','info')}
 });
