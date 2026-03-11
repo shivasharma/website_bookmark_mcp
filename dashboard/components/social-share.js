@@ -1,7 +1,11 @@
-import { facebookIcon, xIcon, linkedinIcon } from "./social-icons.js";
 
 class SocialShare extends HTMLElement {
   connectedCallback() {
+    // Inline SVGs styled like react-icons
+    const facebookIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#1877f2"/><path d="M16 8.5h-2a1 1 0 0 0-1 1V12h3l-.5 3h-2.5v7h-3v-7H8v-3h2V9.5A3.5 3.5 0 0 1 13.5 6h2.5v2.5z" fill="#ffffff"/></svg>`;
+    const xIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#222"/><path d="M7 7l10 10M17 7L7 17" stroke="#fff" stroke-width="2.2"/></svg>`;
+    const linkedinIcon = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0a66c2"/><path d="M8.5 17v-6.5M8.5 8.5v.01M12 17v-3.5a1.5 1.5 0 0 1 3 0V17" stroke="#fff" stroke-width="1.7"/><circle cx="8.5" cy="8.5" r="1.2" fill="#fff"/></svg>`;
+
     const shareUrl = this.getAttribute("url") || window.location.href;
     const shareText = this.getAttribute("text") || "Check this out";
     const shareTitle = this.getAttribute("title") || document.title || "Shared from LinkSync AI";
