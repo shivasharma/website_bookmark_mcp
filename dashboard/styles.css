@@ -54,6 +54,22 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 [data-theme="light"] .stat-inline strong{color:#243548}
 [data-theme="light"] .primary-search input::placeholder{color:#4D627A}
 [data-theme="light"] .fi::placeholder{color:#4D627A}
+[data-theme="light"] .code-block,
+[data-theme="light"] .pwa-manifest,
+[data-theme="light"] .bookmarklet-code,
+[data-theme="light"] .tool-panel pre{
+  background:#DCE4EF;
+  border-color:#AAB8CA;
+  color:#1C2F45;
+}
+[data-theme="light"] .code-block .kw{color:#1D4ED8}
+[data-theme="light"] .code-block .str{color:#0B7A5F}
+[data-theme="light"] .code-block .cm{color:#475B72}
+[data-theme="light"] .code-block .fn{color:#0B76A8}
+[data-theme="light"] .tool-panel pre{color:#0B76A8}
+[data-theme="light"] .api-url{color:#21364F}
+[data-theme="light"] .code-copy{background:#E7EDF6;color:#334A63;border-color:#AAB8CA}
+[data-theme="light"] .code-copy:hover{color:#0B76A8;border-color:#7E95AF}
 @keyframes saveHighlightLight{0%{box-shadow:0 0 0 0 rgba(10,143,165,.4)}40%{box-shadow:0 0 0 8px rgba(10,143,165,.12)}100%{box-shadow:none}}
 
 body{background:var(--bg);color:var(--text1);font-family:var(--font-b);font-size:clamp(16px,1vw + 12px,18px);font-weight:400;line-height:1.6;min-height:100vh;min-height:100dvh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}

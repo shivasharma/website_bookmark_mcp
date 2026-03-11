@@ -5,6 +5,40 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="theme-color" content="#080E17"/>
 <title>LinkSync AI — Your links, synced smarter by MCP + AI.</title>
+<meta name="description" content="LinkSync AI is an AI bookmark sync platform and bookmark manager with MCP integration for smarter link management."/>
+<meta name="keywords" content="bookmark manager, MCP integration, AI bookmark sync, link management"/>
+<meta property="og:title" content="LinkSync AI — Your links, synced smarter by MCP + AI."/>
+<meta property="og:description" content="A bookmark manager with MCP integration and AI bookmark sync built for modern link management."/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="/icons/linksync-hero.svg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="LinkSync AI — Your links, synced smarter by MCP + AI."/>
+<meta name="twitter:description" content="Bookmark manager + MCP integration + AI bookmark sync for smarter link management."/>
+<meta name="twitter:image" content="/icons/linksync-hero.svg"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LinkSync AI",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "Web",
+  "description": "LinkSync AI is a bookmark manager for AI bookmark sync and link management with MCP integration as its core differentiator.",
+  "slogan": "Your links, synced smarter by MCP + AI.",
+  "featureList": [
+    "Bookmark manager",
+    "MCP integration",
+    "AI bookmark sync",
+    "Link management"
+  ],
+  "url": "/",
+  "image": "/icons/linksync-hero.svg",
+  "potentialAction": {
+    "@type": "Action",
+    "name": "Login with GitHub or Google",
+    "target": "/register"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -82,7 +116,7 @@
 
   <!-- MAIN -->
   <main class="main" id="mainArea">
-    <div class="onboard-banner au d1" id="onboardBanner">
+    <div class="onboard-banner au d1" id="onboardBanner" style="display:none">
       <div class="ob-icon">🚀</div>
       <div class="ob-text">
         <div class="ob-title">Welcome to LinkSync AI — Your links, synced smarter by MCP + AI.</div>
@@ -92,7 +126,7 @@
       <button class="ob-close" onclick="closeBanner()">✕</button>
     </div>
 
-    <div class="dash-header au d2">
+    <div class="dash-header au d2" style="display:none">
       <div>
         <h1 class="dash-title">All <span>Bookmarks</span></h1>
         <p class="dash-sub">Your saved links and resources</p>
@@ -106,7 +140,7 @@
       </div>
     </div>
 
-    <div class="action-bar au d3">
+    <div class="action-bar au d3" style="display:none">
       <div class="primary-search">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         <input type="text" placeholder="Search bookmarks, notes, tags..." id="searchInput" autocomplete="off"/>
@@ -121,7 +155,7 @@
       <button class="btn-primary btn-add-compact" type="button" onclick="openAddModal()"><span class="add-plus-wrap"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span>Add Bookmark</span><span class="add-spark">✦</span></button>
     </div>
 
-    <div class="filter-bar au d3">
+    <div class="filter-bar au d3" style="display:none">
       <div class="filter-bar-left">
         <button class="fpill on" data-filter="all">All</button>
         <button class="fpill" data-filter="starred">⭐ Starred</button>
@@ -137,7 +171,7 @@
       </div>
     </div>
 
-    <div class="advanced-filters" id="advancedFilters">
+    <div class="advanced-filters" id="advancedFilters" style="display:none">
       <div class="adv-filters-inner">
         <div class="adv-row">
           <span class="search-chip-label">Time</span>
@@ -159,7 +193,7 @@
     <!-- TOOL PANEL (System Health / MCP Setup) -->
     <div id="toolPanel" class="tool-panel" style="display:none"></div>
 
-    <div class="content-area au d4" id="bookmarkContent">
+    <div class="content-area au d4" id="bookmarkContent" style="display:none">
       <div>
         <div class="panel">
           <div class="bk-list" id="bookmarkContainer"></div>

@@ -4,6 +4,13 @@ Your links, synced smarter by MCP + AI.
 
 LinkSync AI is a bookmark manager + MCP bridge that lets AI clients work with your saved links using natural language.
 
+## SEO Key Points
+
+- Target keywords: `bookmark manager`, `MCP integration`, `AI bookmark sync`, `link management`
+- Unique value proposition: LinkSync AI combines MCP + AI integration so assistants can work directly with bookmark context.
+- Call-to-action for indexing: `Login with GitHub or Google`
+- Structured data: `SoftwareApplication` schema markup is included in the dashboard entry page.
+
 ## What Problem This Solves
 
 Most bookmark tools are built for manual use in the browser. AI clients (Cursor, Claude Desktop, VS Code MCP, etc.) cannot easily access those bookmarks in a structured way.

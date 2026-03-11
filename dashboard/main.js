@@ -167,6 +167,7 @@ function renderAuthUi(){
     authEls.userAvatarBtn.classList.add('hidden');
     authEls.userAvatarBtn.textContent='U';
     authEls.userAvatarBtn.title='Not signed in';
+    setBookmarkUiVisible(false);
     return;
   }
   const label=currentUser.name||currentUser.email||'User';
@@ -184,8 +185,18 @@ function renderAuthUi(){
   authEls.userAvatarBtn.classList.remove('hidden');
   authEls.userAvatarBtn.textContent=initial;
   authEls.userAvatarBtn.title=`Logged in as ${label}`;
+  setBookmarkUiVisible(true);
   // when user logs in, hide welcome and restore bookmark UI
   if(typeof hideWelcomeExperience==='function')hideWelcomeExperience();
+}
+
+function setBookmarkUiVisible(show){
+  const display=show?'':'none';
+  document.querySelectorAll('.dash-header,.action-bar,.filter-bar,.advanced-filters').forEach((el)=>{el.style.display=display});
+  const bc=document.getElementById('bookmarkContent');
+  if(bc)bc.style.display=display;
+  const onboard=document.getElementById('onboardBanner');
+  if(onboard)onboard.style.display=display;
 }
 
 async function loadNotificationSummary(){
