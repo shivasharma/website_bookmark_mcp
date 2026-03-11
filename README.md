@@ -1,8 +1,15 @@
+
+
 # LinkSync AI
 
 Your links, synced smarter by MCP + AI.
 
 LinkSync AI is a bookmark manager + MCP bridge that lets AI clients work with your saved links using natural language.
+
+
+## Live Demo
+ - <a href="https://ai.shivaprogramming.com" target="_blank">https://ai.shivaprogramming.com</a>
+ - <img src="/dashboard/icons/linksync-hero.svg" alt="LinkSync AI" width="400" alt/>
 
 ## SEO Key Points
 
@@ -93,7 +100,7 @@ Use this as the base template in your MCP client:
 {
 	"mcpServers": {
 		"bookmark": {
-			"command": "node",
+			"command": "npx",
 			"args": ["-y", "github:shivasharma/website_bookmark_mcp"],
 			"env": {
 				"BOOKMARK_API_BASE_URL": "https://ai.shivaprogramming.com",
