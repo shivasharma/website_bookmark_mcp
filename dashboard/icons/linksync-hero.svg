@@ -276,19 +276,16 @@
     <g transform="translate(664 272)">
       <rect x="0" y="0" width="112" height="24" rx="10" fill="#10384a" stroke="#06C0E0"/>
       <path d="M12 8h10l3 4-3 4H12z" fill="#06C0E0"/>
-      <text x="30" y="16" class="chipLabel">Tags</text>
     </g>
 
     <g transform="translate(664 308)">
       <rect x="0" y="0" width="112" height="24" rx="10" fill="#10384a" stroke="#06C0E0"/>
       <path d="M10 8h10v8H8V6h8l2 2z" fill="#06C0E0"/>
-      <text x="28" y="16" class="chipLabel">Folder</text>
     </g>
 
     <g transform="translate(664 344)">
       <rect x="0" y="0" width="112" height="24" rx="10" fill="#10384a" stroke="#06C0E0"/>
       <path d="M13 17l2.8-5.2L10.8 8h5.6L19 3l2.6 5h5.6l-5 3.8L25 17l-6-3z" fill="#06C0E0"/>
-      <text x="33" y="16" class="chipLabel">Favorites</text>
     </g>
 
   </g>
@@ -360,7 +357,7 @@
     <animate attributeName="opacity" from="0" to="1" begin="4.3s" dur="0.35s" fill="freeze"/>
     <circle class="badgeCore" cx="28" cy="24" r="20" fill="#0f2a41"/>
     <rect x="18" y="17" width="20" height="14" rx="4" fill="#06C0E0"/>
-    <text x="28" y="26.7" text-anchor="middle" font-family="Sora, Segoe UI, sans-serif" font-size="7" font-weight="800" fill="#0f2a41" letter-spacing="0.35">MCP</text>
+    <path d="m34.5 28.8l-.07.06l-7.25 7.11a.22.22 0 0 0-.01.33l.01.01l1.49 1.47a.69.69 0 0 1 .01.97l-.01.01a.72.72 0 0 1-1 0l-1.49-1.46a1.6 1.6 0 0 1 0-2.29L33.43 28a2.06 2.06 0 0 0 .04-2.91l-.04-.04l-.04-.04a2.16 2.16 0 0 0-3 0l-5.97 5.86h-.01l-.08.08a.72.72 0 0 1-1 0a.69.69 0 0 1-.01-.97l.01-.01l6.06-5.95a2.05 2.05 0 0 0 0-2.91l-.03-.04a2.16 2.16 0 0 0-3.01 0l-8.07 7.91a.72.72 0 0 1-1 0a.69.69 0 0 1-.01-.97l.01-.01l8.02-7.86a3.59 3.59 0 0 1 5.01 0a3.24 3.24 0 0 1 1 2.95a3.19 3.19 0 0 1 3 1l.05.04a3.43 3.43 0 0 1 .06 4.85m-2.12-1.94a.69.69 0 0 0 .01-.97l-.01-.01a.72.72 0 0 0-1 0l-5.93 5.81a2.16 2.16 0 0 1-3.01 0a2.06 2.06 0 0 1 0-2.95l5.93-5.81a.69.69 0 0 0 .01-.97l-.01-.01a.72.72 0 0 0-1 0l-5.93 5.81a3.43 3.43 0 0 0 0 4.91a3.59 3.59 0 0 0 5.01 0z" fill="#0f2a41" transform="translate(-2 -8) scale(0.42)"/>
   </g>
 
   <g class="badge" transform="translate(426 72)">
@@ -404,10 +401,5 @@
     <path d="M33 23c3-2 7-1 9 2-2-1-4 0-5 1s-1 3 0 4c-3-2-5-5-4-7z" fill="#fff" opacity="0.8"/>
   </g>
 
-  <g transform="translate(548 66)">
-    <text x="0" y="82" font-family="Sora, Segoe UI, sans-serif" font-size="56" font-weight="800" fill="#ecf8ff" letter-spacing="0.2">LinkSync </text>
-    <text x="252" y="82" font-family="Sora, Segoe UI, sans-serif" font-size="56" font-weight="800" fill="#06C0E0" letter-spacing="0.2">AI</text>
-    <text x="0" y="126" font-family="Plus Jakarta Sans, Segoe UI, sans-serif" font-size="19" font-weight="700" fill="#d7ecff">Your links, synced smarter by MCP + AI.</text>
-  </g>
 </svg>
 
