@@ -1,3 +1,32 @@
+<style>
+  .tool-panel .mcp-steps-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+
+  #mcpTokenPre,
+  #mcpConfigPre{
+    background:#000;
+    border:1px solid rgba(255,255,255,.18);
+    color:#9EE8F7;
+  }
+
+  [data-theme="light"] #mcpTokenPre,
+  [data-theme="light"] #mcpConfigPre{
+    background:#000;
+    border:1px solid rgba(255,255,255,.2);
+    color:#9EE8F7;
+  }
+
+  @media(max-width:1200px){
+    .tool-panel .mcp-steps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+
+  @media(max-width:760px){
+    .tool-panel .mcp-steps-grid{grid-template-columns:1fr}
+  }
+</style>
+
 <div class="tp-header tp-header-modern">
   <div class="tp-title-row">
     <span class="tp-title-icon" aria-hidden="true">
