@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#080E17"/>
+<title>LinkSync AI - Share</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/styles.css"/>
+<script>
+(function(){
+  var t = localStorage.getItem('linksync-theme');
+  if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme:light)').matches) t = 'light';
+  if(t) document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+<style>
+  .share-shell{max-width:760px;margin:0 auto;padding:34px 20px 60px}
+  .share-card{background:linear-gradient(180deg,var(--s2),var(--s1));border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm)}
+  .share-title{margin:0 0 8px;font-family:var(--font-d);font-size:clamp(24px,1.2vw + 16px,34px);letter-spacing:-.4px}
+  .share-sub{margin:0 0 18px;color:var(--text3);font-size:14px;line-height:1.6}
+  .social-share{display:flex;gap:10px;flex-wrap:wrap}
+  .share-btn{border:1px solid var(--border2);background:var(--s3);color:var(--text1);padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;transition:var(--t)}
+  .share-btn:hover{transform:translateY(-1px);border-color:var(--accent)}
+  .share-btn.fb{background:#1877f2;color:#fff;border-color:#1877f2}
+  .share-btn.x{background:#0f172a;color:#fff;border-color:#334155}
+  .share-btn.in{background:#0a66c2;color:#fff;border-color:#0a66c2}
+</style>
+</head>
+<body>
+  <div class="share-shell">
+    <div class="share-card">
+      <h1 class="share-title">Share LinkSync AI</h1>
+      <p class="share-sub">Use the share component below to quickly post on Facebook, X, or LinkedIn.</p>
+      <social-share
+        url="https://ai.shivaprogramming.com/"
+        title="LinkSync AI"
+        text="Check out LinkSync AI — Your links, synced smarter by MCP + AI.">
+      </social-share>
+    </div>
+  </div>
+
+  <script src="/components/social-share.js"></script>
+</body>
+</html>
