@@ -24,6 +24,11 @@ const SESSION_COOKIE_SECURE = process.env.SESSION_COOKIE_SECURE === "true"
     : process.env.SESSION_COOKIE_SECURE === "false"
         ? false
         : process.env.NODE_ENV === "production";
+const CLIENT_ID_GOOGLE = process.env.CLIENT_ID_GOOGLE ?? process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET_GOOGLE = process.env.CLIENT_SECRET_GOOGLE ?? process.env.GOOGLE_CLIENT_SECRET;
+const CALLBACK_URL_GOOGLE = process.env.CALLBACK_URL_GOOGLE ??
+    process.env.GOOGLE_CALLBACK_URL ??
+    `${PUBLIC_BASE_URL}/auth/google/callback`;
 const CLIENT_ID_GITHUB = process.env.CLIENT_ID_GITHUB ?? process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET_GITHUB = process.env.CLIENT_SECRET_GITHUB ?? process.env.GITHUB_CLIENT_SECRET;
 const CALLBACK_URL_GITHUB = process.env.CALLBACK_URL_GITHUB ??
@@ -213,11 +218,11 @@ passport.deserializeUser(async (id, done) => {
         done(error);
     }
 });
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+if (CLIENT_ID_GOOGLE && CLIENT_SECRET_GOOGLE) {
     passport.use(new GoogleStrategy({
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL ?? `${PUBLIC_BASE_URL}/auth/google/callback`,
+        clientID: CLIENT_ID_GOOGLE,
+        clientSecret: CLIENT_SECRET_GOOGLE,
+        callbackURL: CALLBACK_URL_GOOGLE,
     }, async (_accessToken, _refreshToken, profile, done) => {
         try {
             const email = profile.emails?.[0]?.value ?? null;
