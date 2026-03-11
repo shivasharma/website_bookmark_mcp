@@ -1,4 +1,4 @@
-# SSL/TLS Configuration Quick Reference
+# LinkSync AI SSL/TLS Configuration Quick Reference
 
 ## 🔒 Security Setup Summary
 

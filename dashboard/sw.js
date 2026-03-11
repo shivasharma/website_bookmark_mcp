@@ -1,4 +1,4 @@
-const CACHE_NAME = "markd-shell-v8";
+const CACHE_NAME = "linksync-shell-v9";
 const CORE_ASSETS = [
   "/",
   "/bookmarks",
@@ -11,6 +11,8 @@ const CORE_ASSETS = [
   "/manifest.webmanifest",
   "/react/app.js",
   "/react/styles.js",
+  "/icons/linksync-logo.svg",
+  "/icons/linksync-hero.svg",
   "/icons/icon-192.svg",
   "/icons/icon-512.svg",
   "/icons/icon-maskable.svg"

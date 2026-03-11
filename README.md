@@ -1,6 +1,8 @@
-# website_bookmark_mcp
+# LinkSync AI
 
-Bookmark manager + MCP bridge that lets AI clients work with your saved links using natural language.
+Your links, synced smarter by MCP + AI.
+
+LinkSync AI is a bookmark manager + MCP bridge that lets AI clients work with your saved links using natural language.
 
 ## What Problem This Solves
 

@@ -1,7 +1,7 @@
 {
-  "name": "BookMarkManager",
-  "short_name": "BMark",
-  "description": "Save and organize bookmarks quickly.",
+  "name": "LinkSync AI",
+  "short_name": "LinkSync",
+  "description": "Your links, synced smarter by MCP + AI.",
   "start_url": "/bookmarks",
   "scope": "/",
   "display": "standalone",

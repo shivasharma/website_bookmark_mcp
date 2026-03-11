@@ -4,12 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="theme-color" content="#080E17"/>
-<title>BMark — Smart Bookmark Manager</title>
+<title>LinkSync AI — Your links, synced smarter by MCP + AI.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/styles.css">
-<script>/* prevent flash of wrong theme */(function(){var t=localStorage.getItem('bmark-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t)})()</script>
+<script>/* prevent flash of wrong theme */(function(){var t=localStorage.getItem('linksync-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t)})()</script>
 </head>
 <body>
 
@@ -23,7 +23,7 @@
   <!-- TOP BAR -->
   <header class="topbar">
     <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Open navigation menu" onclick="toggleMobileSidebar()"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-    <a class="logo" href="#"><div class="logo-mark">🔖</div><span class="logo-text">BookMark<em>Manager</em></span></a>
+    <a class="logo" href="#"><div class="logo-mark"><img src="/icons/linksync-logo.svg" alt="LinkSync AI logo"/></div><span class="logo-text">LinkSync <em>AI</em></span></a>
     <div class="topbar-actions">
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle light/dark mode" title="Toggle theme" onclick="toggleTheme()"><svg class="ico-moon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg><svg class="ico-sun" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
       <button class="btn-icon hidden" id="topNotifyBtn" type="button" title="Notifications" onclick="switchSection('notifications')"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="badge hidden" id="topNotifyBadge">0</span></button>
@@ -85,7 +85,7 @@
     <div class="onboard-banner au d1" id="onboardBanner">
       <div class="ob-icon">🚀</div>
       <div class="ob-text">
-        <div class="ob-title">Welcome to BookMark Manager — Your AI-powered bookmark hub</div>
+        <div class="ob-title">Welcome to LinkSync AI — Your links, synced smarter by MCP + AI.</div>
         <div class="ob-sub">Import from Chrome, Firefox, Pocket, Raindrop and more — or save links via email, API, or bookmarklet.</div>
       </div>
       <button class="btn-primary" onclick="openImport()">Import Bookmarks</button>
@@ -270,7 +270,7 @@
 
     <div class="im-header">
       <div class="im-title-row">
-        <div><div class="im-title">📥 Import Hub</div><div class="im-sub">9 ways to bring your bookmarks into BMark — choose your source below.</div></div>
+        <div><div class="im-title">📥 Import Hub</div><div class="im-sub">9 ways to bring your bookmarks into LinkSync AI — choose your source below.</div></div>
         <button class="modal-x" onclick="closeModal('importModal')" style="margin-top:0">✕</button>
       </div>
     </div>
@@ -331,7 +331,7 @@
 
       <!-- ── CSV / JSON ── -->
       <div class="im-section" id="tab-csv">
-        <div class="info-banner"><div class="info-banner-ico">📊</div><div class="info-banner-text">Upload any <strong>CSV or JSON</strong> file. BMark auto-detects URL, title, tags, and notes columns. For JSON, provide an array of objects with <code style="color:var(--accent);font-size:11px">url</code>, <code style="color:var(--accent);font-size:11px">title</code>, <code style="color:var(--accent);font-size:11px">tags</code> fields.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">📊</div><div class="info-banner-text">Upload any <strong>CSV or JSON</strong> file. LinkSync AI auto-detects URL, title, tags, and notes columns. For JSON, provide an array of objects with <code style="color:var(--accent);font-size:11px">url</code>, <code style="color:var(--accent);font-size:11px">title</code>, <code style="color:var(--accent);font-size:11px">tags</code> fields.</div></div>
         <div class="drop-zone" id="csvDrop">
           <input type="file" accept=".csv,.json" id="csvFile" onchange="handleCSVFile(event)"/>
           <div class="dz-icon">📋</div>
@@ -380,15 +380,15 @@
 
       <!-- ── BOOKMARKLET ── -->
       <div class="im-section" id="tab-bookmarklet">
-        <div class="info-banner"><div class="info-banner-ico">🔗</div><div class="info-banner-text"><strong>Drag the button below</strong> to your bookmarks bar. Then click it on any webpage to instantly save to BMark — pre-filled with page title and URL.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">🔗</div><div class="info-banner-text"><strong>Drag the button below</strong> to your bookmarks bar. Then click it on any webpage to instantly save to LinkSync AI — pre-filled with page title and URL.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text">Make sure your browser <strong>bookmarks bar is visible</strong> (Ctrl+Shift+B / Cmd+Shift+B)</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Drag</strong> the green button below onto your bookmarks bar</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Navigate to any page and click <strong>"+ Save to BMark"</strong> in your bookmarks bar</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Navigate to any page and click <strong>"+ Save to LinkSync AI"</strong> in your bookmarks bar</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 0">
           <a class="bookmarklet-drag" id="bookmarkletLink" href="#" onclick="return false;" draggable="true">
-            🔖 + Save to BMark
+            🔗 + Save to LinkSync AI
           </a>
           <div style="flex:1;min-width:160px">
             <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px;font-family:var(--font-d);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Or copy the code:</div>
@@ -403,17 +403,17 @@
 
       <!-- ── EMAIL ── -->
       <div class="im-section" id="tab-email">
-        <div class="info-banner"><div class="info-banner-ico">✉️</div><div class="info-banner-text">Forward or email any link to your <strong>unique BMark inbox address</strong>. The URL in the email body is saved as a bookmark instantly. Great for mobile sharing.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">✉️</div><div class="info-banner-text">Forward or email any link to your <strong>unique LinkSync AI inbox address</strong>. The URL in the email body is saved as a bookmark instantly. Great for mobile sharing.</div></div>
         <div class="how-steps">
-          <div class="how-step"><div class="how-num">1</div><div class="how-text">Copy your personal <strong>BMark inbox address</strong> below</div></div>
+          <div class="how-step"><div class="how-num">1</div><div class="how-text">Copy your personal <strong>LinkSync AI inbox address</strong> below</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text">On any phone/desktop, use <strong>Share → Mail</strong> and send to this address</div></div>
           <div class="how-step"><div class="how-num">3</div><div class="how-text">Or <strong>forward newsletter emails</strong> — every URL in the body gets saved</div></div>
-          <div class="how-step"><div class="how-num">4</div><div class="how-text">Add it to your <strong>contacts as "BMark"</strong> for fast mobile access</div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">Add it to your <strong>contacts as "LinkSync AI"</strong> for fast mobile access</div></div>
         </div>
         <div class="fl">
           <div class="fl-label">Your personal inbox address</div>
           <div class="email-address-wrap">
-            <div class="email-addr" id="emailAddr">save+user_abc123@markd.app</div>
+            <div class="email-addr" id="emailAddr">save+user_abc123@linksync-ai.app</div>
             <button class="copy-btn" onclick="copyEmail()">Copy</button>
           </div>
         </div>
@@ -437,14 +437,14 @@
         <div>
           <div class="fl-label" style="margin-bottom:8px">Endpoints</div>
           <div style="display:flex;flex-direction:column;gap:6px">
-            <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.markd.app/v1/bookmarks</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.markd.app/v1/bookmarks')">Copy</button></div>
-            <div class="api-endpoint"><span class="api-method get">GET</span><span class="api-url">https://api.markd.app/v1/bookmarks</span></div>
-            <div class="api-endpoint"><span class="api-method" style="background:rgba(240,82,82,.1);color:#F05252">DEL</span><span class="api-url">https://api.markd.app/v1/bookmarks/:id</span></div>
+            <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.linksync-ai.app/v1/bookmarks')">Copy</button></div>
+            <div class="api-endpoint"><span class="api-method get">GET</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks</span></div>
+            <div class="api-endpoint"><span class="api-method" style="background:rgba(240,82,82,.1);color:#F05252">DEL</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks/:id</span></div>
           </div>
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">Example — Save a Bookmark</div>
-          <div class="code-block"><button class="code-copy" onclick="copyAPIExample()">Copy</button><span class="kw">curl</span> -X POST https://api.markd.app/v1/bookmarks \
+          <div class="code-block"><button class="code-copy" onclick="copyAPIExample()">Copy</button><span class="kw">curl</span> -X POST https://api.linksync-ai.app/v1/bookmarks \
   -H <span class="str">"Authorization: Bearer YOUR_API_KEY"</span> \
   -H <span class="str">"Content-Type: application/json"</span> \
   -d <span class="str">'{
@@ -463,47 +463,47 @@
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">Webhook — Receive Events</div>
-          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url" id="webhookUrl">https://your-server.com/markd-webhook</span><button class="copy-btn" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showToast('Configure webhook URL in Settings','info')">Set URL</button></div>
+          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url" id="webhookUrl">https://your-server.com/linksync-webhook</span><button class="copy-btn" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showToast('Configure webhook URL in Settings','info')">Set URL</button></div>
         </div>
       </div>
 
       <!-- ── ZAPIER ── -->
       <div class="im-section" id="tab-zapier">
-        <div class="info-banner"><div class="info-banner-ico">🔌</div><div class="info-banner-text">Connect BMark to <strong>6,000+ apps</strong> via Zapier or Make (formerly Integromat). Automatically save bookmarks from Twitter/X likes, Slack messages, Gmail, Notion and more.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">🔌</div><div class="info-banner-text">Connect LinkSync AI to <strong>6,000+ apps</strong> via Zapier or Make (formerly Integromat). Automatically save bookmarks from Twitter/X likes, Slack messages, Gmail, Notion and more.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text">Go to <strong>zapier.com</strong> or <strong>make.com</strong> and create a new Zap/Scenario</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text">Set your <strong>trigger</strong> (e.g. "New liked Tweet", "New starred email in Gmail")</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Set the <strong>action</strong> to "Webhooks by Zapier → POST" using your BMark API endpoint</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Set the <strong>action</strong> to "Webhooks by Zapier → POST" using your LinkSync AI API endpoint</div></div>
           <div class="how-step"><div class="how-num">4</div><div class="how-text">Map the URL and title fields, then <strong>test and enable</strong> your Zap</div></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-          <div class="source-card" onclick="showToast('Twitter/X → BMark template coming soon','info')"><div class="source-ico">🐦</div><div class="source-name">Twitter/X Likes</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Gmail → BMark template coming soon','info')"><div class="source-ico">📧</div><div class="source-name">Gmail Stars</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Slack → BMark template coming soon','info')"><div class="source-ico">💬</div><div class="source-name">Slack Links</div><div class="source-fmt">via Zapier</div></div>
-          <div class="source-card" onclick="showToast('Notion → BMark template coming soon','info')"><div class="source-ico">🗒</div><div class="source-name">Notion DB</div><div class="source-fmt">via Make</div></div>
-          <div class="source-card" onclick="showToast('IFTTT → BMark template coming soon','info')"><div class="source-ico">⚡</div><div class="source-name">IFTTT</div><div class="source-fmt">Applet</div></div>
-          <div class="source-card" onclick="showToast('n8n → BMark template coming soon','info')"><div class="source-ico">🔄</div><div class="source-name">n8n</div><div class="source-fmt">Self-hosted</div></div>
+          <div class="source-card" onclick="showToast('Twitter/X → LinkSync AI template coming soon','info')"><div class="source-ico">🐦</div><div class="source-name">Twitter/X Likes</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Gmail → LinkSync AI template coming soon','info')"><div class="source-ico">📧</div><div class="source-name">Gmail Stars</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Slack → LinkSync AI template coming soon','info')"><div class="source-ico">💬</div><div class="source-name">Slack Links</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Notion → LinkSync AI template coming soon','info')"><div class="source-ico">🗒</div><div class="source-name">Notion DB</div><div class="source-fmt">via Make</div></div>
+          <div class="source-card" onclick="showToast('IFTTT → LinkSync AI template coming soon','info')"><div class="source-ico">⚡</div><div class="source-name">IFTTT</div><div class="source-fmt">Applet</div></div>
+          <div class="source-card" onclick="showToast('n8n → LinkSync AI template coming soon','info')"><div class="source-ico">🔄</div><div class="source-name">n8n</div><div class="source-fmt">Self-hosted</div></div>
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">Zapier Webhook URL</div>
-          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.markd.app/v1/zapier/hook</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.markd.app/v1/zapier/hook')">Copy</button></div>
+          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.linksync-ai.app/v1/zapier/hook</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.linksync-ai.app/v1/zapier/hook')">Copy</button></div>
         </div>
       </div>
 
       <!-- ── PWA / MOBILE ── -->
       <div class="im-section" id="tab-pwa">
-        <div class="info-banner"><div class="info-banner-ico">📱</div><div class="info-banner-text">Install BMark as a <strong>PWA</strong> to get native share sheet integration on iOS and Android — save any link from any app in 2 taps.</div></div>
+        <div class="info-banner"><div class="info-banner-ico">📱</div><div class="info-banner-text">Install LinkSync AI as a <strong>PWA</strong> to get native share sheet integration on iOS and Android — save any link from any app in 2 taps.</div></div>
         <div class="how-steps">
           <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>iOS Safari:</strong> Tap Share → Add to Home Screen → Tap "Add"</div></div>
           <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Android Chrome:</strong> Menu → Add to Home screen → Install</div></div>
-          <div class="how-step"><div class="how-num">3</div><div class="how-text">Now open any link in any app, tap <strong>Share → BMark</strong></div></div>
-          <div class="how-step"><div class="how-num">4</div><div class="how-text">BMark appears as <strong>"Save to BMark"</strong> in your native share sheet</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Now open any link in any app, tap <strong>Share → LinkSync AI</strong></div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">LinkSync AI appears as <strong>"Save to LinkSync AI"</strong> in your native share sheet</div></div>
         </div>
         <div>
           <div class="fl-label" style="margin-bottom:8px">manifest.json — Share Target Config</div>
           <div class="pwa-manifest"><span class="kw">{
-  "name"</span>: <span class="str">"BookMarkManager"</span>,
-  <span class="kw">"short_name"</span>: <span class="str">"BMark"</span>,
+  "name"</span>: <span class="str">"LinkSync AI"</span>,
+  <span class="kw">"short_name"</span>: <span class="str">"LinkSync"</span>,
   <span class="kw">"display"</span>: <span class="str">"standalone"</span>,
   <span class="kw">"share_target"</span>: {
     <span class="kw">"action"</span>: <span class="str">"/save"</span>,
@@ -520,7 +520,7 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:8px">🍎</div><div style="font-size:12px;font-weight:700;color:var(--text1);font-family:var(--font-d)">iOS Share Sheet</div><div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Works after Add to Home Screen on Safari</div></div>
-          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:8px">🤖</div><div style="font-size:12px;font-weight:700;color:var(--text1);font-family:var(--font-d)">Android Intent</div><div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Native "Save to Markd" in all Android share sheets</div></div>
+          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:8px">🤖</div><div style="font-size:12px;font-weight:700;color:var(--text1);font-family:var(--font-d)">Android Intent</div><div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Native "Save to LinkSync AI" in all Android share sheets</div></div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
-# HTTPS/SSL Deployment Guide
+# LinkSync AI HTTPS/SSL Deployment Guide
 
-This guide explains how to deploy the Bookmark MCP application with SSL/TLS certificates using Docker and nginx.
+This guide explains how to deploy the LinkSync AI application with SSL/TLS certificates using Docker and nginx.
 
 ## Architecture
 

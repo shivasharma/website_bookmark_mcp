@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06C0E0"/>
+      <stop offset="100%" stop-color="#2F80ED"/>
+    </linearGradient>
+  </defs>
   <rect width="512" height="512" fill="#080E17"/>
-  <rect x="96" y="88" width="320" height="336" rx="52" fill="#0F1D2E" stroke="#1D3A56" stroke-width="10"/>
-  <path d="M182 148h148c16 0 28 12 28 28v224l-102-66-102 66V176c0-16 12-28 28-28z" fill="#06C0E0"/>
-  <text x="256" y="294" text-anchor="middle" font-size="104" font-family="Arial, sans-serif" font-weight="700" fill="#03121A">M</text>
+  <rect x="96" y="88" width="320" height="336" rx="64" fill="#0F1D2E" stroke="#1D3A56" stroke-width="10"/>
+  <path d="M168 188a44 44 0 0 1 62 0l22 22-30 30-22-22a14 14 0 0 0-20 20l22 22-30 30-22-22a44 44 0 0 1 0-62z" fill="url(#g)"/>
+  <path d="M344 364a44 44 0 0 1-62 0l-22-22 30-30 22 22a14 14 0 0 0 20-20l-22-22 30-30 22 22a44 44 0 0 1 0 62z" fill="url(#g)"/>
+  <path d="M228 300l56-56" stroke="#9EE8F7" stroke-width="16" stroke-linecap="round"/>
 </svg>

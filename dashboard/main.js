@@ -2,7 +2,7 @@
 // THEME
 // ══════════════════════════════════════════════
 (function initTheme(){
-  const saved=localStorage.getItem('bmark-theme');
+  const saved=localStorage.getItem('linksync-theme');
   if(saved){document.documentElement.setAttribute('data-theme',saved);return;}
   if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches){
     document.documentElement.setAttribute('data-theme','light');
@@ -12,7 +12,7 @@ function toggleTheme(){
   const current=document.documentElement.getAttribute('data-theme');
   const next=current==='light'?'dark':'light';
   document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('bmark-theme',next);
+  localStorage.setItem('linksync-theme',next);
 }
 
 // ══════════════════════════════════════════════
@@ -37,13 +37,13 @@ let currentUser = null;
 let notificationsUnread = 0;
 let currentSection = 'bookmarks';
 let _healthTimer = null;
-const RECENT_SEARCHES_KEY = 'markd_recent_searches_v1';
+const RECENT_SEARCHES_KEY = 'linksync_recent_searches_v1';
 const MAX_RECENT_SEARCHES = 6;
-const TUTORIAL_DISMISSED_KEY = 'markd_first_save_tutorial_dismissed_v1';
-const LOCAL_FALLBACK_PREF_KEY = 'markd_local_fallback_pref_v1';
-const ONBOARD_TOUR_KEY = 'markd_onboard_tour_done_v1';
+const TUTORIAL_DISMISSED_KEY = 'linksync_first_save_tutorial_dismissed_v1';
+const LOCAL_FALLBACK_PREF_KEY = 'linksync_local_fallback_pref_v1';
+const ONBOARD_TOUR_KEY = 'linksync_onboard_tour_done_v1';
 try{localFallbackEnabled=localStorage.getItem(LOCAL_FALLBACK_PREF_KEY)==='true'}catch(e){localFallbackEnabled=false}
-const SUGGEST_HIDDEN_KEY='markd_suggest_hidden_v1';
+const SUGGEST_HIDDEN_KEY='linksync_suggest_hidden_v1';
 const SUGGESTED_BOOKMARKS = [
   { title: 'GitHub Trending', url: 'https://github.com/trending', meta: 'Dev' },
   { title: 'MDN Web Docs', url: 'https://developer.mozilla.org/', meta: 'Dev' },
@@ -1683,10 +1683,10 @@ function copyText(t){
 }
 function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');showToast('Copied!','success')}catch(e){}document.body.removeChild(ta)}
 function copyEmail(){copyText(document.getElementById('emailAddr').textContent)}
-function copyAPIExample(){copyText(`curl -X POST https://api.markd.app/v1/bookmarks \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url":"https://example.com","title":"Example","tags":["dev"]}'`)}
+function copyAPIExample(){copyText(`curl -X POST https://api.linksync-ai.app/v1/bookmarks \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"url":"https://example.com","title":"Example","tags":["dev"]}'`)}
 function copyCSVTemplate(){copyText('url,title,tags,notes\nhttps://example.com,Example Site,"dev,tools",My notes here')}
 function copyJSONTemplate(){copyText('[{"url":"https://example.com","title":"Example Site","tags":["dev","tools"],"notes":"Optional notes"}]')}
-function copyPWAManifest(){copyText(`{\n  "name": "Markd",\n  "short_name": "Markd",\n  "display": "standalone",\n  "share_target": {\n    "action": "/save",\n    "method": "POST",\n    "enctype": "multipart/form-data",\n    "params": {"title":"title","text":"text","url":"url"}\n  }\n}`)}
+function copyPWAManifest(){copyText(`{\n  "name": "LinkSync AI",\n  "short_name": "LinkSync",\n  "display": "standalone",\n  "share_target": {\n    "action": "/save",\n    "method": "POST",\n    "enctype": "multipart/form-data",\n    "params": {"title":"title","text":"text","url":"url"}\n  }\n}`)}
 
 // Source card selection
 function selectSource(el,src){
@@ -1721,7 +1721,7 @@ const CMDS=[
   {name:'Switch to grid view',sub:'',ico:'▦',act:()=>setView('grid')},
   {name:'Switch to list view',sub:'',ico:'≡',act:()=>setView('list')},
   {name:'Switch to table view',sub:'',ico:'☷',act:()=>setView('table')},
-  {name:'Export bookmarks',sub:'',ico:'📤',act:()=>{const all=JSON.stringify(bookmarks,null,2);downloadFile('markd-export.json',all,'application/json');showToast('Exported all bookmarks','info')}},
+  {name:'Export bookmarks',sub:'',ico:'📤',act:()=>{const all=JSON.stringify(bookmarks,null,2);downloadFile('linksync-export.json',all,'application/json');showToast('Exported all bookmarks','info')}},
   {name:'Show starred',sub:'',ico:'⭐',act:()=>{currentFilter='starred';document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('on'));render()}},
   {name:'Sort A → Z',sub:'',ico:'🔤',act:()=>{currentSort='az';document.getElementById('sortSelect').value='az';render()}},
   {name:'Sort newest first',sub:'',ico:'🕐',act:()=>{currentSort='newest';document.getElementById('sortSelect').value='newest';render()}},
@@ -2634,3 +2634,5 @@ window._testImport=function(){
   ];
   openPreview(demo,'Demo Import','demo.html');
 };
+
+
