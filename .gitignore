@@ -44,16 +44,6 @@ lcov-report/
 Thumbs.db
 
 ########################
-# Python (if used)
-########################
-__pycache__/
-*.py[cod]
-*.pyo
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-
-########################
 # Misc
 ########################
 .cache/
@@ -62,7 +52,7 @@ tmp/
 docker-data/
 certbot/
 
-
-node_modules
-npm-debug.log
-.git
+########################
+# Data files
+########################
+server/bookmarks.json

@@ -21,7 +21,6 @@ import {
   getStats,
   getTotalUsers,
   getUserById,
-  getUserByEmail,
   initRealtimeListener,
   initDb,
   listBookmarks,
@@ -50,6 +49,9 @@ const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
 const SESSION_SECRET = process.env.SESSION_SECRET ?? "change-me-in-prod";
+if (SESSION_SECRET === "change-me-in-prod") {
+  console.warn("[SECURITY] SESSION_SECRET is using the default fallback. Set a strong secret via the SESSION_SECRET environment variable.");
+}
 const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_FALLBACK !== "false";
 const SESSION_COOKIE_SECURE =
   process.env.SESSION_COOKIE_SECURE === "true"
