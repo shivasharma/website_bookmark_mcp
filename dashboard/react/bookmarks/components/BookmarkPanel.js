@@ -11,48 +11,60 @@ function tagClass(tag) {
   return "t2";
 }
 
-function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite }) {
+// 70/30 Split Card Layout and Hover-Only Actions
+function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart }) {
   const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
-    { className: "bk-preview-card", onClick: () => onOpen(bookmark.url) },
+    {
+      className: "bk-preview-card bk-split-card",
+      onClick: () => onOpen(bookmark.url),
+      draggable: true,
+      onDragStart: (e) => onDragStart && onDragStart(e, bookmark)
+    },
     React.createElement(
       "div",
-      { className: "bk-preview-fav" },
-      bookmark.faviconUrl
-        ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", loading: "lazy" })
-        : "🔖"
-    ),
-    React.createElement(
-      "div",
-      { className: "bk-preview-body" },
+      { className: "bk-split-main" },
       React.createElement(
         "div",
-        { className: "bk-preview-top" },
-        React.createElement("span", { className: "bk-preview-title" }, bookmark.title),
-        React.createElement("span", { className: "bk-preview-url" }, bookmark.url)
-      ),
-      bookmark.description && React.createElement(
-        "div",
-        { className: "bk-preview-excerpt" },
-        bookmark.description
-      ),
-      React.createElement(
-        "div",
-        { className: "bk-preview-meta" },
-        ...(bookmark.tags || []).map((tag, index) =>
-          React.createElement("span", { className: `bm-tag ${tagClass(tag)}` , key: `${bookmark.id}-tag-${index}` }, String(tag))
+        { className: "bk-split-left" },
+        React.createElement(
+          "div",
+          { className: "bk-preview-top" },
+          React.createElement("span", { className: "bk-preview-title" }, bookmark.title),
+          React.createElement("span", { className: "bk-preview-url" }, bookmark.url)
+        ),
+        bookmark.description && React.createElement(
+          "div",
+          { className: "bk-preview-excerpt" },
+          bookmark.description
         ),
         React.createElement(
-          "span",
-          { className: "bk-preview-date" },
-          bookmark.timeAgo || bookmark.dateLabel
+          "div",
+          { className: "bk-preview-meta" },
+          ...(bookmark.tags || []).map((tag, index) =>
+            React.createElement("span", { className: `bm-tag ${tagClass(tag)}` , key: `${bookmark.id}-tag-${index}` }, String(tag))
+          ),
+          React.createElement(
+            "span",
+            { className: "bk-preview-date" },
+            bookmark.timeAgo || bookmark.dateLabel
+          )
         )
+      ),
+      React.createElement(
+        "div",
+        { className: "bk-split-right" },
+        bookmark.thumbnailUrl
+          ? React.createElement("img", { src: bookmark.thumbnailUrl, alt: "preview", className: "bk-preview-thumb" })
+          : bookmark.faviconUrl
+            ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", className: "bk-preview-fav-large" })
+            : React.createElement("div", { className: "bk-preview-fav-large" }, "🔖")
       )
     ),
     React.createElement(
       "div",
-      { className: "bk-preview-actions" },
+      { className: "bk-preview-actions hover-only" },
       React.createElement(
         "button",
         {
@@ -93,11 +105,16 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
   );
 }
 
-function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite }) {
+function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart }) {
   const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
-    { className: "bm-grid-item", onClick: () => onOpen(bookmark.url) },
+    {
+      className: "bm-grid-item",
+      onClick: () => onOpen(bookmark.url),
+      draggable: true,
+      onDragStart: (e) => onDragStart && onDragStart(e, bookmark)
+    },
     React.createElement("div", { className: "bm-item-title" }, bookmark.title),
     React.createElement("div", { className: "bm-item-url" }, bookmark.domain || bookmark.url),
     React.createElement(
@@ -153,6 +170,91 @@ function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
   );
 }
 
+function BookmarkTable({ items, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart }) {
+  return React.createElement(
+    "div",
+    { className: "bk-table-wrap" },
+    React.createElement(
+      "table",
+      { className: "bk-table" },
+      React.createElement(
+        "thead",
+        null,
+        React.createElement(
+          "tr",
+          null,
+          React.createElement("th", null, "Favicon"),
+          React.createElement("th", null, "Title"),
+          React.createElement("th", null, "URL"),
+          React.createElement("th", null, "Date Added"),
+          React.createElement("th", null, "Tags"),
+          React.createElement("th", null, "Actions")
+        )
+      ),
+      React.createElement(
+        "tbody",
+        null,
+        ...items.map((bookmark) =>
+          React.createElement(
+            "tr",
+            {
+              key: `table-${bookmark.id}`,
+              draggable: true,
+              onDragStart: (e) => onDragStart && onDragStart(e, bookmark)
+            },
+            React.createElement(
+              "td",
+              null,
+              bookmark.faviconUrl
+                ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", style: { width: 20, height: 20, borderRadius: "50%" } })
+                : "🔖"
+            ),
+            React.createElement(
+              "td",
+              { className: "bk-table-title", onClick: () => onOpen(bookmark.url), style: { cursor: "pointer" } },
+              bookmark.title
+            ),
+            React.createElement(
+              "td",
+              { style: { maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } },
+              bookmark.url
+            ),
+            React.createElement(
+              "td",
+              null,
+              bookmark.dateLabel || bookmark.timeAgo
+            ),
+            React.createElement(
+              "td",
+              null,
+              (bookmark.tags || []).map((tag, i) => React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `table-tag-${i}` }, tag))
+            ),
+            React.createElement(
+              "td",
+              null,
+              React.createElement(
+                "button",
+                { className: "btn", type: "button", onClick: (e) => { e.stopPropagation(); onEdit(bookmark); } },
+                "Edit"
+              ),
+              React.createElement(
+                "button",
+                { className: "btn", type: "button", onClick: (e) => { e.stopPropagation(); onDelete(bookmark); } },
+                "Delete"
+              ),
+              React.createElement(
+                "button",
+                { className: "btn", type: "button", onClick: (e) => { e.stopPropagation(); onToggleFavorite(bookmark); } },
+                bookmark.starred ? "★" : "☆"
+              )
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
 export function BookmarkPanel({
   items,
   view,
@@ -173,7 +275,8 @@ export function BookmarkPanel({
   authBlocked,
   localFallbackPromptEnabled,
   onLocalFallbackPromptChange,
-  onAddClick
+  onAddClick,
+  onBookmarkDragStart
 }) {
   if (!items.length) {
     if (authBlocked) {
@@ -256,10 +359,17 @@ export function BookmarkPanel({
           { className: `btn${view === "grid" ? " primary" : ""}`, type: "button", onClick: () => onViewChange("grid") },
           React.createElement(IconGrid, { className: "bm-icon" }),
           "Grid"
+        ),
+        React.createElement(
+          "button",
+          { className: `btn${view === "table" ? " primary" : ""}`, type: "button", onClick: () => onViewChange("table") },
+          "Table"
         )
       )
     ),
-    view === "list"
+    view === "table"
+      ? React.createElement(BookmarkTable, { items, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart: onBookmarkDragStart })
+      : view === "list"
       ? React.createElement(
           "div",
           { className: "bm-list" },
@@ -270,7 +380,8 @@ export function BookmarkPanel({
               onOpen,
               onEdit,
               onDelete,
-              onToggleFavorite
+              onToggleFavorite,
+              onDragStart: onBookmarkDragStart
             })
           )
         )
@@ -284,7 +395,8 @@ export function BookmarkPanel({
               onOpen,
               onEdit,
               onDelete,
-              onToggleFavorite
+              onToggleFavorite,
+              onDragStart: onBookmarkDragStart
             })
           )
         ),

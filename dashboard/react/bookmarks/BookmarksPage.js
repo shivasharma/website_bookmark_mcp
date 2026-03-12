@@ -539,6 +539,33 @@ export function BookmarksPage() {
     setPathname(target);
   }
 
+  // Drag-and-drop handlers
+  function handleBookmarkDragStart(e, bookmark) {
+    e.dataTransfer.setData("bookmarkId", bookmark.id);
+  }
+
+  async function handleBookmarkDrop(bookmarkId, tag) {
+    try {
+      // Find the bookmark
+      const bm = bookmarks.find((b) => b.id === bookmarkId);
+      if (!bm) return;
+      // Add or replace first tag
+      const newTags = [tag, ...(bm.tags ? bm.tags.filter((t) => t !== tag) : [])];
+      const { response, payload } = await api(`/bookmarks/${bookmarkId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ tags: newTags })
+      });
+      if (response.ok && payload && payload.success) {
+        setMessage(`Bookmark re-tagged as "${tag}"`);
+        await loadBookmarks(currentPage, false);
+      } else {
+        setMessage("Failed to update tag");
+      }
+    } catch {
+      setMessage("Network error while updating tag");
+    }
+  }
+
   return React.createElement(
     "div",
     { className: "bm-shell" },
@@ -559,7 +586,8 @@ export function BookmarksPage() {
         onFilterChange: setFilter,
         total,
         starred,
-        unreadCount
+        unreadCount,
+        onBookmarkDrop: handleBookmarkDrop
       }),
       React.createElement(
         "main",
@@ -570,18 +598,59 @@ export function BookmarksPage() {
             null,
             React.createElement(
               "header",
-              { className: "bm-unified-header" },
-              React.createElement("h1", { className: "bm-section-title" }, sectionTitle),
-              React.createElement(StatsStrip, { total, starred, tags: tagsCount, imported: 0 }),
+              { className: "bm-command-center-header" },
               React.createElement(
                 "div",
-                { className: "bm-panel-search bm-unified-search" },
-                React.createElement("input", {
-                  value: search,
-                  onChange: (event) => setSearch(event.target.value),
-                  placeholder: "Search bookmarks...",
-                  "aria-label": "Search bookmarks"
-                })
+                { className: "bm-command-row" },
+                React.createElement(
+                  "div",
+                  { className: "bm-command-title-group" },
+                  React.createElement("h1", { className: "bm-section-title" }, sectionTitle),
+                  React.createElement(
+                    "span",
+                    { className: "bm-section-count" },
+                    `${filteredItems.length} item${filteredItems.length === 1 ? '' : 's'}`
+                  )
+                ),
+                React.createElement(
+                  "div",
+                  { className: "bm-command-search-group" },
+                  React.createElement(
+                    "div",
+                    { className: "bm-panel-search bm-unified-search" },
+                    React.createElement("input", {
+                      value: search,
+                      onChange: (event) => setSearch(event.target.value),
+                      placeholder: "Search bookmarks...",
+                      "aria-label": "Search bookmarks"
+                    }),
+                    React.createElement(
+                      "button",
+                      {
+                        className: "btn primary bm-add-btn",
+                        type: "button",
+                        onClick: () => {
+                          setEditingBookmark(null);
+                          setModalOpen(true);
+                        },
+                        style: { marginLeft: 8 }
+                      },
+                      "+ Add"
+                    )
+                  ),
+                  React.createElement(
+                    "select",
+                    {
+                      className: "bm-sort-dropdown",
+                      defaultValue: "newest",
+                      style: { marginLeft: 12 },
+                      onChange: (e) => {/* TODO: implement sort */}
+                    },
+                    React.createElement("option", { value: "newest" }, "Newest"),
+                    React.createElement("option", { value: "oldest" }, "Oldest"),
+                    React.createElement("option", { value: "az" }, "A-Z")
+                  )
+                )
               )
             ),
             !!message && React.createElement("div", { className: "bm-message" }, message),
@@ -647,7 +716,8 @@ export function BookmarksPage() {
                 onAddClick: () => {
                   setEditingBookmark(null);
                   setModalOpen(true);
-                }
+                },
+                onBookmarkDragStart
               }),
               React.createElement(QuickAddPanel, {
                 onSave: async (payload) => {
