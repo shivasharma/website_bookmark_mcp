@@ -20,7 +20,13 @@ const CORE_ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CORE_ASSETS))
+      .catch((err) => {
+        // If any asset fails, skip waiting but log the error
+        console.warn('Service Worker: Some assets failed to cache:', err);
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
