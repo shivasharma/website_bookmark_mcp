@@ -26,40 +26,41 @@
 
 /* Bookmark Card: Two-line description, compact, favicon next to title, actions on hover */
 .bk-preview-card {
-  min-height: 48px;
-  padding: 10px 14px 8px 14px;
-  background: var(--surface2);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-  border-radius: var(--r12);
-  border: none;
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  padding: 10px 14px 8px 14px;
+  border: none;
+  border-radius: var(--r12);
+  background: var(--s2);
+  transition: var(--t);
+  cursor: pointer;
   position: relative;
-  transition: var(--t), box-shadow .18s;
+  min-height: 64px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 .bk-preview-card:hover {
-  background: var(--surface3);
+  background: var(--s3);
   box-shadow: 0 6px 24px rgba(0,0,0,0.18);
 }
 .bk-preview-fav {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--surface1);
-  border: none;
-  margin-right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--s4);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  margin-right: 6px;
 }
 .bk-preview-fav img {
   width: 24px;
   height: 24px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 50%;
 }
 .bk-preview-body {
   min-width: 0;
@@ -352,7 +353,7 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .hidden{display:none !important}
 
 /* SIDEBAR */
-.sidebar{background:rgba(22,22,22,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:none;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;box-shadow:0 2px 16px rgba(0,0,0,0.18);}
+.sidebar{background:rgba(11,18,28,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}
 .sidebar::-webkit-scrollbar{display:none}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:499;-webkit-tap-highlight-color:transparent;}
 .sidebar-inner{padding:16px 12px;display:flex;flex-direction:column;gap:4px;flex:1;}
@@ -562,37 +563,35 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
   padding: 10px 14px 8px 14px;
   border: none;
   border-radius: var(--r12);
-  background: var(--surface2);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
-  border: none;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  background: var(--s2);
+  transition: var(--t);
+  cursor: pointer;
   position: relative;
-  transition: var(--t), box-shadow .18s;
+  min-height: 64px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
 }
 .bk-preview-card:hover {
-  background: var(--surface3);
+  background: var(--s3);
   box-shadow: 0 6px 24px rgba(0,0,0,0.18);
 }
 .bk-preview-fav {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--surface1);
-  border: none;
-  margin-right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--s4);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  margin-right: 6px;
 }
 .bk-preview-fav img {
   width: 24px;
   height: 24px;
   object-fit: contain;
-  border-radius: 6px;
+  border-radius: 50%;
 }
 .bk-preview-body {
   min-width: 0;
