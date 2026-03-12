@@ -16,90 +16,66 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
   const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
-    {
-      className: "bk-preview-card bk-split-card",
-      onClick: () => onOpen(bookmark.url),
-      draggable: true,
-      onDragStart: (e) => onDragStart && onDragStart(e, bookmark)
-    },
+    { className: "bm-item", onClick: () => onOpen(bookmark.url) },
     React.createElement(
       "div",
-      { className: "bk-split-main" },
+      { className: "bm-item-main" },
+      React.createElement("div", { className: "bm-item-title" }, bookmark.title),
+      React.createElement("div", { className: "bm-item-url" }, bookmark.url),
       React.createElement(
         "div",
-        { className: "bk-split-left" },
-        React.createElement(
-          "div",
-          { className: "bk-preview-top" },
-          React.createElement("span", { className: "bk-preview-title" }, bookmark.title),
-          React.createElement("span", { className: "bk-preview-url" }, bookmark.url)
-        ),
-        bookmark.description && React.createElement(
-          "div",
-          { className: "bk-preview-excerpt" },
-          bookmark.description
-        ),
-        React.createElement(
-          "div",
-          { className: "bk-preview-meta" },
-          ...(bookmark.tags || []).map((tag, index) =>
-            React.createElement("span", { className: `bm-tag ${tagClass(tag)}` , key: `${bookmark.id}-tag-${index}` }, String(tag))
-          ),
-          React.createElement(
-            "span",
-            { className: "bk-preview-date" },
-            bookmark.timeAgo || bookmark.dateLabel
-          )
+        { className: "bm-tags" },
+        ...(bookmark.tags || []).map((tag, index) =>
+          React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-tag-${index}` }, String(tag))
         )
-      ),
-      React.createElement(
-        "div",
-        { className: "bk-split-right" },
-        bookmark.thumbnailUrl
-          ? React.createElement("img", { src: bookmark.thumbnailUrl, alt: "preview", className: "bk-preview-thumb" })
-          : bookmark.faviconUrl
-            ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", className: "bk-preview-fav-large" })
-            : React.createElement("div", { className: "bk-preview-fav-large" }, "🔖")
       )
     ),
     React.createElement(
       "div",
-      { className: "bk-preview-actions hover-only" },
+      { className: "bm-item-right" },
+      React.createElement("div", { className: "bm-date" }, bookmark.dateLabel),
       React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: (event) => {
-            event.stopPropagation();
-            onToggleFavorite(bookmark);
-          }
-        },
-        starIcon
-      ),
-      React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: (event) => {
-            event.stopPropagation();
-            onEdit(bookmark);
-          }
-        },
-        React.createElement(IconEdit, { className: "bm-icon" })
-      ),
-      React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: (event) => {
-            event.stopPropagation();
-            onDelete(bookmark);
-          }
-        },
-        React.createElement(IconTrash, { className: "bm-icon" })
+        "div",
+        { className: "bm-actions" },
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: (event) => {
+              event.stopPropagation();
+              onToggleFavorite(bookmark);
+            }
+          },
+          starIcon,
+          bookmark.starred ? "Unstar" : "Star"
+        ),
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: (event) => {
+              event.stopPropagation();
+              onEdit(bookmark);
+            }
+          },
+          React.createElement(IconEdit, { className: "bm-icon" }),
+          "Edit"
+        ),
+        React.createElement(
+          "button",
+          {
+            className: "btn",
+            type: "button",
+            onClick: (event) => {
+              event.stopPropagation();
+              onDelete(bookmark);
+            }
+          },
+          React.createElement(IconTrash, { className: "bm-icon" }),
+          "Delete"
+        )
       )
     )
   );
