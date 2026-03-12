@@ -10,6 +10,7 @@ permissions:
 
 env:
   DEPLOY_DIR: /opt/website_bookmark_mcp
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # --- JOB 1: Build MCP and Sync Dist Folder ---

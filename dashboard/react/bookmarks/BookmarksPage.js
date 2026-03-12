@@ -564,13 +564,27 @@ export function BookmarksPage() {
       React.createElement(
         "main",
         { className: "bm-content" },
-        React.createElement("h1", { className: "bm-section-title" }, section === "notifications" ? "Notifications" : sectionTitle),
-        !!message && React.createElement("div", { className: "bm-message" }, message),
         section === "bookmarks" &&
           React.createElement(
             React.Fragment,
             null,
-            React.createElement(StatsStrip, { total, starred, tags: tagsCount, imported: 0 }),
+            React.createElement(
+              "header",
+              { className: "bm-unified-header" },
+              React.createElement("h1", { className: "bm-section-title" }, sectionTitle),
+              React.createElement(StatsStrip, { total, starred, tags: tagsCount, imported: 0 }),
+              React.createElement(
+                "div",
+                { className: "bm-panel-search bm-unified-search" },
+                React.createElement("input", {
+                  value: search,
+                  onChange: (event) => setSearch(event.target.value),
+                  placeholder: "Search bookmarks...",
+                  "aria-label": "Search bookmarks"
+                })
+              )
+            ),
+            !!message && React.createElement("div", { className: "bm-message" }, message),
             notifications.length > 0 &&
               React.createElement(
                 "section",

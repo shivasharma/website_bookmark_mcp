@@ -18,29 +18,35 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
     { className: "bk-preview-card", onClick: () => onOpen(bookmark.url) },
     React.createElement(
       "div",
-      { className: "bk-preview-main" },
+      { className: "bk-preview-fav" },
+      bookmark.faviconUrl
+        ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", loading: "lazy" })
+        : "🔖"
+    ),
+    React.createElement(
+      "div",
+      { className: "bk-preview-body" },
       React.createElement(
-        "span",
-        { className: "bk-preview-fav" },
-        bookmark.faviconUrl
-          ? React.createElement("img", { src: bookmark.faviconUrl, alt: "favicon", loading: "lazy" })
-          : "🔖"
+        "div",
+        { className: "bk-preview-top" },
+        React.createElement("span", { className: "bk-preview-title" }, bookmark.title),
+        React.createElement("span", { className: "bk-preview-url" }, bookmark.url)
+      ),
+      bookmark.description && React.createElement(
+        "div",
+        { className: "bk-preview-excerpt" },
+        bookmark.description
       ),
       React.createElement(
         "div",
-        { className: "bk-preview-body" },
-        React.createElement(
-          "div",
-          { className: "bk-preview-top" },
-          React.createElement("span", { className: "bk-preview-title" }, bookmark.title),
-          React.createElement("span", { className: "bk-preview-url" }, bookmark.url)
+        { className: "bk-preview-meta" },
+        ...(bookmark.tags || []).map((tag, index) =>
+          React.createElement("span", { className: `bm-tag ${tagClass(tag)}` , key: `${bookmark.id}-tag-${index}` }, String(tag))
         ),
         React.createElement(
-          "div",
-          { className: "bk-preview-meta" },
-          ...(bookmark.tags || []).map((tag, index) =>
-            React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-tag-${index}` }, String(tag))
-          )
+          "span",
+          { className: "bk-preview-date" },
+          bookmark.timeAgo || bookmark.dateLabel
         )
       )
     ),
@@ -82,11 +88,6 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
           }
         },
         React.createElement(IconTrash, { className: "bm-icon" })
-      ),
-      React.createElement(
-        "span",
-        { className: "bk-preview-date" },
-        bookmark.timeAgo || bookmark.dateLabel
       )
     )
   );
@@ -233,17 +234,7 @@ export function BookmarkPanel({
       React.createElement(
         "div",
         { className: "bm-panel-tools" },
-        React.createElement(
-          "div",
-          { className: "bm-panel-search" },
-          React.createElement(IconSearch, { className: "bm-icon bm-search-icon" }),
-          React.createElement("input", {
-            value: search,
-            onChange: (event) => onSearchChange(event.target.value),
-            placeholder: "Search bookmarks...",
-            "aria-label": "Search bookmarks"
-          })
-        ),
+        null,
         React.createElement(
           "button",
           {
