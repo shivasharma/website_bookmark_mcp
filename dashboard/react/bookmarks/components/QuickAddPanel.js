@@ -258,45 +258,38 @@ export function QuickAddPanel({ onSave, tagFrequency, existingUrls }) {
     setMetaMessage(inferred.length ? "Auto-filled details and suggested tags." : "Auto-filled details.");
   }
 
-  async function submit(keepForm) {
+  async function handleQuickSave() {
     const normalizedUrl = toOptionalText(url);
-    if (!normalizedUrl) {
-      return;
-    }
-
+    if (!normalizedUrl) return;
+    setUrlStatus("valid");
+    setDuplicateWarning("");
+    setMetaMessage("");
+    setLoadingMeta(true);
     const metadata = await enrichFromUrl(normalizedUrl);
-    const mergedTags = uniqueTags([...parseTags(tags), ...selectedSuggestedTags]);
-    const finalTitle = toOptionalText(title) || toOptionalText(metadata.title);
-    const finalDescription = toOptionalText(description) || toOptionalText(metadata.description);
-    const finalUrl = toOptionalText(metadata.url) || normalizedUrl;
-
+    setLoadingMeta(false);
     const payload = {
-      url: finalUrl,
-      title: finalTitle,
-      description: finalDescription,
-      notes: toOptionalText(notes),
-      tags: mergedTags
+      url: metadata.url || normalizedUrl,
+      title: metadata.title || title,
+      description: metadata.description || description,
+      notes: notes,
+      tags: uniqueTags([...parseTags(tags), ...selectedSuggestedTags])
     };
-
-    const snapshot = { ...payload };
     await onSave(payload);
-
-    cancelConfirmTimer();
-    setSavedConfirm(snapshot);
-
-    if (keepForm) {
-      setUrl("");
-      setUrlStatus("idle");
-      setDuplicateWarning("");
-      setMetaMessage("Saved! Enter another URL.");
-    } else {
-      clearForm();
-    }
-
-    savedTimerRef.current = setTimeout(() => {
-      setSavedConfirm(null);
-    }, 5000);
+    setSavedConfirm(payload);
+    setStep(2);
   }
+
+  function handleAddTagsNotes() {
+    setStep(2);
+  }
+
+  function handleDone() {
+    clearForm();
+    setStep(1);
+    setSavedConfirm(null);
+  }
+
+  const [step, setStep] = useState(1);
 
   return React.createElement(
     "section",
@@ -471,13 +464,11 @@ export function QuickAddPanel({ onSave, tagFrequency, existingUrls }) {
     React.createElement(
       "div",
       { className: "bm-quick-actions" },
-      React.createElement("button", { className: "btn", type: "button", onClick: clearForm }, "Clear"),
       React.createElement(
         "button",
-        { className: "btn", type: "button", onClick: () => submit(true), "aria-label": "Save bookmark and add another" },
-        "Save & Add Another"
-      ),
-      React.createElement("button", { className: "btn primary", type: "button", onClick: () => submit(false), "aria-label": "Save bookmark" }, "Save")
+        { className: "btn primary", type: "button", onClick: handleQuickSave, disabled: !url },
+        loadingMeta ? "Saving..." : "Quick Save"
+      )
     )
   );
 }
