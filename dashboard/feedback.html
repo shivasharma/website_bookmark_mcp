@@ -1,59 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#080E17"/>
-<title>LinkSync AI - Feedback</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/styles.css"/>
-<script>
-(function(){
-  var t = localStorage.getItem('linksync-theme');
-  if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme:light)').matches) t = 'light';
-  if(t) document.documentElement.setAttribute('data-theme', t);
-})();
-</script>
-<style>
-  .feedback-shell{max-width:860px;margin:0 auto;padding:34px 20px 60px}
-  .feedback-card{background:linear-gradient(180deg,var(--s2),var(--s1));border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm)}
-  .feedback-title{margin:0 0 8px;font-family:var(--font-d);font-size:clamp(24px,1.2vw + 16px,34px);letter-spacing:-.4px}
-  .feedback-sub{margin:0 0 18px;color:var(--text3);font-size:14px;line-height:1.6}
-  .feedback-input{width:100%;min-height:180px;resize:vertical;border-radius:12px;border:1px solid var(--border2);background:var(--s3);color:var(--text1);padding:14px 16px;font-family:var(--font-b);font-size:14px;line-height:1.6;outline:none}
-  .feedback-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(6,192,224,.16)}
-  .feedback-row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
-  .feedback-note{margin:0;color:var(--text3);font-size:12px}
-  .btn-primary{min-width:130px}
-</style>
-</head>
-<body>
-  <div class="feedback-shell">
-    <div class="feedback-card">
-      <h1 class="feedback-title">Share Feedback</h1>
-      <p class="feedback-sub">Tell us what is working well and what we should improve in LinkSync AI.</p>
-      <form id="feedbackForm">
-        <textarea id="feedbackText" class="feedback-input" placeholder="Write your feedback here..." required></textarea>
-        <div class="feedback-row">
-          <button class="btn-primary" type="submit">Submit Feedback</button>
-          <a class="btn-outline" href="/">Back to Dashboard</a>
-        </div>
-      </form>
-     
-      
-    </div>
-  </div>
 
-  <script>
-    document.getElementById('feedbackForm').addEventListener('submit', function(e){
-      e.preventDefault();
-      var text = document.getElementById('feedbackText').value.trim();
-      if(!text) return;
-      var subject = encodeURIComponent('LinkSync AI Feedback');
-      var body = encodeURIComponent(text);
-      window.location.href = 'mailto:shivathebravo@gmail.com?subject=' + subject + '&body=' + body;
-    });
-  </script>
-</body>
-</html>
+import React, { useRef, useState } from 'react';
+
+export const ContactUs = () => {
+  const form = useRef();
+  const [status, setStatus] = useState(null);
+
+  const sendFeedback = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form.current);
+    const data = Object.fromEntries(formData.entries());
+    setStatus(null);
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setStatus('SUCCESS');
+        form.current.reset();
+      } else {
+        setStatus('FAILED');
+      }
+    } catch {
+      setStatus('FAILED');
+    }
+  };
+
+  return (
+    <form ref={form} onSubmit={sendFeedback}>
+      <label>Name</label>
+      <input type="text" name="user_name" required />
+      <label>Email</label>
+      <input type="email" name="user_email" required />
+      <label>Message</label>
+      <textarea name="message" required />
+      <input type="submit" value="Send" />
+      {status === 'SUCCESS' && <div style={{color:'green'}}>Feedback sent!</div>}
+      {status === 'FAILED' && <div style={{color:'red'}}>Failed to send feedback.</div>}
+    </form>
+  );
+};
