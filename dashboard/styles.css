@@ -16,6 +16,7 @@
   letter-spacing: 0.02em;
   text-transform: uppercase;
   box-shadow: 0 1px 4px rgba(6,192,224,.04);
+}
 /* End of previous block - removed stray closing brace */
 .bm-tag.t1 { background: rgba(6,192,224,0.18); color: #06C0E0; }
 .bm-tag.t2 { background: rgba(47,128,237,0.18); color: #2F80ED; }
@@ -729,3 +730,4 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
 @media(max-width:768px){.quick-smart-row{flex-direction:column;align-items:stretch}.quick-meta{align-items:flex-start;flex-wrap:wrap}.quick-tags{margin-left:0}}
 @media(max-width:480px){.stats-strip{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:14px 14px 12px}.stat-val{font-size:24px}.dash-title{font-size:22px}.action-bar .btn-add-compact{width:42px;padding:0;overflow:hidden;justify-content:center}.action-bar .btn-add-compact svg+*{display:none}.content-area{padding:8px 12px 96px}.bk-grid .bk-card{padding:14px}.bk-list .bk-item{padding:14px;gap:12px}
+}
