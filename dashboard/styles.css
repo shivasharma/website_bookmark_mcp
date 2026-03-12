@@ -85,7 +85,7 @@
 .share-btn.fb { border-color: #1877f2; }
 .share-btn.fb:hover { background: #1877f2; color: #fff; box-shadow: 0 4px 18px #1877f2a0; }
 .share-btn.x { border-color: #222; }
-.share-btn.x:hover { background: #222; color: #fff; box-shadow: 0 4px 18px #222a0; }
+.share-btn.x:hover { background: #222; color: #fff; box-shadow: 0 4px 18px #222a0a; }
 .share-btn.in { border-color: #0a66c2; }
 .share-btn.in:hover { background: #0a66c2; color: #fff; box-shadow: 0 4px 18px #0a66c2a0; }
 .share-back-btn {
@@ -439,11 +439,7 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
   min-height: 64px;
   box-shadow: 0 1px 4px rgba(6,192,224,.04);
 }
-  border-color: #3b82f6;
-  background: var(--s3);
-  box-shadow: 0 0 0 2px #3b82f6, 0 8px 32px rgba(59,130,246,0.10), var(--shadow-sm);
-  transform: translateY(-2px) scale(1.02);
-  z-index: 2;
+/* Removed stray properties not inside a selector */
 }
 .bk-preview-main {
   display: flex;
@@ -484,30 +480,12 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
   gap: 7px;
   min-width: 0;
 }
-  font-family: var(--font-d);
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--text1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  letter-spacing: -0.01em;
+/* Removed stray properties not inside a selector */
 }
 .bk-preview-title .bk-preview-fav {
   margin-right: 7px;
 }
-  font-size: 12px;
-  color: var(--text3);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 0;
-  font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', monospace;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+/* Removed stray properties not inside a selector */
 }
 .bk-preview-excerpt {
   margin-top: 2px;

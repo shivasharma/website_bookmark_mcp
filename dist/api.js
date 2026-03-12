@@ -13,7 +13,10 @@ import { fileURLToPath } from "node:url";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { clearNotifications, deleteBookmark, ensureLocalDefaultUser, getDatabaseHealth, getBookmarkById, getOrCreateOAuthUser, getStats, getTotalUsers, getUserById, initRealtimeListener, initDb, listBookmarks, listNotifications, markAllNotificationsRead, markNotificationRead, saveBookmark, subscribeBookmarkEvents, updateBookmark, } from "./db.js";
 import { z } from "zod";
+import feedbackRouter from "./feedback.js";
 const app = express();
+// Feedback endpoint
+app.use("/api", feedbackRouter);
 const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
