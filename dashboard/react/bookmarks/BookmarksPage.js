@@ -274,6 +274,7 @@ export function BookmarksPage() {
   }, []);
 
   const section = useMemo(() => {
+    if (pathname.startsWith("/aichat")) return "aichat";
     if (pathname.startsWith("/syshealth")) return "syshealth";
     if (pathname.startsWith("/mcp")) return "mcp";
     if (pathname.startsWith("/notifications")) return "notifications";
@@ -532,7 +533,11 @@ export function BookmarksPage() {
   }
 
   function handleSectionChange(next) {
-    const target = next === "syshealth" ? "/syshealth" : next === "mcp" ? "/mcp" : next === "notifications" ? "/notifications" : "/bookmarks";
+    let target = "/bookmarks";
+    if (next === "aichat") target = "/aichat";
+    else if (next === "syshealth") target = "/syshealth";
+    else if (next === "mcp") target = "/mcp";
+    else if (next === "notifications") target = "/notifications";
     if (window.location.pathname !== target) {
       window.history.pushState({}, "", target);
     }
@@ -688,9 +693,13 @@ export function BookmarksPage() {
                 .catch(() => {});
             }
           }),
+        section === "aichat" && React.createElement("div", { className: "card" },
+          React.createElement("h2", null, "AI Chat"),
+          React.createElement("div", { style: { padding: 16, textAlign: "center", color: "#b3c7dd" } }, "AI chat UI coming soon...")
+        ),
         section === "syshealth" && React.createElement(SystemHealthPanel),
         section === "mcp" && React.createElement(McpSetupPanel, { currentUser, onMessage: setMessage }),
-        section !== "bookmarks" && section !== "notifications" && section !== "syshealth" && section !== "mcp" &&
+        section !== "bookmarks" && section !== "notifications" && section !== "syshealth" && section !== "mcp" && section !== "aichat" &&
           React.createElement("div", { className: "bm-message" }, "Unknown section. Returning to bookmarks...")
       )
     ),

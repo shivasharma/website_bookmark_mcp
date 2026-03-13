@@ -1,5 +1,5 @@
 import React from "react";
-import { IconBell, IconBookmark, IconClock, IconReadLater, IconSettings, IconShield, IconStar } from "./icons.js";
+import { IconBell, IconBookmark, IconClock, IconReadLater, IconSettings, IconShield, IconStar, IconMcp } from "./icons.js";
 
 function NavLink({ label, active, onClick, icon, count }) {
   return React.createElement(
@@ -24,6 +24,12 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
   return React.createElement(
     "aside",
     { className: "bm-sidebar" },
+    React.createElement(NavLink, {
+      label: "AI Chat",
+      icon: React.createElement(IconMcp, { className: "bm-icon" }),
+      active: section === "aichat",
+      onClick: () => onSectionChange("aichat")
+    }),
     React.createElement("div", { className: "bm-side-title" }, "Library"),
     React.createElement(NavLink, {
       label: "All Bookmarks",
@@ -92,6 +98,11 @@ export function MobileNav({ section, unreadCount, onSectionChange }) {
   return React.createElement(
     "nav",
     { className: "bm-mobile-nav", "aria-label": "Primary" },
+    React.createElement(NavTab, {
+      id: "aichat",
+      label: "AI Chat",
+      icon: React.createElement(IconMcp, { className: "bm-icon" })
+    }),
     React.createElement(NavTab, {
       id: "bookmarks",
       label: "Library",
