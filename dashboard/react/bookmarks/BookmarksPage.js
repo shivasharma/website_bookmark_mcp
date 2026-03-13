@@ -552,7 +552,11 @@ export function BookmarksPage() {
       onOpenNotifications: () => handleSectionChange("notifications"),
       unreadCount,
       currentUser,
-      onLogout: handleLogout
+      onLogout: handleLogout,
+      onAddBookmark: () => {
+        setEditingBookmark(null);
+        setModalOpen(true);
+      }
     }),
     React.createElement(
       "div",
@@ -635,10 +639,8 @@ export function BookmarksPage() {
                 authBlocked,
                 localFallbackPromptEnabled,
                 onLocalFallbackPromptChange: setLocalFallbackPromptEnabled,
-                onAddClick: () => {
-                  setEditingBookmark(null);
-                  setModalOpen(true);
-                }
+                // Add Bookmark button now in TopBar
+                onAddClick: undefined
               }),
               React.createElement(QuickAddPanel, {
                 onSave: async (payload) => {

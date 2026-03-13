@@ -22,7 +22,7 @@ function IconAIChat(props = {}) {
   );
 }
 
-export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout }) {
+export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout, onAddBookmark }) {
   const userLabel = currentUser ? currentUser.name || currentUser.email || "User" : "";
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
 
@@ -39,6 +39,18 @@ export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUse
     React.createElement(
       "div",
       { className: "bm-top-actions" },
+      React.createElement(
+        "button",
+        {
+          className: "btn primary",
+          type: "button",
+          style: { fontWeight: 700 },
+          onClick: onAddBookmark,
+          title: "Add Bookmark"
+        },
+        React.createElement("span", { style: { fontSize: 18, marginRight: 6 } }, "+"),
+        "Add Bookmark"
+      ),
       React.createElement(
         "button",
         {
