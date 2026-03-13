@@ -725,7 +725,8 @@ export function BookmarksPage() {
                 onAddClick: () => {
                   setEditingBookmark(null);
                   setModalOpen(true);
-                }
+                },
+                onBookmarkDragStart
               }),
               React.createElement(QuickAddPanel, {
                 onSave: async (payload) => {
