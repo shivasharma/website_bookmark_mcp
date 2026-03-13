@@ -34,7 +34,7 @@ import {
 
 import type { User } from "./types.js";
 import { z } from "zod";
-import feedbackRouter from "./feedback.js";
+// import feedbackRouter from "./feedback.js";
 
 declare global {
   namespace Express {
@@ -47,8 +47,7 @@ declare global {
 }
 
 const app = express();
-// Feedback endpoint
-app.use("/api", feedbackRouter);
+// Feedback endpoint removed
 const PORT = Number(process.env.PORT ?? 3001);
 const HOST = process.env.HOST ?? "0.0.0.0";
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
