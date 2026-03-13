@@ -1,3 +1,79 @@
+/* --- Visual Hierarchy & Section Differentiation --- */
+.bm-section-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+  border-left: 4px solid var(--accent, #06c0e0);
+  padding-left: 12px;
+  background: rgba(6,192,224,0.04);
+}
+.bm-side-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent, #06c0e0);
+  margin-bottom: 12px;
+}
+
+/* --- Text Truncation & Readability --- */
+.bk-preview-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+.bk-preview-url {
+  font-size: 0.95rem;
+  color: var(--muted, #b3c7dd);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Spacing & Card Layout Consistency --- */
+.card, .bm-activity-item, .bm-notification-item {
+  border-radius: 14px;
+  padding: 20px 18px 16px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(6,192,224,0.04);
+}
+.bk-preview-meta {
+  margin-top: 8px;
+  gap: 6px;
+}
+.bm-content-grid {
+  gap: 22px;
+}
+
+/* --- Empty State Handling --- */
+.bm-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: var(--muted, #b3c7dd);
+}
+.bm-empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  color: var(--accent, #06c0e0);
+}
+.bm-empty-state .btn {
+  margin-top: 18px;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 700px) {
+  .bm-content-grid { gap: 12px; }
+  .card { padding: 14px 6px; }
+  .bm-tab-pills { flex-wrap: nowrap; overflow-x: auto; }
+  .bm-side-link, .bm-mobile-tab { min-height: 44px; font-size: 1rem; }
+  .bk-preview-title { font-size: 1rem; }
+}
 /* Modern pill tags for React cards */
 .bm-tag {
   display: inline-flex;

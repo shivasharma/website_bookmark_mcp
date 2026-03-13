@@ -322,8 +322,7 @@ export function BookmarkPanel({
       "div",
       { className: "card" },
       React.createElement("h2", null, "No bookmarks found"),
-      React.createElement("p", { className: "sub" }, "Add your first bookmark or change filters."),
-      React.createElement("button", { className: "btn primary", type: "button", onClick: onAddClick }, "Add Bookmark")
+      React.createElement("p", { className: "sub" }, "Add your first bookmark or change filters.")
     );
   }
 

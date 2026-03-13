@@ -1,7 +1,28 @@
 import React from "react";
 import { IconBell, IconBookmark, IconMcp } from "./icons.js";
 
-export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout }) {
+function IconAIChat(props = {}) {
+  return React.createElement(
+    "svg",
+    { ...{
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 1.8,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      "aria-hidden": true,
+      focusable: false,
+      ...props
+    } },
+    React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+    React.createElement("path", { d: "M8 15c1.5-2 6.5-2 8 0" }),
+    React.createElement("circle", { cx: 9, cy: 10, r: 1 }),
+    React.createElement("circle", { cx: 15, cy: 10, r: 1 })
+  );
+}
+
+export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout, onAddBookmark }) {
   const userLabel = currentUser ? currentUser.name || currentUser.email || "User" : "";
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
 
@@ -18,6 +39,29 @@ export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUse
     React.createElement(
       "div",
       { className: "bm-top-actions" },
+      React.createElement(
+        "button",
+        {
+          className: "btn primary",
+          type: "button",
+          style: { fontWeight: 700 },
+          onClick: onAddBookmark,
+          title: "Add Bookmark"
+        },
+        React.createElement("span", { style: { fontSize: 18, marginRight: 6 } }, "+"),
+        "Add Bookmark"
+      ),
+      React.createElement(
+        "button",
+        {
+          className: "btn bm-aichat-btn",
+          type: "button",
+          title: "AI Chat",
+          onClick: () => window.location.assign("/chat")
+        },
+        React.createElement(IconAIChat, { className: "bm-icon" }),
+        "AI Chat"
+      ),
       React.createElement(
         "button",
         {

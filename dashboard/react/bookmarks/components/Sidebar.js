@@ -1,6 +1,27 @@
 import React from "react";
 import { IconBell, IconBookmark, IconClock, IconReadLater, IconSettings, IconShield, IconStar } from "./icons.js";
 
+function IconAIChat(props = {}) {
+  return React.createElement(
+    "svg",
+    { ...{
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: 1.8,
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      "aria-hidden": true,
+      focusable: false,
+      ...props
+    } },
+    React.createElement("circle", { cx: 12, cy: 12, r: 10 }),
+    React.createElement("path", { d: "M8 15c1.5-2 6.5-2 8 0" }),
+    React.createElement("circle", { cx: 9, cy: 10, r: 1 }),
+    React.createElement("circle", { cx: 15, cy: 10, r: 1 })
+  );
+}
+
 // Patch NavLink to support drop for tags/categories
 function NavLink({ label, active, onClick, icon, count, onDrop, onDragOver }) {
   return React.createElement(
@@ -62,69 +83,51 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
     "aside",
     { className: "bm-sidebar" },
     React.createElement("div", { className: "bm-side-title" }, "Library"),
-    React.createElement(CollapsibleSection, {
-      title: "Bookmarks",
-      defaultOpen: true,
-      children: [
-        React.createElement(NavLink, {
-          key: "all",
-          label: "All Bookmarks",
-          count: total,
-          icon: React.createElement(IconBookmark, { className: "bm-icon" }),
-          active: section === "bookmarks" && filter === "all",
-          onClick: () => openBookmarks("all")
-        }),
-        React.createElement(NavLink, {
-          key: "starred",
-          label: "Starred",
-          count: starred,
-          icon: React.createElement(IconStar, { className: "bm-icon" }),
-          active: section === "bookmarks" && filter === "starred",
-          onClick: () => openBookmarks("starred")
-        }),
-        React.createElement(NavLink, {
-          key: "recent",
-          label: "Recent",
-          icon: React.createElement(IconClock, { className: "bm-icon" }),
-          active: section === "bookmarks" && filter === "recent",
-          onClick: () => openBookmarks("recent")
-        }),
-        React.createElement(NavLink, {
-          key: "unread",
-          label: "Read Later",
-          icon: React.createElement(IconReadLater, { className: "bm-icon" }),
-          active: section === "bookmarks" && filter === "unread",
-          onClick: () => openBookmarks("unread")
-        })
-      ]
+    React.createElement(NavLink, {
+      label: "All Bookmarks",
+      count: total,
+      icon: React.createElement(IconBookmark, { className: "bm-icon" }),
+      active: section === "bookmarks" && filter === "all",
+      onClick: () => openBookmarks("all")
     }),
-    React.createElement(CollapsibleSection, {
-      title: "Tools",
-      defaultOpen: false,
-      children: [
-        React.createElement(NavLink, {
-          key: "notifications",
-          label: "Notifications",
-          count: unreadCount,
-          icon: React.createElement(IconBell, { className: "bm-icon" }),
-          active: section === "notifications",
-          onClick: () => onSectionChange("notifications")
-        }),
-        React.createElement(NavLink, {
-          key: "syshealth",
-          label: "System Health",
-          icon: React.createElement(IconShield, { className: "bm-icon" }),
-          active: section === "syshealth",
-          onClick: () => onSectionChange("syshealth")
-        }),
-        React.createElement(NavLink, {
-          key: "mcp",
-          label: "MCP Setup",
-          icon: React.createElement(IconSettings, { className: "bm-icon" }),
-          active: section === "mcp",
-          onClick: () => onSectionChange("mcp")
-        })
-      ]
+    React.createElement(NavLink, {
+      label: "Starred",
+      count: starred,
+      icon: React.createElement(IconStar, { className: "bm-icon" }),
+      active: section === "bookmarks" && filter === "starred",
+      onClick: () => openBookmarks("starred")
+    }),
+    React.createElement(NavLink, {
+      label: "Recent",
+      icon: React.createElement(IconClock, { className: "bm-icon" }),
+      active: section === "bookmarks" && filter === "recent",
+      onClick: () => openBookmarks("recent")
+    }),
+    React.createElement(NavLink, {
+      label: "Read Later",
+      icon: React.createElement(IconReadLater, { className: "bm-icon" }),
+      active: section === "bookmarks" && filter === "unread",
+      onClick: () => openBookmarks("unread")
+    }),
+    React.createElement(NavLink, {
+      label: "Notifications",
+      count: unreadCount,
+      icon: React.createElement(IconBell, { className: "bm-icon" }),
+      active: section === "notifications",
+      onClick: () => onSectionChange("notifications")
+    }),
+    React.createElement("div", { className: "bm-side-divider" }),
+    React.createElement(NavLink, {
+      label: "System Health",
+      icon: React.createElement(IconShield, { className: "bm-icon" }),
+      active: section === "syshealth",
+      onClick: () => onSectionChange("syshealth")
+    }),
+    React.createElement(NavLink, {
+      label: "MCP Setup",
+      icon: React.createElement(IconSettings, { className: "bm-icon" }),
+      active: section === "mcp",
+      onClick: () => onSectionChange("mcp")
     })
   );
 }
@@ -147,6 +150,11 @@ export function MobileNav({ section, unreadCount, onSectionChange }) {
   return React.createElement(
     "nav",
     { className: "bm-mobile-nav", "aria-label": "Primary" },
+    React.createElement(NavTab, {
+      id: "aichat",
+      label: "AI Chat",
+      icon: React.createElement(IconAIChat, { className: "bm-icon" })
+    }),
     React.createElement(NavTab, {
       id: "bookmarks",
       label: "Library",
