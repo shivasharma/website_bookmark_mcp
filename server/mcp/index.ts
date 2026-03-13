@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  saveBookmark as dbSaveBookmark,
+  updateBookmark as dbUpdateBookmark,
+  deleteBookmark as dbDeleteBookmark,
+  getBookmarkById as dbGetBookmarkById,
+  listBookmarks as dbListBookmarks,
+} from "../db.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
@@ -67,10 +74,8 @@ server.tool(
   async ({ url, title, description, tags, notes }) => {
     try {
       const favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=64`;
-      const bookmark = await apiRequest<Bookmark>("/api/bookmarks", {
-        method: "POST",
-        body: JSON.stringify({ url, title, description, tags, notes, favicon }),
-      });
+      const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+      const bookmark = await dbSaveBookmark({ url, title, description, tags, notes, favicon, user_id }, "mcp");
       return {
         content: [
           {
@@ -106,12 +111,15 @@ server.tool(
   },
   async ({ search, tag, favorite, limit }) => {
     try {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (tag) params.set("tag", tag);
-      if (favorite) params.set("favorite", "true");
-      const query = params.toString();
-      const bookmarks = (await apiRequest<Bookmark[]>(`/api/bookmarks${query ? `?${query}` : ""}`)).slice(0, limit);
+      const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+      const { items } = await dbListBookmarks({
+        user_id,
+        search,
+        tag,
+        favorite,
+        limit,
+      });
+      const bookmarks = items.slice(0, limit);
       if (!bookmarks.length) {
         return { content: [{ type: "text", text: "No bookmarks found." }] };
       }
@@ -148,10 +156,8 @@ server.tool(
   },
   async ({ id, title, description, tags, notes, is_favorite }) => {
     try {
-      const updated = await apiRequest<Bookmark>(`/api/bookmarks/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ title, description, tags, notes, is_favorite }),
-      });
+      const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+      const updated = await dbUpdateBookmark(id, { title, description, tags, notes, is_favorite }, user_id, "mcp");
       return {
         content: [
           {
@@ -183,7 +189,8 @@ server.tool(
   { id: z.number().describe("The ID of the bookmark to delete") },
   async ({ id }) => {
     try {
-      const deleted = await apiRequest<Bookmark>(`/api/bookmarks/${id}`, { method: "DELETE" });
+      const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+      const deleted = await dbDeleteBookmark(id, user_id, "mcp");
       return { content: [{ type: "text", text: `Deleted bookmark #${id}: ${deleted.url}` }] };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
