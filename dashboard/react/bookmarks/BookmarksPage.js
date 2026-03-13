@@ -366,27 +366,22 @@ export function BookmarksPage() {
 
   useEffect(() => {
     let isDisposed = false;
-    const eventSource = new EventSource("/api/events", { withCredentials: true });
+    // Updated endpoint to match backend SSE for bookmarks
+    const eventSource = new EventSource("/api/bookmarks/events", { withCredentials: true });
 
     eventSource.onopen = () => {
-      if (isDisposed) {
-        return;
-      }
+      if (isDisposed) return;
       setRealtimeStatus("connected");
     };
 
     function onBookmarkEvent(event) {
-      if (isDisposed) {
-        return;
-      }
-
+      if (isDisposed) return;
       let payload = null;
       try {
         payload = JSON.parse(event.data || "{}");
       } catch {
         payload = null;
       }
-
       const realtimeMessage = getRealtimeMessage(payload);
       setRealtimeStatus("connected");
       setMessage(realtimeMessage);
@@ -395,7 +390,6 @@ export function BookmarksPage() {
       } else {
         loadNotifications({ mode: "activity" });
       }
-
       if (sectionRef.current === "bookmarks") {
         loadBookmarks(1, false);
       }
@@ -403,9 +397,7 @@ export function BookmarksPage() {
     }
 
     function onError() {
-      if (isDisposed) {
-        return;
-      }
+      if (isDisposed) return;
       setRealtimeStatus("disconnected");
       setMessage("Realtime notifications disconnected. Retrying...");
     }
