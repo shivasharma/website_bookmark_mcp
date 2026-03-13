@@ -49,7 +49,29 @@
 }
 
 /* --- Empty State Handling --- */
-.bm-empty-state {
+
+.bm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: none;
+  font-family: var(--font-d);
+  animation: fadeUp .2s ease both;
+  background: rgba(6,192,224,0.10);
+  color: #06C0E0;
+}
+.bm-tag.t1 { background: rgba(6,192,224,0.10); color: #06C0E0; }
+.bm-tag.t2 { background: rgba(47,128,237,0.10); color: #2F80ED; }
+.bm-tag.t3 { background: rgba(0,212,160,0.10); color: #00D4A0; }
+.bm-tag.t4 { background: rgba(245,166,35,0.10); color: #F5A623; }
+.bm-tag.t5 { background: rgba(167,139,250,0.10); color: #A78BFA; }
+.bm-tag.t6 { background: rgba(240,82,82,0.10); color: #F05252; }
+/* SOCIAL SHARE UI */
+.social-share-ui {
   display: flex;
   flex-direction: column;
   align-items: center;

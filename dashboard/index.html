@@ -43,6 +43,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" type="image/svg+xml" sizes="192x192" href="/icons/icon-192.svg">
+<link rel="icon" type="image/svg+xml" sizes="512x512" href="/icons/icon-512.svg">
+<link rel="icon" type="image/svg+xml" sizes="any" href="/icons/linksync-logo.svg">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.svg">
+<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.svg">
+<link rel="mask-icon" href="/icons/icon-maskable.svg" color="#080E17">
 <script>/* prevent flash of wrong theme */(function(){var t=localStorage.getItem('linksync-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t)})()</script>
 </head>
 <body>
@@ -687,5 +694,19 @@
 
 <script src="/components/social-share.js"></script>
 <script src="/main.js"></script>
+<script>
+  // Register service worker for PWA support
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+        // Registration successful
+        // console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        // Registration failed
+        console.warn('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+</script>
 </body>
 </html>
