@@ -1,3 +1,127 @@
+@media (max-width: 700px) {
+  .bm-content-grid {
+    gap: 14px;
+    padding: 0 2px;
+  }
+  .card {
+    padding: 16px 8px 14px 8px;
+    border-radius: 12px;
+  }
+  .bm-tab-pills {
+    flex-direction: row;
+    gap: 4px;
+    margin-bottom: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .bm-tab-pills .bm-side-link {
+    font-size: 12px;
+    padding: 7px 8px;
+    min-width: 70px;
+    border-radius: 999px;
+  }
+}
+/* Tab Pills for Sidebar Navigation */
+.bm-tab-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.bm-tab-pills .bm-side-link {
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.bm-tab-pills .bm-side-link.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.bm-tab-pills .bm-side-link:hover {
+  background: rgba(6,192,224,0.12);
+  color: var(--text);
+}
+
+/* Card Layout Improvements */
+.bm-content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.card {
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(6, 192, 224, 0.04), 0 1.5px 6px rgba(0,0,0,0.08);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  padding: 24px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.bm-section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+  letter-spacing: -0.5px;
+}
+.bm-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.bm-panel-head h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+.bm-activity-list, .bm-notification-list {
+  gap: 10px;
+}
+.bm-activity-item, .bm-notification-item {
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.bm-activity-item span, .bm-notification-item span {
+  font-size: 13px;
+}
+.bm-activity-source, .bm-activity-action {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-right: 6px;
+}
+.bm-activity-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bm-activity-time {
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 8px;
+}
+@media (max-width: 900px) {
+  .bm-tab-pills { flex-direction: row; gap: 6px; margin-bottom: 12px; }
+  .bm-tab-pills .bm-side-link { font-size: 13px; padding: 8px 10px; }
+  .bm-content-grid { padding: 0 4px; }
+}
 export const baseCss = `
 :root {
   --bg: #080e17;
