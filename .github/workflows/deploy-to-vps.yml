@@ -195,3 +195,7 @@ jobs:
             done
 
             echo "Deployment succeeded: https://ai.shivaprogramming.com"
+
+            echo "Cleaning up unused Docker images..."
+            docker image prune -f
+            echo "Docker image cleanup complete."
