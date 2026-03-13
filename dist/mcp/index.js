@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { saveBookmark as dbSaveBookmark, updateBookmark as dbUpdateBookmark, deleteBookmark as dbDeleteBookmark, listBookmarks as dbListBookmarks, } from "../db.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 const API_BASE_URL = (process.env.BOOKMARK_API_BASE_URL ?? "https://ai.shivaprogramming.com").replace(/\/+$/, "");
@@ -34,10 +35,8 @@ server.tool("save_bookmark", "Save a website URL as a bookmark. Provide the URL 
 }, async ({ url, title, description, tags, notes }) => {
     try {
         const favicon = `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=64`;
-        const bookmark = await apiRequest("/api/bookmarks", {
-            method: "POST",
-            body: JSON.stringify({ url, title, description, tags, notes, favicon }),
-        });
+        const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+        const bookmark = await dbSaveBookmark({ url, title, description, tags, notes, favicon, user_id }, "mcp");
         return {
             content: [
                 {
@@ -67,15 +66,15 @@ server.tool("list_bookmarks", "List all saved bookmarks. Optionally filter by se
     limit: z.number().optional().default(20).describe("Max number of results to return"),
 }, async ({ search, tag, favorite, limit }) => {
     try {
-        const params = new URLSearchParams();
-        if (search)
-            params.set("search", search);
-        if (tag)
-            params.set("tag", tag);
-        if (favorite)
-            params.set("favorite", "true");
-        const query = params.toString();
-        const bookmarks = (await apiRequest(`/api/bookmarks${query ? `?${query}` : ""}`)).slice(0, limit);
+        const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+        const { items } = await dbListBookmarks({
+            user_id,
+            search,
+            tag,
+            favorite,
+            limit,
+        });
+        const bookmarks = items.slice(0, limit);
         if (!bookmarks.length) {
             return { content: [{ type: "text", text: "No bookmarks found." }] };
         }
@@ -104,10 +103,14 @@ server.tool("update_bookmark", "Update an existing bookmark by its ID. You can c
     is_favorite: z.boolean().optional().describe("Mark or unmark as favorite"),
 }, async ({ id, title, description, tags, notes, is_favorite }) => {
     try {
-        const updated = await apiRequest(`/api/bookmarks/${id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ title, description, tags, notes, is_favorite }),
-        });
+        const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+        const updated = await dbUpdateBookmark(id, { title, description, tags, notes, is_favorite }, user_id, "mcp");
+        if (!updated) {
+            return {
+                content: [{ type: "text", text: `Bookmark #${id} not found or could not be updated.` }],
+                isError: true,
+            };
+        }
         return {
             content: [
                 {
@@ -133,7 +136,14 @@ server.tool("update_bookmark", "Update an existing bookmark by its ID. You can c
 });
 server.tool("delete_bookmark", "Delete a bookmark permanently by its ID.", { id: z.number().describe("The ID of the bookmark to delete") }, async ({ id }) => {
     try {
-        const deleted = await apiRequest(`/api/bookmarks/${id}`, { method: "DELETE" });
+        const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
+        const deleted = await dbDeleteBookmark(id, user_id, "mcp");
+        if (!deleted) {
+            return {
+                content: [{ type: "text", text: `Bookmark #${id} not found or could not be deleted.` }],
+                isError: true,
+            };
+        }
         return { content: [{ type: "text", text: `Deleted bookmark #${id}: ${deleted.url}` }] };
     }
     catch (error) {

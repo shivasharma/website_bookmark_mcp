@@ -158,6 +158,12 @@ server.tool(
     try {
       const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
       const updated = await dbUpdateBookmark(id, { title, description, tags, notes, is_favorite }, user_id, "mcp");
+      if (!updated) {
+        return {
+          content: [{ type: "text", text: `Bookmark #${id} not found or could not be updated.` }],
+          isError: true,
+        };
+      }
       return {
         content: [
           {
@@ -191,6 +197,12 @@ server.tool(
     try {
       const user_id = Number(process.env.DEFAULT_USER_ID ?? 1);
       const deleted = await dbDeleteBookmark(id, user_id, "mcp");
+      if (!deleted) {
+        return {
+          content: [{ type: "text", text: `Bookmark #${id} not found or could not be deleted.` }],
+          isError: true,
+        };
+      }
       return { content: [{ type: "text", text: `Deleted bookmark #${id}: ${deleted.url}` }] };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
