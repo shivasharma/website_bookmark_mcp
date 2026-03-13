@@ -95,6 +95,23 @@
   .bm-tab-pills { flex-wrap: nowrap; overflow-x: auto; }
   .bm-side-link, .bm-mobile-tab { min-height: 44px; font-size: 1rem; }
   .bk-preview-title { font-size: 1rem; }
+  .mob-nav {
+    padding-top: 8px;
+    padding-bottom: 4px;
+    box-shadow: 0 -1px 0 var(--border);
+  }
+  .mob-nav-btn {
+    margin-top: 4px;
+    margin-bottom: 2px;
+    /* Move icons down from the border */
+    padding-top: 8px;
+    padding-bottom: 2px;
+  }
+  .mob-nav-btn svg {
+    margin-top: 2px;
+    margin-bottom: 0;
+    display: block;
+  }
 }
 /* Modern pill tags for React cards */
 .bm-tag {
