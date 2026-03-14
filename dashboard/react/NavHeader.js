@@ -78,15 +78,7 @@ export default function NavHeader({
                 <option value="week">This week</option>
               </select>
             </div>
-            <div className="refine-dropdown-section">
-              <div className="refine-dropdown-label">Tags</div>
-              <input
-                type="text"
-                placeholder="Filter by tag..."
-                value={refineOptions.tags || ""}
-                onChange={e => onRefineChange({ ...refineOptions, tags: e.target.value })}
-              />
-            </div>
+            {/* Tags section removed from navigation */}
           </div>
         </div>
       </div>
