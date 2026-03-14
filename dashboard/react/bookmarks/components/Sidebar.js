@@ -22,17 +22,14 @@ function IconAIChat(props = {}) {
   );
 }
 
-// Patch NavLink to support drop for tags/categories
-function NavLink({ label, active, onClick, icon, count, onDrop, onDragOver }) {
+// Patch NavLink (category support removed, if any)
+function NavLink({ label, active, onClick, icon, count }) {
   return React.createElement(
     "button",
     {
       className: `bm-side-link${active ? " active" : ""}`,
       type: "button",
-      onClick,
-      onDrop: onDrop,
-      onDragOver: onDragOver,
-      style: onDrop ? { border: "2px dashed var(--accent)" } : undefined
+      onClick
     },
     icon,
     React.createElement("span", { className: "bm-side-label" }, label),
@@ -67,17 +64,7 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
     onFilterChange(nextFilter);
   }
 
-  // Helper for drop
-  function handleDropTag(tag) {
-    return (e) => {
-      e.preventDefault();
-      const bookmarkId = e.dataTransfer.getData("bookmarkId");
-      if (bookmarkId && onBookmarkDrop) {
-        onBookmarkDrop(Number(bookmarkId), tag);
-      }
-    };
-  }
-  function allowDrop(e) { e.preventDefault(); }
+  // Category logic removed (if any)
 
   return React.createElement(
     "aside",
