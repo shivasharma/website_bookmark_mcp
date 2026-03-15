@@ -1650,16 +1650,49 @@ async function commitImport(){
 // ══════════════════════════════════════════════
 const BOOKMARKLET_CODE=`javascript:(function(){var url=encodeURIComponent(location.href);var title=encodeURIComponent(document.title);window.open('https://ai.shivaprogramming.com/bookmarks?import=1&url='+url+'&title='+title,'_blank','width=480,height=600')})();`;
 document.addEventListener('DOMContentLoaded',()=>{
+  // Ensure all main dashboard sections are visible on load
+  [
+    'dash-header',
+    'action-bar',
+    'filter-bar',
+    'bookmarkContent'
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display='';
+  });
+  // Show advanced filters if previously open
+  const adv=document.getElementById('advancedFilters');
+  if(adv && window.innerWidth > 900) adv.style.display='';
+  // Set up bookmarklet code
   const el=document.getElementById('bookmarkletCode');
   if(el)el.textContent=BOOKMARKLET_CODE;
   const link=document.getElementById('bookmarkletLink');
   if(link)link.href=BOOKMARKLET_CODE;
+  // Responsive fix: ensure sidebar overlay is hidden on desktop
+  if(window.innerWidth > 900){
+    const overlay=document.getElementById('sidebarOverlay');
+    if(overlay) overlay.classList.remove('open');
+  }
 });
 window.addEventListener('load',()=>{
+  // Same as DOMContentLoaded for redundancy
+  [
+    'dash-header',
+    'action-bar',
+    'filter-bar',
+    'bookmarkContent'
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.display='';
+  });
   const el=document.getElementById('bookmarkletCode');
   if(el)el.textContent=BOOKMARKLET_CODE;
   const link=document.getElementById('bookmarkletLink');
   if(link)link.href=BOOKMARKLET_CODE;
+  if(window.innerWidth > 900){
+    const overlay=document.getElementById('sidebarOverlay');
+    if(overlay) overlay.classList.remove('open');
+  }
 });
 function copyBookmarklet(){copyText(BOOKMARKLET_CODE);showToast('Bookmarklet code copied!','success')}
 
