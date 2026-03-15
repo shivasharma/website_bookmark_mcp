@@ -60,12 +60,9 @@ export function TopBar({ onOpenNotifications, unreadCount, currentUser, onLogout
         React.createElement(IconBell, { className: "bm-icon" }),
         unreadCount > 0 && React.createElement("span", { className: "topbar-bell-badge" }, String(unreadCount > 99 ? "99+" : unreadCount))
       ),
-      React.createElement("img", {
-        className: "topbar-avatar",
-        src: avatarUrl,
-        alt: userLabel,
-        title: `Logged in as ${userLabel}`
-      })
+      !currentUser && React.createElement("a", { className: "btn", href: "/register" }, "GitHub Login"),
+      !!currentUser && React.createElement("button", { className: "btn", type: "button", onClick: onLogout }, "Logout"),
+      !!currentUser && React.createElement("div", { className: "bm-avatar", title: `Logged in as ${userLabel}` }, initial)
     )
   );
 }
