@@ -158,6 +158,7 @@ async function loadBookmarks(){
 
 function renderAuthUi(){
   if(!authEls.signInBtn||!authEls.menuLogoutBtn||!authEls.userAvatarBtn||!authEls.menuLoginLink||!authEls.topNotifyBtn||!authEls.topNotifyBadge)return;
+  const sidebarNav = document.getElementById('sidebarNav');
   if(!currentUser){
     authEls.signInBtn.classList.remove('hidden');
     authEls.topNotifyBtn.classList.add('hidden');
@@ -168,6 +169,7 @@ function renderAuthUi(){
     authEls.userAvatarBtn.textContent='U';
     authEls.userAvatarBtn.title='Not signed in';
     setBookmarkUiVisible(false);
+    if(sidebarNav) sidebarNav.classList.add('hidden');
     return;
   }
   const label=currentUser.name||currentUser.email||'User';
@@ -186,6 +188,7 @@ function renderAuthUi(){
   authEls.userAvatarBtn.textContent=initial;
   authEls.userAvatarBtn.title=`Logged in as ${label}`;
   setBookmarkUiVisible(true);
+  if(sidebarNav) sidebarNav.classList.remove('hidden');
   // when user logs in, hide welcome and restore bookmark UI
   if(typeof hideWelcomeExperience==='function')hideWelcomeExperience();
 }
@@ -1944,114 +1947,6 @@ async function loadToolPanelTemplate(container,path,fallbackHtml){
   return false;
 }
 
-async function renderSystemHealthPanel(container){
-  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
-  const HEALTH_POLL_MS=60*60*1000;
-  const fallbackHtml=`
-    <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
-      <div class="tp-kpis" id="shKpis">
-        <div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
-      </div>
-      <p class="tp-sub" id="shLastUpdate">Polling every 1 hour. Last update: --</p>
-    </div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>User Activity</h3></div>
-      <div class="tp-kpis" id="shUserKpis">
-        <div class="tp-kpi"><div class="tp-kpi-label">Total Users</div><div class="tp-kpi-value" id="shUserTotal">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Live Users</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Authenticated Users</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Load Avg</div><div class="tp-kpi-value" id="shLoadAvg">--</div></div>
-      </div>
-    </div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>Services</h3></div>
-      <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
-    </div>`;
-  await loadToolPanelTemplate(container,'/health.html',fallbackHtml);
-
-  const ctrl=new AbortController();
-  async function fetchHealth(){
-    try{
-      const r=await fetch('/api/system-health',{credentials:'include',cache:'no-store',signal:ctrl.signal});
-      const p=await r.json().catch(()=>null);
-      if(!r.ok||!p?.success||!p.data)throw new Error('Unable to fetch');
-      _renderHealthData(p.data);
-    }catch(e){if(e?.name==='AbortError')return;_renderHealthError()}
-  }
-
-  function _renderHealthData(d){
-    const apiOk=d.api?.status==='ok',dbOk=d.database?.status==='ok';
-    const overallOk=apiOk&&dbOk;
-    _setCommandState('shApiState','shApiValue',apiOk?'state-green':'state-red',apiOk?'Healthy':'Critical');
-    _setCommandState('shDbState','shDbValue',dbOk?'state-green':'state-red',dbOk?'Healthy':'Critical');
-    _setCommandState('shRuntimeState','shRuntimeValue','state-blue','Monitoring');
-    _setCommandState('shOverallState','shOverallValue',overallOk?'state-green':'state-red',overallOk?'Healthy':'Critical');
-
-    const kpis=document.getElementById('shKpis');
-    if(kpis)kpis.innerHTML=[
-      ['API',apiOk?'OK':'Down'],['Database',dbOk?'OK':'Down'],
-      ['Uptime',_fmtUptime(d.api?.uptimeSec)],['Memory',_fmtBytes(d.system?.memory?.rss)]
-    ].map(([l,v])=>`<div class="tp-kpi"><div class="tp-kpi-label">${l}</div><div class="tp-kpi-value">${v}</div></div>`).join('');
-    const totalUsers=Number(d.users?.totalUsers||0);
-    const liveSessions=Number(d.users?.liveSessions||0);
-    const authSessions=Number(d.users?.authenticatedSessions||0);
-    const loadAvg=Number(d.system?.loadAvg1||0).toFixed(2);
-    const userTotalEl=document.getElementById('shUserTotal');
-    if(userTotalEl)userTotalEl.textContent=String(totalUsers);
-    const liveSessionsEl=document.getElementById('shLiveSessions');
-    if(liveSessionsEl)liveSessionsEl.textContent=String(liveSessions);
-    const authSessionsEl=document.getElementById('shAuthSessions');
-    if(authSessionsEl)authSessionsEl.textContent=String(authSessions);
-    const loadAvgEl=document.getElementById('shLoadAvg');
-    if(loadAvgEl)loadAvgEl.textContent=loadAvg;
-    const ts=d.timestamp?new Date(d.timestamp).toLocaleTimeString():'--';
-    const upd=document.getElementById('shLastUpdate');if(upd)upd.textContent=`Polling every 1 hour. Last update: ${ts}`;
-    const svc=document.getElementById('shServices');
-    if(svc)svc.innerHTML=[
-      {name:'Application API',status:apiOk?'ok':'down',detail:d.api?`PID ${d.api.pid} • Node ${d.api.nodeVersion} • Uptime ${_fmtUptime(d.api.uptimeSec)}`:'Collecting...'},
-      {name:'PostgreSQL',status:dbOk?'ok':'down',detail:d.database?`Latency ${d.database.latencyMs??'--'} ms${d.database.serverTime?' • DB time '+new Date(d.database.serverTime).toLocaleTimeString():''}`:'Collecting...'},
-      {name:'Host Runtime',status:'ok',detail:d.system?`${d.system.platform}/${d.system.arch} • CPU ${d.system.cpuCount} • Load ${Number(d.system.loadAvg1||0).toFixed(2)}`:'Collecting...'}
-    ].map(s=>`<div class="tp-service"><div class="tp-service-head"><h4 class="tp-service-name">${s.name}</h4><span class="tp-pill ${s.status}">${s.status}</span></div><div class="tp-service-meta">${s.detail}</div></div>`).join('');
-  }
-
-  function _setCommandState(boxId,valId,stateClass,value){
-    const box=document.getElementById(boxId);
-    const val=document.getElementById(valId);
-    if(box){
-      box.classList.remove('state-green','state-red','state-blue');
-      box.classList.add(stateClass);
-    }
-    if(val)val.textContent=value;
-  }
-
-  function _renderHealthError(){
-    _setCommandState('shApiState','shApiValue','state-red','Critical');
-    _setCommandState('shDbState','shDbValue','state-red','Critical');
-    _setCommandState('shRuntimeState','shRuntimeValue','state-blue','Monitoring');
-    _setCommandState('shOverallState','shOverallValue','state-red','Critical');
-    const userTotalEl=document.getElementById('shUserTotal');
-    if(userTotalEl)userTotalEl.textContent='--';
-    const liveSessionsEl=document.getElementById('shLiveSessions');
-    if(liveSessionsEl)liveSessionsEl.textContent='--';
-    const authSessionsEl=document.getElementById('shAuthSessions');
-    if(authSessionsEl)authSessionsEl.textContent='--';
-    const loadAvgEl=document.getElementById('shLoadAvg');
-    if(loadAvgEl)loadAvgEl.textContent='--';
-    const svc=document.getElementById('shServices');
-    if(svc)svc.innerHTML='<p class="tp-sub">Unable to reach health endpoint. Retrying...</p>';
-  }
-
-  document.getElementById('shRefreshBtn')?.addEventListener('click',()=>fetchHealth());
-  fetchHealth();
-  _healthTimer=setInterval(fetchHealth,HEALTH_POLL_MS);
-  // cleanup when section changes
-  container._cleanup=()=>{ctrl.abort();if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}};
-}
 
 // ── MCP Setup Panel (vanilla JS) ──
 async function renderMcpSetupPanel(container){
