@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>LinkSync AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#007AFF;--indigo:#5856D6;--purple:#AF52DE;
+  --orange:#FF9500;--green:#34C759;--red:#FF3B30;--pink:#FF2D55;
+  --bg1:#F2F2F7;--bg2:#FFFFFF;
+  --l1:#1C1C1E;--l2:#3A3A3C;--l3:rgba(60,60,67,.6);--l4:rgba(60,60,67,.28);
+  --sep:rgba(60,60,67,.12);
+  --r-md:12px;--r-lg:16px;--r-xl:20px;
+  --sb:240px;--tabh:82px;
+}
+html,body{height:100%;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg1);color:var(--l1);-webkit-font-smoothing:antialiased;overflow:hidden}
+
+/* ── APP SHELL ── */
+.app{display:flex;height:100vh;overflow:hidden;position:relative}
+
+/* ── OVERLAY (mobile drawer backdrop) ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;backdrop-filter:blur(2px)}
+.overlay.show{display:block}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sb);flex-shrink:0;
+  background:rgba(242,242,247,.92);
+  backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  border-right:.5px solid rgba(60,60,67,.18);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  z-index:300;
+}
+.logo-area{padding:20px 16px 14px;border-bottom:.5px solid var(--sep);display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--indigo));display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,122,255,.35)}
+.logo-mark svg{width:15px;height:15px}
+.logo-text{font-size:14px;font-weight:700;color:var(--l1);letter-spacing:-.3px}
+.logo-text em{font-style:normal;color:var(--blue)}
+.close-sb{margin-left:auto;display:none;width:28px;height:28px;border-radius:50%;background:rgba(120,120,128,.15);align-items:center;justify-content:center;cursor:pointer;border:none;flex-shrink:0}
+.close-sb svg{width:12px;height:12px}
+
+.nav-scroll{flex:1;overflow-y:auto;padding:8px 10px 0;scrollbar-width:none}
+.nav-scroll::-webkit-scrollbar{display:none}
+.nav-sec-lbl{font-size:11px;font-weight:600;color:var(--l3);letter-spacing:.04em;text-transform:uppercase;padding:10px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r-md);cursor:pointer;transition:background .12s;color:var(--l2);font-size:13.5px;font-weight:500;margin-bottom:1px;user-select:none}
+.nav-item:active{background:rgba(0,0,0,.06)}
+.nav-item:hover{background:rgba(0,0,0,.04)}
+.nav-item.active{background:var(--blue);color:#fff}
+.ni-icon{width:15px;height:15px;flex-shrink:0;opacity:.6}
+.nav-item.active .ni-icon{opacity:1}
+.ni-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ni-badge{margin-left:auto;font-size:10px;font-weight:600;background:rgba(0,0,0,.07);color:var(--l3);padding:1px 7px;border-radius:20px}
+.nav-item.active .ni-badge{background:rgba(255,255,255,.25);color:#fff}
+.nav-sep{height:.5px;background:var(--sep);margin:8px 6px}
+
+.sb-bottom{padding:12px 16px;border-top:.5px solid var(--sep);display:flex;align-items:center;gap:10px}
+.user-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:12.5px;font-weight:600;color:var(--l1)}
+.user-plan{font-size:11px;color:var(--l3)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg1);min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{
+  flex-shrink:0;
+  background:rgba(242,242,247,.9);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid rgba(60,60,67,.18);
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  height:52px;
+}
+.ham-btn{width:32px;height:32px;display:none;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;border-radius:8px;flex-shrink:0}
+.ham-btn:active{background:rgba(0,0,0,.06)}
+.ham-btn svg{width:16px;height:16px}
+.page-ttl{font-size:16px;font-weight:700;color:var(--l1);letter-spacing:-.3px;white-space:nowrap}
+.search-wrap{flex:1;background:rgba(118,118,128,.12);border-radius:10px;display:flex;align-items:center;padding:0 10px;gap:6px;transition:background .15s;min-width:0}
+.search-wrap:focus-within{background:rgba(118,118,128,.2)}
+.search-wrap svg{width:13px;height:13px;flex-shrink:0;color:rgba(60,60,67,.45)}
+.search-wrap input{flex:1;border:none;background:transparent;font-size:13px;font-family:inherit;color:var(--l1);outline:none;padding:7px 0;min-width:0}
+.search-wrap input::placeholder{color:rgba(60,60,67,.38)}
+.topbar-actions{display:flex;gap:7px;flex-shrink:0}
+.tb-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .12s;white-space:nowrap}
+.tb-btn:active{transform:scale(.97)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 6px rgba(0,122,255,.28)}
+.btn-ghost{background:rgba(118,118,128,.12);color:var(--l2)}
+.btn-icon{width:33px;height:33px;padding:0;justify-content:center;border-radius:10px}
+.tb-btn svg{width:12px;height:12px}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(16px + var(--tabh));scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.08) transparent}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:4px}
+
+/* ── BOTTOM TAB BAR ── */
+.tab-bar{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--tabh);
+  background:rgba(242,242,247,.95);
+  backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  border-top:.5px solid rgba(60,60,67,.18);
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+  z-index:100;
+}
+.tab-bar-inner{display:flex;justify-content:space-around;align-items:center;height:100%}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:10px;transition:all .12s;flex:1;user-select:none}
+.tab-item:active{background:rgba(0,0,0,.05);transform:scale(.93)}
+.tab-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.tab-icon svg{width:22px;height:22px;color:var(--l3);transition:color .12s}
+.tab-label{font-size:10px;font-weight:500;color:var(--l3);transition:color .12s}
+.tab-item.active .tab-icon svg{color:var(--blue)}
+.tab-item.active .tab-label{color:var(--blue);font-weight:600}
+
+/* ── COMPONENTS ── */
+.ios-card{background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 10px rgba(0,0,0,.04)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--bg2);border-radius:var(--r-xl);padding:14px 16px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);transition:transform .15s;cursor:default}
+.stat-card:active{transform:scale(.98)}
+.stat-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.stat-ic svg{width:16px;height:16px}
+.stat-num{font-size:22px;font-weight:700;color:var(--l1);letter-spacing:-.4px;line-height:1;margin-bottom:3px}
+.stat-lbl{font-size:11px;color:var(--l3);font-weight:500}
+.stat-dl{font-size:10.5px;font-weight:600;margin-top:5px;padding:2px 7px;border-radius:20px;display:inline-block}
+.dl-up{background:rgba(52,199,89,.12);color:var(--green)}
+.dl-dn{background:rgba(255,59,48,.1);color:var(--red)}
+
+/* Two col */
+.two-col{display:grid;grid-template-columns:1fr 290px;gap:14px}
+
+/* Section */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-ttl{font-size:14px;font-weight:700;color:var(--l1)}
+.sec-link{font-size:13px;font-weight:500;color:var(--blue);cursor:pointer;padding:4px 0}
+.sec-link:active{opacity:.6}
+
+/* Link list */
+.link-list{background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04)}
+.link-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:.5px solid var(--sep);cursor:pointer;transition:background .1s;-webkit-user-select:none;user-select:none}
+.link-row:last-child{border-bottom:none}
+.link-row:active{background:rgba(0,122,255,.04)}
+.lk-fav{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
+.lk-body{flex:1;min-width:0}
+.lk-title{font-size:13.5px;font-weight:600;color:var(--l1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-url{font-size:11.5px;color:var(--l3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.lk-foot{display:flex;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap}
+.lk-col{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.lk-tag{padding:2px 6px;background:rgba(118,118,128,.1);border-radius:5px;font-size:10.5px;font-weight:500;color:var(--l2);white-space:nowrap}
+.lk-date{font-size:11px;color:var(--l4);flex-shrink:0;margin-left:auto;white-space:nowrap}
+.lk-chev{flex-shrink:0;opacity:.22;margin-left:3px}
+.lk-chev svg{width:11px;height:11px;display:block}
+
+/* Panel */
+.panel{background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);margin-bottom:14px}
+.panel:last-child{margin-bottom:0}
+.panel-hdr{padding:14px 16px;border-bottom:.5px solid var(--sep);display:flex;align-items:center;justify-content:space-between}
+.panel-ttl{font-size:14px;font-weight:700;color:var(--l1)}
+.panel-body{padding:14px 16px}
+.form-field{margin-bottom:12px}
+.form-lbl{font-size:11px;font-weight:600;color:var(--l3);letter-spacing:.03em;text-transform:uppercase;margin-bottom:5px}
+.form-input{width:100%;padding:10px 13px;background:rgba(118,118,128,.1);border:none;border-radius:10px;font-size:14px;font-family:inherit;color:var(--l1);outline:none;transition:background .12s;-webkit-appearance:none;appearance:none}
+.form-input::placeholder{color:var(--l4)}
+.form-input:focus{background:rgba(118,118,128,.18)}
+.btn-full{width:100%;justify-content:center;padding:11px 14px;font-size:14px;border-radius:12px;margin-top:4px}
+
+/* Activity */
+.act-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:.5px solid var(--sep)}
+.act-row:last-child{border-bottom:none}
+.act-ic{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.act-msg{font-size:12.5px;color:var(--l2);line-height:1.45}
+.act-msg strong{color:var(--l1);font-weight:600}
+.act-time{font-size:11px;color:var(--l4);margin-top:2px}
+
+/* Collections */
+.col-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.col-card{background:var(--bg2);border-radius:var(--r-xl);padding:16px;cursor:pointer;transition:transform .15s;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04)}
+.col-card:active{transform:scale(.97)}
+.col-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:11px}
+.col-ico svg{width:20px;height:20px}
+.col-name{font-size:13.5px;font-weight:700;color:var(--l1);margin-bottom:2px}
+.col-n{font-size:12px;color:var(--l3)}
+
+/* API Keys */
+.key-card{background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04);margin-bottom:10px}
+.key-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:.5px solid var(--sep)}
+.key-row:last-child{border-bottom:none}
+.key-name{font-size:13.5px;font-weight:600;color:var(--l1)}
+.key-val{font-size:11px;color:var(--l3);font-family:monospace;margin-top:2px}
+.key-stat{padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;margin-left:auto;flex-shrink:0}
+.ks-live{background:rgba(52,199,89,.12);color:var(--green)}
+.ks-off{background:rgba(118,118,128,.1);color:var(--l3)}
+
+/* MCP */
+.mcp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mcp-s{background:var(--bg2);border-radius:var(--r-xl);padding:14px 16px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04)}
+.mcp-sv{font-size:18px;font-weight:700;color:var(--l1);letter-spacing:-.2px}
+.mcp-sl{font-size:11.5px;color:var(--l3);margin-top:2px}
+.tool-card{background:var(--bg2);border-radius:var(--r-lg);padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 0 rgba(0,0,0,.03),0 1px 6px rgba(0,0,0,.03)}
+.tool-nm{font-size:13px;font-weight:700;color:var(--l1);font-family:monospace}
+.tool-ds{font-size:11.5px;color:var(--l3);margin-top:1px}
+.method{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;margin-left:auto;flex-shrink:0}
+.m-get{background:rgba(52,199,89,.12);color:var(--green)}
+.m-post{background:rgba(0,122,255,.1);color:var(--blue)}
+.m-del{background:rgba(255,59,48,.1);color:var(--red)}
+
+/* Settings */
+.set-grp{background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 0 rgba(0,0,0,.04),0 2px 8px rgba(0,0,0,.04)}
+.set-row{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--sep);cursor:pointer;transition:background .1s}
+.set-row:last-child{border-bottom:none}
+.set-row:active{background:rgba(0,0,0,.03)}
+.set-lbl{font-size:14px;font-weight:500;color:var(--l1)}
+.set-sub{font-size:12px;color:var(--l3);margin-top:2px}
+.set-val{margin-left:auto;font-size:13px;color:var(--l3)}
+.toggle{width:44px;height:26px;border-radius:13px;cursor:pointer;margin-left:auto;flex-shrink:0;transition:background .22s;display:flex;align-items:center;padding:3px}
+.ton{background:var(--green)}
+.tof{background:rgba(120,120,128,.25)}
+.tknob{width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:transform .22s}
+.ton .tknob{transform:translateX(18px)}
+.set-grp-lbl{font-size:12px;font-weight:600;color:var(--l3);padding:14px 16px 4px;text-transform:uppercase;letter-spacing:.04em}
+
+/* Live dot */
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 0 2px rgba(52,199,89,.18);animation:ld 2s ease-in-out infinite;margin-right:5px}
+@keyframes ld{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Page anim */
+.pv{animation:pf .18s ease}
+@keyframes pf{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+/* FAB (mobile add button) */
+.fab{
+  display:none;
+  position:fixed;right:18px;bottom:calc(var(--tabh) + 14px);
+  width:52px;height:52px;border-radius:50%;
+  background:var(--blue);color:#fff;
+  box-shadow:0 4px 16px rgba(0,122,255,.4);
+  align-items:center;justify-content:center;
+  cursor:pointer;border:none;
+  z-index:150;transition:transform .15s;
+}
+.fab:active{transform:scale(.92)}
+.fab svg{width:22px;height:22px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .close-sb{display:flex}
+  .ham-btn{display:flex}
+  .search-wrap{max-width:none}
+  .topbar-actions .tb-btn:not(.btn-icon){display:none}
+  .tab-bar{display:block}
+  .fab{display:flex}
+  .content{padding:14px 14px calc(14px + var(--tabh))}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .two-col{grid-template-columns:1fr}
+  .col-grid{grid-template-columns:repeat(2,1fr)}
+  .mcp-grid{grid-template-columns:repeat(3,1fr)}
+  .stat-num{font-size:20px}
+  .stat-card{padding:13px 14px}
+  .page-ttl{font-size:15px}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .col-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .mcp-grid{grid-template-columns:repeat(2,1fr)}
+  .link-row{padding:12px 14px;gap:10px}
+  .lk-fav{width:34px;height:34px;font-size:13px}
+}
+@media(min-width:769px){
+  .tab-bar{display:none}
+  .fab{display:none}
+  .ham-btn{display:none}
+  .close-sb{display:none}
+}
+
+/* Tablet tweaks */
+@media(max-width:1100px) and (min-width:769px){
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:960px) and (min-width:769px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .col-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- Overlay -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-area">
+      <div class="logo-mark">
+        <svg fill="none" viewBox="0 0 15 15"><path d="M2 7.5C2 5 4 3 6.5 3H8.5C11 3 13 5 13 7.5S11 12 8.5 12H6.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/><path d="M6.5 7.5H3.5M3.5 7.5l2-2M3.5 7.5l2 2" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="logo-text">Link<em>Sync</em> AI</div>
+      <button class="close-sb" onclick="closeSidebar()">
+        <svg fill="none" viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="nav-scroll">
+      <div class="nav-sec-lbl">Workspace</div>
+      <div class="nav-item active" data-route="dashboard" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".85"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".5"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".5"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity=".28"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-route="links" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><path d="M2 4h11M2 7.5h8M2 11h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        All Links<span class="ni-badge">1,247</span>
+      </div>
+      <div class="nav-item" data-route="collections" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><path d="M1.5 5.5h3.5v8H1.5zM5.8 5.5h3.4v8H5.8zM10 5.5h3.5v8H10z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M1 4h13" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Collections<span class="ni-badge">6</span>
+      </div>
+      <div class="nav-item" data-route="recent" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 4.5v3.5L10 9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Recent
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-sec-lbl">Developer</div>
+      <div class="nav-item" data-route="apikeys" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><circle cx="5.5" cy="7.5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M8.5 7.5h5M11.5 5.5v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        API Keys
+      </div>
+      <div class="nav-item" data-route="mcp" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><rect x="2" y="4.5" width="11" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 8h5M7.5 6v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        MCP Server<span class="ni-badge" style="background:rgba(52,199,89,.12);color:#34C759">Live</span>
+      </div>
+      <div class="nav-item" data-route="settings" onclick="navTo(this)">
+        <svg class="ni-icon" fill="none" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 1.5v1.8M7.5 11.7v1.8M1.5 7.5h1.8M11.7 7.5h1.8M3.4 3.4l1.3 1.3M10.3 10.3l1.3 1.3M10.3 4.7l-1.3 1.3M4.7 10.3l-1.3 1.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Settings
+      </div>
+      <div class="nav-sep"></div>
+      <div class="nav-sec-lbl">Collections</div>
+      <div class="nav-item" onclick="navTo(document.querySelector('[data-route=collections]'))"><div class="ni-dot" style="background:#007AFF"></div>Dev Resources<span class="ni-badge">284</span></div>
+      <div class="nav-item" onclick="navTo(document.querySelector('[data-route=collections]'))"><div class="ni-dot" style="background:#5856D6"></div>AI / ML<span class="ni-badge">436</span></div>
+      <div class="nav-item" onclick="navTo(document.querySelector('[data-route=collections]'))"><div class="ni-dot" style="background:#AF52DE"></div>Research<span class="ni-badge">156</span></div>
+      <div class="nav-item" onclick="navTo(document.querySelector('[data-route=collections]'))"><div class="ni-dot" style="background:#FF9500"></div>Design<span class="ni-badge">93</span></div>
+      <div class="nav-item" onclick="navTo(document.querySelector('[data-route=collections]'))"><div class="ni-dot" style="background:#FF3B30"></div>Tools &amp; Apps<span class="ni-badge">201</span></div>
+    </div>
+
+    <div class="sb-bottom">
+      <div class="user-ava">AJ</div>
+      <div><div class="user-name">Alex Johnson</div><div class="user-plan">Pro Plan</div></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="ham-btn" onclick="openSidebar()">
+        <svg fill="none" viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="page-ttl" id="pg-title">Dashboard</div>
+      <div class="search-wrap">
+        <svg fill="none" viewBox="0 0 13 13"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M9.5 9.5L13 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input placeholder="Search…"/>
+      </div>
+      <div class="topbar-actions">
+        <button class="tb-btn btn-ghost">Import</button>
+        <button class="tb-btn btn-primary">
+          <svg fill="none" viewBox="0 0 11 11"><path d="M5.5 1v9M1 5.5h9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Add Link
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content"></div>
+  </div>
+
+  <!-- BOTTOM TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab-bar-inner">
+      <div class="tab-item active" data-route="dashboard" onclick="tabTo(this)">
+        <div class="tab-icon"><svg fill="none" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.8" opacity=".5"/><rect x="3" y="14" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.8" opacity=".5"/><rect x="14" y="14" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.8" opacity=".28"/></svg></div>
+        <div class="tab-label">Dashboard</div>
+      </div>
+      <div class="tab-item" data-route="links" onclick="tabTo(this)">
+        <div class="tab-icon"><svg fill="none" viewBox="0 0 24 24"><path d="M4 6h16M4 12h11M4 18h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="tab-label">Links</div>
+      </div>
+      <div class="tab-item" data-route="collections" onclick="tabTo(this)">
+        <div class="tab-icon"><svg fill="none" viewBox="0 0 24 24"><path d="M3 8h4v13H3zM10 8h4v13h-4zM17 8h4v13h-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M2 6h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="tab-label">Collections</div>
+      </div>
+      <div class="tab-item" data-route="mcp" onclick="tabTo(this)">
+        <div class="tab-icon"><svg fill="none" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="11" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M9 12h6M12 10v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="tab-label">MCP</div>
+      </div>
+      <div class="tab-item" data-route="settings" onclick="tabTo(this)">
+        <div class="tab-icon"><svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M17.3 6.7l-1.8 1.8M6.7 17.3l-1.8 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <div class="tab-label">Settings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fab">
+    <svg fill="none" viewBox="0 0 22 22"><path d="M11 3v16M3 11h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<script>
+const LINKS=[
+  {id:1,title:'Getting Started with MCP Servers',url:'docs.anthropic.com/mcp/intro',col:'AI / ML',tags:['mcp','api'],date:'2h ago',c:'#5856D6',bg:'rgba(88,86,214,.1)'},
+  {id:2,title:'Vercel AI SDK Documentation',url:'sdk.vercel.ai/docs',col:'Dev Resources',tags:['nextjs','ai'],date:'5h ago',c:'#007AFF',bg:'rgba(0,122,255,.1)'},
+  {id:3,title:'Figma Variables & Tokens Guide',url:'figma.com/best-practices/variables',col:'Design',tags:['design','tokens'],date:'Yesterday',c:'#FF9500',bg:'rgba(255,149,0,.1)'},
+  {id:4,title:'Attention Is All You Need — ArXiv',url:'arxiv.org/abs/1706.03762',col:'Research',tags:['transformers','ml'],date:'2d ago',c:'#AF52DE',bg:'rgba(175,82,222,.1)'},
+  {id:5,title:'GitHub — Model Context Protocol',url:'github.com/modelcontextprotocol',col:'AI / ML',tags:['mcp','oss'],date:'3d ago',c:'#34C759',bg:'rgba(52,199,89,.1)'},
+  {id:6,title:'Tailwind CSS v4 Release',url:'tailwindcss.com/blog/v4',col:'Dev Resources',tags:['css','tailwind'],date:'4d ago',c:'#007AFF',bg:'rgba(0,122,255,.1)'},
+  {id:7,title:'Linear — Issue Tracker',url:'linear.app',col:'Tools',tags:['productivity'],date:'5d ago',c:'#5856D6',bg:'rgba(88,86,214,.1)'},
+];
+
+function lkCard(l){
+  return`<div class="link-row">
+    <div class="lk-fav" style="background:${l.bg};color:${l.c}">${l.title[0]}</div>
+    <div class="lk-body">
+      <div class="lk-title">${l.title}</div>
+      <div class="lk-url">${l.url}</div>
+      <div class="lk-foot">
+        <span class="lk-col" style="background:${l.bg};color:${l.c}">${l.col}</span>
+        ${l.tags.map(t=>`<span class="lk-tag">${t}</span>`).join('')}
+        <span class="lk-date">${l.date}</span>
+      </div>
+    </div>
+    <div class="lk-chev"><svg fill="none" viewBox="0 0 11 11"><path d="M4 2.5l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  </div>`;
+}
+
+const COLS=[
+  {name:'Dev Resources',n:284,c:'#007AFF',bg:'rgba(0,122,255,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2" stroke="#007AFF" stroke-width="1.5"/><path d="M7 9l-3 3 3 3M13 9l3 3-3 3M10 7l-2 6" stroke="#007AFF" stroke-width="1.4" stroke-linecap="round"/></svg>`},
+  {name:'AI / ML',n:436,c:'#5856D6',bg:'rgba(88,86,214,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6" stroke="#5856D6" stroke-width="1.5"/><path d="M7 10h6M10 7v6" stroke="#5856D6" stroke-width="1.5" stroke-linecap="round"/></svg>`},
+  {name:'Research',n:156,c:'#AF52DE',bg:'rgba(175,82,222,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><path d="M5 16V6a1 1 0 011-1h8a1 1 0 011 1v10" stroke="#AF52DE" stroke-width="1.5"/><path d="M7 8h6M7 11h4" stroke="#AF52DE" stroke-width="1.4" stroke-linecap="round"/></svg>`},
+  {name:'Design',n:93,c:'#FF9500',bg:'rgba(255,149,0,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><path d="M10 4l7 12H3L10 4z" stroke="#FF9500" stroke-width="1.5" stroke-linejoin="round"/></svg>`},
+  {name:'Tools',n:201,c:'#FF3B30',bg:'rgba(255,59,48,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3" stroke="#FF3B30" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2" stroke="#FF3B30" stroke-width="1.5" stroke-linecap="round"/></svg>`},
+  {name:'Reading List',n:77,c:'#34C759',bg:'rgba(52,199,89,.1)',ic:`<svg fill="none" viewBox="0 0 20 20"><path d="M5 5h10v12H5z" stroke="#34C759" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 9h4M8 12h2" stroke="#34C759" stroke-width="1.4" stroke-linecap="round"/></svg>`},
+];
+
+const VIEWS={
+  dashboard(){
+    return`<div class="pv">
+      <div class="stats-grid">
+        ${[
+          {n:'1,247',l:'Total Links',dl:'+12%',up:true,bg:'rgba(0,122,255,.1)',ic:`<svg fill="none" viewBox="0 0 16 16"><path d="M2 11L6 7l3 3 5-6" stroke="#007AFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
+          {n:'6',l:'Collections',dl:'+3',up:true,bg:'rgba(88,86,214,.1)',ic:`<svg fill="none" viewBox="0 0 16 16"><path d="M2 5.5h3v8H2zM5.8 5.5h3.2v8H5.8zM10 5.5h4v8h-4z" stroke="#5856D6" stroke-width="1.3" stroke-linejoin="round"/></svg>`},
+          {n:'9,382',l:'API Calls',dl:'+840',up:true,bg:'rgba(255,149,0,.1)',ic:`<svg fill="none" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8" rx="1.5" stroke="#FF9500" stroke-width="1.4"/><path d="M5 7l-2 2 2 2" stroke="#FF9500" stroke-width="1.2" stroke-linecap="round"/></svg>`},
+          {n:'1,198',l:'Synced',dl:'-2',up:false,bg:'rgba(52,199,89,.1)',ic:`<svg fill="none" viewBox="0 0 16 16"><path d="M3 8A5 5 0 0113 6M13 8A5 5 0 013 10" stroke="#34C759" stroke-width="1.4" stroke-linecap="round"/></svg>`},
+        ].map(s=>`<div class="stat-card">
+          <div class="stat-ic" style="background:${s.bg}">${s.ic}</div>
+          <div class="stat-num">${s.n}</div>
+          <div class="stat-lbl">${s.l}</div>
+          <span class="stat-dl ${s.up?'dl-up':'dl-dn'}">${s.dl}</span>
+        </div>`).join('')}
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="sec-hdr">
+            <div class="sec-ttl">Recent Links</div>
+            <div class="sec-link" onclick="navTo(document.querySelector('[data-route=links]'))">See all</div>
+          </div>
+          <div class="link-list">${LINKS.slice(0,5).map(lkCard).join('')}</div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-ttl">Quick Add</div></div>
+            <div class="panel-body">
+              <div class="form-field"><div class="form-lbl">URL</div><input class="form-input" placeholder="https://…" type="url"/></div>
+              <div class="form-field"><div class="form-lbl">Collection</div>
+                <select class="form-input"><option>Dev Resources</option><option>AI / ML</option><option>Research</option><option>Design</option></select>
+              </div>
+              <div class="form-field"><div class="form-lbl">Tags</div><input class="form-input" placeholder="mcp, api, docs…"/></div>
+              <button class="tb-btn btn-primary btn-full">Save Link</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-ttl">Activity</div></div>
+            <div class="panel-body" style="padding:10px 16px">
+              ${[
+                {ic:'rgba(0,122,255,.1)',s:'#007AFF',msg:'<strong>MCP</strong> fetched 24 links',t:'12 min ago'},
+                {ic:'rgba(88,86,214,.1)',s:'#5856D6',msg:'Imported <strong>47 links</strong> from Chrome',t:'2h ago'},
+                {ic:'rgba(255,149,0,.1)',s:'#FF9500',msg:'<strong>Design</strong> collection updated',t:'5h ago'},
+              ].map(a=>`<div class="act-row">
+                <div class="act-ic" style="background:${a.ic}"><svg fill="none" viewBox="0 0 13 13" width="13" height="13"><circle cx="6.5" cy="6.5" r="5" stroke="${a.s}" stroke-width="1.3"/></svg></div>
+                <div><div class="act-msg">${a.msg}</div><div class="act-time">${a.t}</div></div>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  },
+  links(){
+    return`<div class="pv">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="flex:1;min-width:160px;background:rgba(118,118,128,.1);border-radius:10px;display:flex;align-items:center;padding:0 10px;gap:6px">
+          <svg width="13" height="13" fill="none" viewBox="0 0 13 13"><circle cx="6" cy="6" r="4.5" stroke="rgba(60,60,67,.45)" stroke-width="1.4"/><path d="M9.5 9.5L13 13" stroke="rgba(60,60,67,.45)" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <input style="flex:1;border:none;background:transparent;font-size:14px;font-family:inherit;color:#1C1C1E;outline:none;padding:9px 0" placeholder="Search links…" type="search"/>
+        </div>
+        <button class="tb-btn btn-ghost" style="font-size:12px;padding:5px 12px">All</button>
+        <button class="tb-btn btn-ghost" style="font-size:12px;padding:5px 12px">Starred</button>
+      </div>
+      <div class="link-list">${LINKS.map(lkCard).join('')}</div>
+    </div>`;
+  },
+  collections(){
+    return`<div class="pv">
+      <div class="col-grid">${COLS.map(c=>`<div class="col-card">
+        <div class="col-ico" style="background:${c.bg}">${c.ic}</div>
+        <div class="col-name">${c.name}</div>
+        <div class="col-n">${c.n} links</div>
+      </div>`).join('')}</div>
+    </div>`;
+  },
+  recent(){
+    return`<div class="pv"><div class="link-list">${LINKS.slice(0,4).map(lkCard).join('')}</div></div>`;
+  },
+  apikeys(){
+    const keys=[
+      {n:'Production Key',v:'lsai_pk_••••3f2a',e:'Production',live:true},
+      {n:'MCP Server Key',v:'lsai_mk_••••9b1c',e:'MCP',live:true},
+      {n:'Development Key',v:'lsai_dk_••••7a0d',e:'Dev',live:false},
+    ];
+    return`<div class="pv">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="tb-btn btn-primary"><svg fill="none" viewBox="0 0 11 11" width="11" height="11"><path d="M5.5 1v9M1 5.5h9" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg> New Key</button>
+      </div>
+      <div class="key-card">${keys.map(k=>`<div class="key-row">
+        <div><div class="key-name">${k.n}</div><div class="key-val">${k.v}</div></div>
+        <span style="font-size:11px;color:rgba(60,60,67,.4);margin-right:8px">${k.e}</span>
+        <span class="key-stat ${k.live?'ks-live':'ks-off'}">${k.live?'Live':'Off'}</span>
+      </div>`).join('')}</div>
+      <div class="ios-card" style="padding:14px 16px;margin-top:8px">
+        <div style="font-size:11px;font-weight:600;color:rgba(60,60,67,.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px">Base URL</div>
+        <code style="font-size:13px;color:#1C1C1E;word-break:break-all">https://api.linksync.ai/v1</code>
+      </div>
+    </div>`;
+  },
+  mcp(){
+    const tools=[
+      {n:'links.list',d:'Fetch all links with filters',m:'GET'},
+      {n:'links.create',d:'Save a new link',m:'POST'},
+      {n:'links.delete',d:'Remove a link by ID',m:'DEL'},
+      {n:'collections.list',d:'List all collections',m:'GET'},
+      {n:'links.search',d:'Semantic search across links',m:'POST'},
+      {n:'links.update',d:'Update link metadata',m:'POST'},
+    ];
+    return`<div class="pv">
+      <div class="mcp-grid">
+        <div class="mcp-s"><div class="mcp-sv"><span class="live-dot"></span>Active</div><div class="mcp-sl">Status</div></div>
+        <div class="mcp-s"><div class="mcp-sv">v2.4.1</div><div class="mcp-sl">Version</div></div>
+        <div class="mcp-s"><div class="mcp-sv">9,382</div><div class="mcp-sl">Calls</div></div>
+      </div>
+      <div class="ios-card" style="padding:14px 16px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;color:rgba(60,60,67,.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Endpoint</div>
+        <code style="font-size:12.5px;color:#1C1C1E;word-break:break-all">mcp://linksync.ai/v2/sse</code>
+      </div>
+      <div class="sec-hdr" style="margin-bottom:10px"><div class="sec-ttl">Available Tools</div></div>
+      ${tools.map(t=>`<div class="tool-card">
+        <div style="flex:1;min-width:0">
+          <div class="tool-nm">${t.n}</div>
+          <div class="tool-ds">${t.d}</div>
+        </div>
+        <span class="method ${t.m==='GET'?'m-get':t.m==='POST'?'m-post':'m-del'}">${t.m}</span>
+      </div>`).join('')}
+    </div>`;
+  },
+  settings(){
+    return`<div class="pv">
+      <div class="set-grp-lbl">Profile</div>
+      <div class="set-grp">
+        ${[['Name','Alex Johnson'],['Email','alex@linksync.ai'],['Plan','Pro · 5 seats']].map(r=>`<div class="set-row">
+          <div class="set-lbl">${r[0]}</div>
+          <div class="set-val">${r[1]}</div>
+          <svg width="11" height="11" fill="none" viewBox="0 0 11 11" style="margin-left:6px;opacity:.22"><path d="M4 2.5l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>`).join('')}
+      </div>
+      <div class="set-grp-lbl">Preferences</div>
+      <div class="set-grp">
+        ${[
+          {l:'Auto-sync',s:'Sync links across all your devices',on:true},
+          {l:'Webhooks',s:'Send events to external endpoints',on:false},
+          {l:'AI Tagging',s:'Automatically tag new links with AI',on:true},
+          {l:'Notifications',s:'Notify on MCP server events',on:true},
+        ].map(r=>`<div class="set-row">
+          <div><div class="set-lbl">${r.l}</div><div class="set-sub">${r.s}</div></div>
+          <div class="toggle ${r.on?'ton':'tof'}" onclick="this.classList.toggle('ton');this.classList.toggle('tof')"><div class="tknob"></div></div>
+        </div>`).join('')}
+      </div>
+      <div class="set-grp-lbl">Danger Zone</div>
+      <div class="set-grp">
+        <div class="set-row"><div class="set-lbl" style="color:#FF3B30">Delete all links</div></div>
+        <div class="set-row"><div class="set-lbl" style="color:#FF3B30">Delete account</div></div>
+      </div>
+    </div>`;
+  }
+};
+
+const TITLES={dashboard:'Dashboard',links:'All Links',collections:'Collections',recent:'Recent',apikeys:'API Keys',mcp:'MCP Server',settings:'Settings'};
+let currentRoute='dashboard';
+
+function renderRoute(route){
+  currentRoute=route;
+  document.getElementById('pg-title').textContent=TITLES[route]||route;
+  document.getElementById('content').innerHTML=(VIEWS[route]||VIEWS.dashboard)();
+  document.getElementById('content').scrollTop=0;
+}
+
+function navTo(el){
+  if(!el)return;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  const route=el.dataset.route;
+  if(route)renderRoute(route);
+  syncTabs(route);
+  closeSidebar();
+}
+
+function tabTo(el){
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const route=el.dataset.route;
+  renderRoute(route);
+  syncSidebar(route);
+}
+
+function syncTabs(route){
+  document.querySelectorAll('.tab-item').forEach(t=>{
+    t.classList.toggle('active',t.dataset.route===route);
+  });
+}
+function syncSidebar(route){
+  document.querySelectorAll('.nav-item[data-route]').forEach(n=>{
+    n.classList.toggle('active',n.dataset.route===route);
+  });
+}
+
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  document.body.style.overflow='';
+}
+
+renderRoute('dashboard');
+</script>
+</body>
+</html>
