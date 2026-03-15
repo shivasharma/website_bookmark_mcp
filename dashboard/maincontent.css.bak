@@ -1,0 +1,35 @@
+/* maincontent.css - styles for maincontent.html */
+.main-content {
+  background: #0D1620;
+  color: #EEF5FF;
+  min-height: 100vh;
+  padding: 32px 40px;
+}
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.dashboard-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #06C0E0;
+}
+.dashboard-header input[type="text"] {
+  background: #162539;
+  color: #EEF5FF;
+  border: 1px solid #1A3048;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  min-width: 260px;
+}
+.dashboard-list {
+  background: #111E2D;
+  border-radius: 12px;
+  padding: 32px;
+  min-height: 200px;
+  color: #B3C7DD;
+  font-size: 1.1rem;
+}

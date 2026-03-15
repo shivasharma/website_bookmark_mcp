@@ -1897,35 +1897,7 @@ async function loadToolPanelTemplate(container,path,fallbackHtml){
   return false;
 }
 
-async function renderSystemHealthPanel(container){
-  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
-  const HEALTH_POLL_MS=60*60*1000;
-  const fallbackHtml=`
-    <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
-      <div class="tp-kpis" id="shKpis">
-        <div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
-      </div>
-      <p class="tp-sub" id="shLastUpdate">Polling every 1 hour. Last update: --</p>
-    </div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>User Activity</h3></div>
-      <div class="tp-kpis" id="shUserKpis">
-        <div class="tp-kpi"><div class="tp-kpi-label">Total Users</div><div class="tp-kpi-value" id="shUserTotal">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Live Users</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Authenticated Users</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
-        <div class="tp-kpi"><div class="tp-kpi-label">Load Avg</div><div class="tp-kpi-value" id="shLoadAvg">--</div></div>
-      </div>
-    </div>
-    <div class="tp-card">
-      <div class="tp-card-head"><h3>Services</h3></div>
-      <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
-    </div>`;
-  await loadToolPanelTemplate(container,'/health.html',fallbackHtml);
+
 
   const ctrl=new AbortController();
   async function fetchHealth(){

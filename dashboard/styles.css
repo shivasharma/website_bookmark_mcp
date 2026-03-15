@@ -70,23 +70,6 @@
 .bm-tag.t4 { background: rgba(245,166,35,0.10); color: #F5A623; }
 .bm-tag.t5 { background: rgba(167,139,250,0.10); color: #A78BFA; }
 .bm-tag.t6 { background: rgba(240,82,82,0.10); color: #F05252; }
-/* SOCIAL SHARE UI */
-.social-share-ui {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 0;
-  color: var(--muted, #b3c7dd);
-}
-.bm-empty-state .icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  color: var(--accent, #06c0e0);
-}
-.bm-empty-state .btn {
-  margin-top: 18px;
-}
 
 /* --- Mobile Responsiveness --- */
 @media (max-width: 700px) {
