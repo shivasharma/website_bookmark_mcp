@@ -1,3 +1,21 @@
+/* AI Chat Button in Top Bar */
+.topbar-ai-btn {
+  background: var(--s4);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  transition: background 0.15s;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(6,192,224,0.10);
+}
+.topbar-ai-btn:hover {
+  background: var(--ag);
+}
 /* Modern Dashboard Card Table for Bookmarks */
 .modern-content-area {
   margin: 36px 32px 0 32px;
