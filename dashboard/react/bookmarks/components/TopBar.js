@@ -28,6 +28,12 @@ export function TopBar({ onOpenNotifications, unreadCount, currentUser, onLogout
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
   const avatarUrl = currentUser?.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(userLabel || "User") + "&background=06c0e0&color=fff";
 
+  // Theme toggle handler
+  function toggleTheme() {
+    const current = document.body.getAttribute('data-theme');
+    document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  }
+
   return (
     <header className="modern-topbar">
       <div className="topbar-left">
@@ -44,6 +50,15 @@ export function TopBar({ onOpenNotifications, unreadCount, currentUser, onLogout
         />
       </div>
       <div className="topbar-right">
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={toggleTheme}
+          title="Toggle dark mode"
+          style={{ marginRight: 8 }}
+        >
+          <span role="img" aria-label="Theme">🌓</span>
+        </button>
         <button
           className="topbar-bell-btn"
           type="button"
