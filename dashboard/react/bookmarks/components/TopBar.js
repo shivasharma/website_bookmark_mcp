@@ -22,50 +22,33 @@ function IconAIChat(props = {}) {
   );
 }
 
-export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUser, onLogout, onAddBookmark }) {
+
+export function TopBar({ onOpenNotifications, unreadCount, currentUser, onLogout, onAddBookmark }) {
   const userLabel = currentUser ? currentUser.name || currentUser.email || "User" : "";
   const initial = userLabel ? String(userLabel).charAt(0).toUpperCase() : "U";
+  const avatarUrl = currentUser?.avatarUrl || "https://ui-avatars.com/api/?name=" + encodeURIComponent(userLabel || "User") + "&background=06c0e0&color=fff";
 
   return React.createElement(
     "header",
-    { className: "bm-top" },
-    React.createElement(
-      "div",
-      { className: "bm-brand" },
-      React.createElement(IconBookmark, { className: "bm-icon" }),
-      React.createElement("span", null, "BookMark"),
-      React.createElement("em", { style: { color: "var(--accent, #06c0e0)", fontStyle: "normal" } }, "Manager")
+    { className: "modern-topbar" },
+    React.createElement("div", { className: "topbar-left" },
+      React.createElement("span", { className: "topbar-logo" },
+        React.createElement(IconBookmark, { className: "bm-icon" }),
+        "LinkSync"
+      )
     ),
-    React.createElement(
-      "div",
-      { className: "bm-top-actions" },
+    React.createElement("div", { className: "topbar-center" },
+      React.createElement("input", {
+        className: "topbar-search",
+        type: "text",
+        placeholder: "Search bookmarks..."
+      })
+    ),
+    React.createElement("div", { className: "topbar-right" },
       React.createElement(
         "button",
         {
-          className: "btn primary",
-          type: "button",
-          style: { fontWeight: 700 },
-          onClick: onAddBookmark,
-          title: "Add Bookmark"
-        },
-        React.createElement("span", { style: { fontSize: 18, marginRight: 6 } }, "+"),
-        "Add Bookmark"
-      ),
-      React.createElement(
-        "button",
-        {
-          className: "btn bm-aichat-btn",
-          type: "button",
-          title: "AI Chat",
-          onClick: () => window.location.assign("/chat")
-        },
-        React.createElement(IconAIChat, { className: "bm-icon" }),
-        "AI Chat"
-      ),
-      React.createElement(
-        "button",
-        {
-          className: "btn bm-bell-btn",
+          className: "topbar-bell-btn",
           type: "button",
           onClick: () => {
             if (onOpenNotifications) {
@@ -75,28 +58,14 @@ export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUse
           title: unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"
         },
         React.createElement(IconBell, { className: "bm-icon" }),
-        "Notifications",
-        unreadCount > 0 && React.createElement("span", { className: "bm-bell-badge" }, String(unreadCount > 99 ? "99+" : unreadCount))
+        unreadCount > 0 && React.createElement("span", { className: "topbar-bell-badge" }, String(unreadCount > 99 ? "99+" : unreadCount))
       ),
-      React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: () => {
-            if (onOpenMcp) {
-              onOpenMcp();
-              return;
-            }
-            window.location.assign("/mcp");
-          }
-        },
-        React.createElement(IconMcp, { className: "bm-icon" }),
-        "MCP"
-      ),
-      !currentUser && React.createElement("a", { className: "btn", href: "/register" }, "GitHub Login"),
-      !!currentUser && React.createElement("button", { className: "btn", type: "button", onClick: onLogout }, "Logout"),
-      !!currentUser && React.createElement("div", { className: "bm-avatar", title: `Logged in as ${userLabel}` }, initial)
+      React.createElement("img", {
+        className: "topbar-avatar",
+        src: avatarUrl,
+        alt: userLabel,
+        title: `Logged in as ${userLabel}`
+      })
     )
   );
 }

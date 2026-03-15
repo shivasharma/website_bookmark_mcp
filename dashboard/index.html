@@ -133,17 +133,22 @@
       <button class="ob-close" onclick="closeBanner()">✕</button>
     </div>
 
-    <div class="dash-header au d2" style="display:none">
-      <div>
-        <h1 class="dash-title">All <span>Bookmarks</span></h1>
-        <p class="dash-sub">Your saved links and resources</p>
+    <div class="summary-cards-row">
+      <div class="summary-card">
+        <div class="summary-card-label">Total Bookmarks</div>
+        <div class="summary-card-value" id="totalCount">3</div>
       </div>
-      <div class="stats-inline">
-        <span class="stat-inline"><strong id="totalCount">3</strong> saved</span>
-        <span class="stat-inline-dot">·</span>
-        <span class="stat-inline"><strong id="starCount">1</strong> starred</span>
-        <span class="stat-inline-dot">·</span>
-        <span class="stat-inline"><strong id="importCount">0</strong> imported</span>
+      <div class="summary-card">
+        <div class="summary-card-label">Starred</div>
+        <div class="summary-card-value" id="starCount">1</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Unread</div>
+        <div class="summary-card-value" id="unreadCount">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Imported</div>
+        <div class="summary-card-value" id="importCount">0</div>
       </div>
     </div>
 
