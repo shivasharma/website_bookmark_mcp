@@ -547,6 +547,32 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
 .secondary-toolbar .sort-select:focus {
   border-color: var(--border2);
   color: var(--text1);
+  .bm-sidebar {
+    background: var(--s2);
+    color: var(--text1);
+    border-right: 1px solid #23272b;
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    padding: 32px 0 0 0;
+    min-width: 420px;
+    max-width: 600px;
+  }
+
+  .sidebar-two-col {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    width: 100%;
+  }
+
+  .sidebar-col {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 180px;
+  }
   background-color: var(--s4);
   outline: none;
 }
