@@ -78,22 +78,6 @@ export function TopBar({ onOpenMcp, onOpenNotifications, unreadCount, currentUse
         "Notifications",
         unreadCount > 0 && React.createElement("span", { className: "bm-bell-badge" }, String(unreadCount > 99 ? "99+" : unreadCount))
       ),
-      React.createElement(
-        "button",
-        {
-          className: "btn",
-          type: "button",
-          onClick: () => {
-            if (onOpenMcp) {
-              onOpenMcp();
-              return;
-            }
-            window.location.assign("/mcp");
-          }
-        },
-        React.createElement(IconMcp, { className: "bm-icon" }),
-        "MCP"
-      ),
       !currentUser && React.createElement("a", { className: "btn", href: "/register" }, "GitHub Login"),
       !!currentUser && React.createElement("button", { className: "btn", type: "button", onClick: onLogout }, "Logout"),
       !!currentUser && React.createElement("div", { className: "bm-avatar", title: `Logged in as ${userLabel}` }, initial)
