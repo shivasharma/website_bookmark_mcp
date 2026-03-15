@@ -13,48 +13,27 @@ function tagClass(tag) {
 
 // 70/30 Split Card Layout and Hover-Only Actions
 function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart }) {
-  const [tab, setTab] = React.useState("details");
   const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
     { className: "bm-item", onClick: () => onOpen(bookmark.url) },
     React.createElement(
       "div",
-      { className: "bm-item-tabs" },
-      React.createElement(
-        "button",
-        { className: tab === "details" ? "tab-pill active" : "tab-pill", onClick: (e) => { e.stopPropagation(); setTab("details"); } },
-        "Details"
-      ),
-      React.createElement(
-        "button",
-        { className: tab === "tags" ? "tab-pill active" : "tab-pill", onClick: (e) => { e.stopPropagation(); setTab("tags"); } },
-        "Tags"
-      )
-    ),
-    tab === "details" && React.createElement(
-      "div",
       { className: "bm-item-main" },
       React.createElement("div", { className: "bm-item-title" }, bookmark.title),
-      React.createElement("div", { className: "bm-item-url" }, bookmark.url)
-    ),
-    tab === "tags" && React.createElement(
-      "div",
-      { className: "bm-tags-panel" },
-      React.createElement("div", { className: "bm-date" }, bookmark.dateLabel),
-      (bookmark.tags && bookmark.tags.length > 0)
-        ? React.createElement(
-            "div",
-            { className: "bm-tags" },
-            ...(bookmark.tags || []).map((tag, index) =>
-              React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-tag-${index}` }, String(tag))
-            )
-          )
-        : React.createElement("span", { className: "bm-tags-empty" }, "No tags")
+      React.createElement("div", { className: "bm-item-url" }, bookmark.url),
+      React.createElement(
+        "div",
+        { className: "bm-tags" },
+        ...(bookmark.tags || []).map((tag, index) =>
+          React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-tag-${index}` }, String(tag))
+        )
+      )
     ),
     React.createElement(
       "div",
       { className: "bm-item-right" },
+      React.createElement("div", { className: "bm-date" }, bookmark.dateLabel),
       React.createElement(
         "div",
         { className: "bm-actions" },
@@ -103,7 +82,6 @@ function BookmarkListItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
 }
 
 function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite, onDragStart }) {
-  const [tab, setTab] = React.useState("details");
   const starIcon = bookmark.starred ? React.createElement(IconStarFilled, { className: "bm-icon" }) : React.createElement(IconStar, { className: "bm-icon" });
   return React.createElement(
     "div",
@@ -113,34 +91,14 @@ function BookmarkGridItem({ bookmark, onOpen, onEdit, onDelete, onToggleFavorite
       draggable: true,
       onDragStart: (e) => onDragStart && onDragStart(e, bookmark)
     },
+    React.createElement("div", { className: "bm-item-title" }, bookmark.title),
+    React.createElement("div", { className: "bm-item-url" }, bookmark.domain || bookmark.url),
     React.createElement(
       "div",
-      { className: "bm-item-tabs" },
-      React.createElement(
-        "button",
-        { className: tab === "details" ? "tab-pill active" : "tab-pill", onClick: (e) => { e.stopPropagation(); setTab("details"); } },
-        "Details"
-      ),
-      React.createElement(
-        "button",
-        { className: tab === "tags" ? "tab-pill active" : "tab-pill", onClick: (e) => { e.stopPropagation(); setTab("tags"); } },
-        "Tags"
+      { className: "bm-tags" },
+      ...(bookmark.tags || []).slice(0, 3).map((tag, index) =>
+        React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-grid-tag-${index}` }, String(tag))
       )
-    ),
-    tab === "details" && React.createElement("div", { className: "bm-item-title" }, bookmark.title),
-    tab === "details" && React.createElement("div", { className: "bm-item-url" }, bookmark.domain || bookmark.url),
-    tab === "tags" && React.createElement(
-      "div",
-      { className: "bm-tags-panel" },
-      (bookmark.tags && bookmark.tags.length > 0)
-        ? React.createElement(
-            "div",
-            { className: "bm-tags" },
-            ...(bookmark.tags || []).map((tag, index) =>
-              React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `${bookmark.id}-grid-tag-${index}` }, String(tag))
-            )
-          )
-        : React.createElement("span", { className: "bm-tags-empty" }, "No tags")
     ),
     React.createElement(
       "div",
@@ -245,36 +203,7 @@ function BookmarkTable({ items, onOpen, onEdit, onDelete, onToggleFavorite, onDr
             React.createElement(
               "td",
               null,
-              React.createElement(
-                "div",
-                { className: "bm-table-tabs" },
-                React.createElement(
-                  "button",
-                  {
-                    className: bookmark._tab === "details" ? "tab-pill active" : "tab-pill",
-                    onClick: (e) => { e.stopPropagation(); bookmark._setTab && bookmark._setTab("details"); }
-                  },
-                  "Details"
-                ),
-                React.createElement(
-                  "button",
-                  {
-                    className: bookmark._tab === "tags" ? "tab-pill active" : "tab-pill",
-                    onClick: (e) => { e.stopPropagation(); bookmark._setTab && bookmark._setTab("tags"); }
-                  },
-                  "Tags"
-                )
-              ),
-              (bookmark._tab === "tags")
-                ? ((bookmark.tags && bookmark.tags.length > 0)
-                    ? React.createElement(
-                        "div",
-                        { className: "bm-tags" },
-                        ...(bookmark.tags || []).map((tag, i) => React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `table-tag-${i}` }, tag))
-                      )
-                    : React.createElement("span", { className: "bm-tags-empty" }, "No tags")
-                  )
-                : null
+              (bookmark.tags || []).map((tag, i) => React.createElement("span", { className: `bm-tag ${tagClass(tag)}`, key: `table-tag-${i}` }, tag))
             ),
             React.createElement(
               "td",

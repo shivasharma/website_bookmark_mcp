@@ -83,8 +83,8 @@ const authEls={
   topNotifyBadge:document.getElementById('topNotifyBadge'),
   menuLogoutBtn:document.getElementById('menuLogoutBtn'),
   menuLoginLink:document.getElementById('menuLoginLink'),
-  // settingsMenuBtn:document.getElementById('settingsMenuBtn'),
-  // topSettingsMenu:document.getElementById('topSettingsMenu'),
+  settingsMenuBtn:document.getElementById('settingsMenuBtn'),
+  topSettingsMenu:document.getElementById('topSettingsMenu'),
   userAvatarBtn:document.getElementById('userAvatarBtn')
 };
 
@@ -220,7 +220,11 @@ async function loadNotificationSummary(){
   }
 }
 
-// function toggleSettingsMenu(force) { /* removed */ }
+function toggleSettingsMenu(force){
+  if(!authEls.topSettingsMenu)return;
+  const shouldOpen=typeof force==='boolean'?force:!authEls.topSettingsMenu.classList.contains('show');
+  authEls.topSettingsMenu.classList.toggle('show',shouldOpen);
+}
 
 function isSuggestionsHidden(){try{return localStorage.getItem(SUGGEST_HIDDEN_KEY)==='true'}catch{return false}}
 function hideSuggestions(){try{localStorage.setItem(SUGGEST_HIDDEN_KEY,'true')}catch{}render();showToast('Suggestions hidden','info')}
@@ -308,7 +312,39 @@ function renderAssistContent(list){
 
 function renderZeroBookmarksState(){
   const tourDone=String(localStorage.getItem(ONBOARD_TOUR_KEY)||'')==='true';
-  return `<div class="empty empty-zero"><div class="empty-t">No bookmarks found</div><div class="empty-actions"><button class="btn-primary" onclick="openAddModal()">Add Bookmark</button></div></div>`;
+  return `<div class="empty empty-zero">
+  <div class="empty-illustration">
+    <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="70" cy="70" r="68" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="6 4" opacity=".5"/>
+      <rect x="42" y="30" width="56" height="72" rx="8" fill="var(--s3)" stroke="var(--border2)" stroke-width="1.5"/>
+      <rect x="50" y="44" width="32" height="3" rx="1.5" fill="var(--accent)" opacity=".6"/>
+      <rect x="50" y="52" width="40" height="2" rx="1" fill="var(--text3)" opacity=".3"/>
+      <rect x="50" y="58" width="36" height="2" rx="1" fill="var(--text3)" opacity=".2"/>
+      <rect x="50" y="68" width="28" height="3" rx="1.5" fill="var(--accent2)" opacity=".5"/>
+      <rect x="50" y="76" width="40" height="2" rx="1" fill="var(--text3)" opacity=".3"/>
+      <rect x="50" y="82" width="34" height="2" rx="1" fill="var(--text3)" opacity=".2"/>
+      <circle cx="104" cy="36" r="16" fill="var(--s2)" stroke="var(--accent)" stroke-width="1.5"/>
+      <line x1="100" y1="36" x2="108" y2="36" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <line x1="104" y1="32" x2="104" y2="40" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M28 105 L70 60" stroke="var(--accent3)" stroke-width="1" stroke-dasharray="4 3" opacity=".4"/>
+      <circle cx="24" cy="108" r="8" fill="var(--a3g)" stroke="var(--accent3)" stroke-width="1"/>
+      <text x="24" y="112" text-anchor="middle" fill="var(--accent3)" font-size="10" font-weight="bold">✦</text>
+    </svg>
+  </div>
+  <div class="empty-t">Your bookmark collection starts here</div>
+  <div class="empty-s">Save links, articles, and resources — organized with tags and powered by auto-detection.</div>
+  <div class="empty-tips">
+    <div class="empty-tip"><span class="empty-tip-ico">🔗</span><span>Paste any URL in <strong>Quick Add</strong> to auto-detect title, favicon &amp; tags</span></div>
+    <div class="empty-tip"><span class="empty-tip-ico">📥</span><span>Import bookmarks from <strong>Chrome, Firefox, Pocket</strong> or Raindrop</span></div>
+    <div class="empty-tip"><span class="empty-tip-ico">⌨️</span><span>Press <kbd class="kbd">Ctrl+K</kbd> to open the <strong>Command Palette</strong></span></div>
+  </div>
+  <div class="empty-actions">
+    <button class="btn-primary" onclick="openAddModal()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Your First Bookmark</button>
+    <button class="btn-outline" onclick="openImport()">📥 Import Bookmarks</button>
+  </div>
+  ${!tourDone?`<button class="empty-tour-btn" onclick="startOnboardTour()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Take a quick tour</button>`:''}
+  ${isSuggestionsHidden()?`<div class="assist-panel assist-collapsed"><button class="suggest-show-btn" onclick="showSuggestions()">Show suggestions</button></div>`:`<div class="assist-panel"><div class="assist-header"><div class="assist-title">✦ Suggested resources to get started</div><button class="suggest-hide-btn" onclick="hideSuggestions()" title="Hide suggestions" aria-label="Hide suggestions">✕ Hide</button></div><div class="suggest-grid">${SUGGESTED_BOOKMARKS.map(item=>renderSuggestCard(item)).join('')}</div></div>`}
+</div>`;
 }
 
 function renderFilterEmptyState(query){
@@ -557,7 +593,18 @@ function setCategoryFilter(tag){
   render();
 }
 
-// Sidebar categories removed
+function renderSidebarCategories(){
+  const container=document.getElementById('sidebarCategories');
+  if(!container)return;
+  const freq=computeTagFrequency();
+  const topTags=getTopTags(freq,10);
+  if(!topTags.length){container.innerHTML='<div style="padding:4px 12px;font-size:11px;color:var(--text3)">No categories yet</div>';return;}
+  const colorCycle=['c1','c2','c3','c4','c5'];
+  container.innerHTML=topTags.map((tag,i)=>{
+    const isActive=currentFilter===tag;
+    return `<a class="nav-link${isActive?' active':''}" href="#" data-cat="${esc(tag)}" onclick="event.preventDefault();setCategoryFilter('${esc(tag)}')"><span class="stag ${colorCycle[i%5]}" style="width:8px;height:8px;min-width:8px;padding:0;border-radius:50%"></span>${esc(tag.charAt(0).toUpperCase()+tag.slice(1))}<span class="nav-count">${freq[tag]}</span></a>`;
+  }).join('');
+}
 
 function loadRecentSearches(){
   try{
@@ -622,7 +669,7 @@ function render(){
   document.getElementById('snReadLater').textContent=bookmarks.filter(b=>(b.tags||[]).some(t=>String(t).toLowerCase()==='read later')).length;
   container.className=currentView==='grid'?'bk-grid':currentView==='table'?'bk-table-wrap':'bk-list';
   renderDynamicTagPills();
-  // renderSidebarCategories(); // sidebar categories removed
+  renderSidebarCategories();
   if(!list.length){
     if(authBlocked){
         container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login to explore more features and also suggest best ideas</div><a class="btn-outline" href="/register" style="margin-top:10px;display:inline-flex">Login</a></div>`;
@@ -1650,49 +1697,16 @@ async function commitImport(){
 // ══════════════════════════════════════════════
 const BOOKMARKLET_CODE=`javascript:(function(){var url=encodeURIComponent(location.href);var title=encodeURIComponent(document.title);window.open('https://ai.shivaprogramming.com/bookmarks?import=1&url='+url+'&title='+title,'_blank','width=480,height=600')})();`;
 document.addEventListener('DOMContentLoaded',()=>{
-  // Ensure all main dashboard sections are visible on load
-  [
-    'dash-header',
-    'action-bar',
-    'filter-bar',
-    'bookmarkContent'
-  ].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.style.display='';
-  });
-  // Show advanced filters if previously open
-  const adv=document.getElementById('advancedFilters');
-  if(adv && window.innerWidth > 900) adv.style.display='';
-  // Set up bookmarklet code
   const el=document.getElementById('bookmarkletCode');
   if(el)el.textContent=BOOKMARKLET_CODE;
   const link=document.getElementById('bookmarkletLink');
   if(link)link.href=BOOKMARKLET_CODE;
-  // Responsive fix: ensure sidebar overlay is hidden on desktop
-  if(window.innerWidth > 900){
-    const overlay=document.getElementById('sidebarOverlay');
-    if(overlay) overlay.classList.remove('open');
-  }
 });
 window.addEventListener('load',()=>{
-  // Same as DOMContentLoaded for redundancy
-  [
-    'dash-header',
-    'action-bar',
-    'filter-bar',
-    'bookmarkContent'
-  ].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el)el.style.display='';
-  });
   const el=document.getElementById('bookmarkletCode');
   if(el)el.textContent=BOOKMARKLET_CODE;
   const link=document.getElementById('bookmarkletLink');
   if(link)link.href=BOOKMARKLET_CODE;
-  if(window.innerWidth > 900){
-    const overlay=document.getElementById('sidebarOverlay');
-    if(overlay) overlay.classList.remove('open');
-  }
 });
 function copyBookmarklet(){copyText(BOOKMARKLET_CODE);showToast('Bookmarklet code copied!','success')}
 
@@ -1930,7 +1944,35 @@ async function loadToolPanelTemplate(container,path,fallbackHtml){
   return false;
 }
 
-
+async function renderSystemHealthPanel(container){
+  if(_healthTimer){clearInterval(_healthTimer);_healthTimer=null}
+  const HEALTH_POLL_MS=60*60*1000;
+  const fallbackHtml=`
+    <div class="tp-header"><h2 class="tp-title">System Health</h2><p class="tp-sub">Real-time server and database monitoring</p></div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Runtime Overview</h3><button class="btn-outline" type="button" id="shRefreshBtn">Refresh</button></div>
+      <div class="tp-kpis" id="shKpis">
+        <div class="tp-kpi"><div class="tp-kpi-label">API</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Database</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Uptime</div><div class="tp-kpi-value">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Memory</div><div class="tp-kpi-value">--</div></div>
+      </div>
+      <p class="tp-sub" id="shLastUpdate">Polling every 1 hour. Last update: --</p>
+    </div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>User Activity</h3></div>
+      <div class="tp-kpis" id="shUserKpis">
+        <div class="tp-kpi"><div class="tp-kpi-label">Total Users</div><div class="tp-kpi-value" id="shUserTotal">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Live Users</div><div class="tp-kpi-value" id="shLiveSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Authenticated Users</div><div class="tp-kpi-value" id="shAuthSessions">--</div></div>
+        <div class="tp-kpi"><div class="tp-kpi-label">Load Avg</div><div class="tp-kpi-value" id="shLoadAvg">--</div></div>
+      </div>
+    </div>
+    <div class="tp-card">
+      <div class="tp-card-head"><h3>Services</h3></div>
+      <div class="tp-services" id="shServices"><p class="tp-sub">Loading health telemetry...</p></div>
+    </div>`;
+  await loadToolPanelTemplate(container,'/health.html',fallbackHtml);
 
   const ctrl=new AbortController();
   async function fetchHealth(){
@@ -2591,7 +2633,18 @@ async function initDashboard(){
   if(authEls.menuLogoutBtn){
     authEls.menuLogoutBtn.addEventListener('click',async()=>{toggleSettingsMenu(false);await performLogout()});
   }
-  // Settings menu logic removed
+  if(authEls.settingsMenuBtn){
+    authEls.settingsMenuBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
+  }
+  if(authEls.userAvatarBtn){
+    authEls.userAvatarBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
+  }
+  document.addEventListener('click',(event)=>{
+    if(!authEls.topSettingsMenu||!authEls.settingsMenuBtn)return;
+    const inMenu=authEls.topSettingsMenu.contains(event.target);
+    const onBtn=authEls.settingsMenuBtn.contains(event.target);
+    if(!inMenu&&!onBtn){toggleSettingsMenu(false)}
+  });
   loadRecentSearches();
   renderRecentSearchChips();
   setupQuickSmartInput();

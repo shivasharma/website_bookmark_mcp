@@ -1,138 +1,68 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LinkSync AI — Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --bg-deep: #080B10; --bg-base: #0D1117; --bg-card: #111824; --bg-hover: #161F2E; --bg-muted: #1A2333; --border: rgba(255,255,255,0.07); --border-hi: rgba(0,212,170,0.35); --teal: #00D4AA; --teal-dim: rgba(0,212,170,0.12); --teal-mid: rgba(0,212,170,0.22); --amber: #F5A623; --coral: #FF6B6B; --blue: #4D9FFF; --text-1: #E8EDF5; --text-2: #8B96A8; --text-3: #4A5568; --font-mono: 'IBM Plex Mono', monospace; --font-sans: 'Syne', sans-serif; --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px; --sidebar-w: 240px; --topbar-h: 60px; }
-  html, body { height: 100%; background: var(--bg-deep); color: var(--text-1); font-family: var(--font-sans); font-size: 14px; }
-  .layout { display: flex; height: 100vh; overflow: hidden; }
-  .sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--bg-base); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 0; position: relative; overflow: hidden; }
-  .sidebar::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 180px; background: linear-gradient(to top, rgba(0,212,170,0.04), transparent); pointer-events: none; }
-  .logo-wrap { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .logo-icon { width: 32px; height: 32px; background: var(--teal); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .logo-icon svg { width: 16px; height: 16px; }
-  .logo-text { font-family: var(--font-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
-  .logo-text span { color: var(--teal); }
-  .nav-section { padding: 16px 12px 8px; flex: 1; overflow-y: auto; }
-  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-3); text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s ease; color: var(--text-2); font-size: 13.5px; font-weight: 500; margin-bottom: 1px; }
-  .nav-item:hover { background: var(--bg-hover); color: var(--text-1); }
-  .nav-item.active { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--border-hi); }
-  .nav-item .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
-  .nav-item.active .nav-icon { opacity: 1; }
-  .nav-badge { margin-left: auto; background: var(--bg-muted); color: var(--text-2); font-size: 10px; font-family: var(--font-mono); padding: 1px 7px; border-radius: 20px; }
-  .nav-item.active .nav-badge { background: var(--teal-mid); color: var(--teal); }
-  .nav-divider { height: 1px; background: var(--border); margin: 12px 8px; }
-  .collections-list { padding: 0 12px; }
-  .col-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.12s; color: var(--text-2); font-size: 13px; margin-bottom: 1px; }
-  .col-item:hover { background: var(--bg-hover); color: var(--text-1); }
-  .col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .col-count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
-  .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--border); }
-  .api-status { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-2); font-family: var(--font-mono); }
-  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:0.6; transform:scale(0.85)} }
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-deep); }
-  .topbar { height: var(--topbar-h); flex-shrink: 0; background: var(--bg-base); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 12px; }
-  .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; flex-shrink: 0; }
-  .topbar-title span { color: var(--teal); }
-  .search-wrap { flex: 1; max-width: 380px; margin-left: 20px; position: relative; }
-  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--text-3); }
-  .search-input { width: 100%; padding: 7px 12px 7px 34px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-1); font-size: 13px; font-family: var(--font-sans); outline: none; transition: border 0.15s; }
-  .search-input::placeholder { color: var(--text-3); }
-  .search-input:focus { border-color: rgba(0,212,170,0.4); }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; font-family: var(--font-sans); }
-  .btn-primary { background: var(--teal); color: #080B10; }
-  .btn-primary:hover { background: #00EFC0; }
-  .btn-ghost { background: var(--bg-card); color: var(--text-2); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--bg-hover); color: var(--text-1); border-color: rgba(255,255,255,0.12); }
-  .btn svg { width: 13px; height: 13px; }
-  .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #00D4AA 0%, #4D9FFF 100%); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #080B10; cursor: pointer; flex-shrink: 0; }
-  .content { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-  .content::-webkit-scrollbar { width: 5px; }
-  .content::-webkit-scrollbar-thumb { background: var(--bg-muted); border-radius: 4px; }
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; cursor: pointer; }
-  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-c, var(--teal)), transparent); opacity: 0; transition: opacity 0.2s; }
-  .stat-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-1px); }
-  .stat-card:hover::before { opacity: 1; }
-  .stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .stat-icon { width: 34px; height: 34px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; }
-  .stat-icon svg { width: 16px; height: 16px; }
-  .stat-delta { font-size: 11px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 20px; font-weight: 500; }
-  .delta-up { background: rgba(0,212,170,0.12); color: var(--teal); }
-  .delta-down { background: rgba(255,107,107,0.12); color: var(--coral); }
-  .stat-val { font-family: var(--font-mono); font-size: 28px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 12px; color: var(--text-2); font-weight: 500; }
-  .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
-  .table-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .card-title { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
-  .card-header-right { margin-left: auto; display: flex; gap: 8px; }
-  .filter-tabs { display: flex; gap: 2px; background: var(--bg-deep); border-radius: var(--radius-sm); padding: 3px; }
-  .ftab { padding: 4px 12px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.12s; color: var(--text-2); }
-  .ftab.active { background: var(--bg-card); color: var(--text-1); }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { border-bottom: 1px solid var(--border); }
-  th { padding: 10px 20px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); font-family: var(--font-mono); white-space: nowrap; }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bg-hover); }
-  td { padding: 12px 20px; vertical-align: middle; }
-  .link-meta { display: flex; align-items: center; gap: 10px; }
-  .fav { width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; font-family: var(--font-mono); font-weight: 700; }
-  .link-title { font-size: 13.5px; font-weight: 600; color: var(--text-1); margin-bottom: 2px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .link-url { font-size: 11.5px; color: var(--text-3); font-family: var(--font-mono); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-  .badge-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
-  .tag-list { display: flex; gap: 5px; flex-wrap: wrap; }
-  .tag { padding: 2px 8px; border-radius: 4px; background: var(--bg-muted); color: var(--text-2); font-size: 10.5px; font-family: var(--font-mono); font-weight: 500; border: 1px solid var(--border); }
-  .date-cell { font-size: 11.5px; font-family: var(--font-mono); color: var(--text-3); white-space: nowrap; }
-  .row-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.15s; }
-  tbody tr:hover .row-actions { opacity: 1; }
-  .action-btn { width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--bg-muted); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.12s; }
-  .action-btn:hover { background: var(--bg-hover); border-color: rgba(255,255,255,0.15); }
-  .action-btn svg { width: 12px; height: 12px; color: var(--text-2); }
-  .right-col { display: flex; flex-direction: column; gap: 14px; }
-  .panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-  .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; justify-content: space-between; }
-  .panel-body { padding: 16px 18px; }
-  .quick-add-form { display: flex; flex-direction: column; gap: 10px; }
-  .form-field { display: flex; flex-direction: column; gap: 4px; }
-  .form-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3); }
-  .form-input { padding: 8px 12px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-1); font-size: 13px; font-family: var(--font-sans); outline: none; transition: border 0.15s; width: 100%; }
-  .form-input::placeholder { color: var(--text-3); }
-  .form-input:focus { border-color: rgba(0,212,170,0.45); }
-  .form-select { padding: 8px 12px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-2); font-size: 13px; font-family: var(--font-sans); outline: none; width: 100%; cursor: pointer; -webkit-appearance: none; }
-  .btn-full { width: 100%; justify-content: center; padding: 9px 14px; }
-  .api-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .api-row:last-child { border-bottom: none; }
-  .api-key-name { font-size: 12.5px; font-weight: 600; }
-  .api-key-val { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
-  .api-badge { font-size: 10px; font-family: var(--font-mono); padding: 2px 7px; border-radius: 4px; font-weight: 600; }
-  .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .activity-item:last-child { border-bottom: none; }
-  .act-icon { width: 26px; height: 26px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-  .act-icon svg { width: 12px; height: 12px; }
-  .act-text { font-size: 12.5px; color: var(--text-2); line-height: 1.5; }
-  .act-text strong { color: var(--text-1); font-weight: 600; }
-  .act-time { font-size: 11px; font-family: var(--font-mono); color: var(--text-3); margin-top: 2px; }
-  .content::-webkit-scrollbar-track { background: transparent; }
-  .topbar { position: relative; }
-  @media (max-width: 1100px) { .two-col { grid-template-columns: 1fr; } .right-col { display: grid; grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 860px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-</style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#080E17"/>
+<title>LinkSync AI — Your links, synced smarter by MCP + AI.</title>
+<meta name="description" content="LinkSync AI is an AI bookmark sync platform and bookmark manager with MCP integration for smarter link management."/>
+<meta name="keywords" content="bookmark manager, MCP integration, AI bookmark sync, link management"/>
+<meta property="og:title" content="LinkSync AI — Your links, synced smarter by MCP + AI."/>
+<meta property="og:description" content="A bookmark manager with MCP integration and AI bookmark sync built for modern link management."/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="/icons/linksync-hero.svg"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="LinkSync AI — Your links, synced smarter by MCP + AI."/>
+<meta name="twitter:description" content="Bookmark manager + MCP integration + AI bookmark sync for smarter link management."/>
+<meta name="twitter:image" content="/icons/linksync-hero.svg"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LinkSync AI",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "Web",
+  "description": "LinkSync AI is a bookmark manager for AI bookmark sync and link management with MCP integration as its core differentiator.",
+  "slogan": "Your links, synced smarter by MCP + AI.",
+  "featureList": [
+    "Bookmark manager",
+    "MCP integration",
+    "AI bookmark sync",
+    "Link management"
+  ],
+  "url": "/",
+  "image": "/icons/linksync-hero.svg",
+  "potentialAction": {
+    "@type": "Action",
+    "name": "Login with GitHub or Google",
+    "target": "/register"
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/styles.css">
+<link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" type="image/svg+xml" sizes="192x192" href="/icons/icon-192.svg">
+<link rel="icon" type="image/svg+xml" sizes="512x512" href="/icons/icon-512.svg">
+<link rel="icon" type="image/svg+xml" sizes="any" href="/icons/linksync-logo.svg">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.svg">
+<link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.svg">
+<link rel="mask-icon" href="/icons/icon-maskable.svg" color="#080E17">
+<script>/* prevent flash of wrong theme */(function(){var t=localStorage.getItem('linksync-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:light)').matches)t='light';if(t)document.documentElement.setAttribute('data-theme',t)})()</script>
 </head>
 <body>
-<div class="layout">
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">... (rest of the provided HTML) ...
+
+<div class="ambient">
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div class="grid-lines"></div>
+</div>
+
+<div class="app" id="app">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
     <button class="hamburger-btn" id="hamburgerBtn" type="button" aria-label="Open navigation menu" onclick="toggleMobileSidebar()"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <a class="logo" href="#"><div class="logo-mark"><img src="/icons/linksync-logo.svg" alt="LinkSync AI logo"/></div><span class="logo-text">LinkSync <em>AI</em></span></a>
     <div class="topbar-actions">
@@ -141,9 +71,10 @@
       <a class="btn-outline" id="signInBtn" href="/register">Login</a>
       <div class="avatar-btn hidden" id="userAvatarBtn" title="Profile">U</div>
       <div class="top-menu-wrap">
-        <button class="btn-icon" id="chatMenuBtn" type="button" title="Chat" onclick="window.location.href='/chat.html'">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        </button>
+        <button class="btn-icon" id="settingsMenuBtn" type="button" title="Settings menu"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01A1.65 1.65 0 0 0 9.91 3H10a2 2 0 1 1 4 0h.09a1.65 1.65 0 0 0 1.51 1h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01A1.65 1.65 0 0 0 21 9.91V10a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <div class="top-menu" id="topSettingsMenu">
+          <button class="top-menu-item" type="button" onclick="toggleTheme();toggleSettingsMenu(false)">Toggle Theme</button>
+          <button class="top-menu-item" type="button" onclick="openImport();toggleSettingsMenu(false)">Import Bookmarks</button>
           <button class="top-menu-item" type="button" onclick="openCmd();toggleSettingsMenu(false)">Command Palette</button>
           <div class="top-menu-divider"></div>
           <a class="top-menu-item" id="menuLoginLink" href="/register">GitHub Login</a>
@@ -184,7 +115,9 @@
           <span>Categories</span>
           <svg class="section-chevron" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        
+        <div class="sidebar-section" id="catSection">
+          <div id="sidebarCategories"></div>
+        </div>
       </div>
     </div>
   </nav>
@@ -424,7 +357,271 @@
   </div>
 </div>
 
+<!-- ════════════════════════════════════════════
+     IMPORT HUB MODAL
+════════════════════════════════════════════ -->
+<div class="overlay" id="importModal" onclick="if(event.target===this)closeModal('importModal')">
+  <div class="modal import-modal">
 
+    <div class="im-header">
+      <div class="im-title-row">
+        <div><div class="im-title">📥 Import Hub</div><div class="im-sub">9 ways to bring your bookmarks into LinkSync AI — choose your source below.</div></div>
+        <button class="modal-x" onclick="closeModal('importModal')" style="margin-top:0">✕</button>
+      </div>
+    </div>
+
+    <!-- Tab Strip -->
+    <div class="im-tabs" id="imTabs">
+      <button class="im-tab active" data-tab="browser"><span class="im-tab-ico">🌐</span>Browser</button>
+      <button class="im-tab" data-tab="apps"><span class="im-tab-ico">📦</span>Apps</button>
+      <button class="im-tab" data-tab="csv"><span class="im-tab-ico">📊</span>CSV/JSON</button>
+      <button class="im-tab" data-tab="opml"><span class="im-tab-ico">📡</span>OPML/RSS</button>
+      <button class="im-tab" data-tab="bookmarklet"><span class="im-tab-ico">🔗</span>Bookmarklet</button>
+      <button class="im-tab" data-tab="email"><span class="im-tab-ico">✉️</span>Email</button>
+      <button class="im-tab" data-tab="api"><span class="im-tab-ico">⚡</span>API</button>
+      <button class="im-tab" data-tab="zapier"><span class="im-tab-ico">🔌</span>Zapier</button>
+      <button class="im-tab" data-tab="pwa"><span class="im-tab-ico">📱</span>Mobile</button>
+    </div>
+
+    <!-- Body -->
+    <div class="im-body">
+
+      <!-- ── BROWSER HTML ── -->
+      <div class="im-section active" id="tab-browser">
+        <div class="info-banner"><div class="info-banner-ico">💡</div><div class="info-banner-text"><strong>Chrome, Firefox, Safari & Edge</strong> can all export bookmarks as a .html file. This is the fastest way to migrate — parse happens 100% in your browser, nothing is uploaded to a server.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>Chrome:</strong> Menu → Bookmarks → Bookmark Manager → ⋮ → Export bookmarks</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Firefox:</strong> Menu → Bookmarks → Manage Bookmarks → Import & Backup → Export Bookmarks to HTML</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text"><strong>Safari:</strong> File → Export Bookmarks… → Save as HTML</div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text"><strong>Edge:</strong> Menu → Favorites → ⋮ → Export favorites</div></div>
+        </div>
+        <div class="drop-zone" id="browserDrop">
+          <input type="file" accept=".html,.htm" id="browserFile" onchange="handleBrowserFile(event)"/>
+          <div class="dz-icon">🗂</div>
+          <div class="dz-title">Drop your bookmarks.html here</div>
+          <div class="dz-sub">Or click to browse — supports Chrome, Firefox, Safari, Edge Netscape format</div>
+          <div class="dz-formats"><span class="dz-fmt">.HTML</span><span class="dz-fmt">.HTM</span><span class="dz-fmt">NETSCAPE</span></div>
+        </div>
+      </div>
+
+      <!-- ── APPS ── -->
+      <div class="im-section" id="tab-apps">
+        <div class="info-banner"><div class="info-banner-ico">📦</div><div class="info-banner-text"><strong>Pocket, Raindrop.io, Pinboard, Instapaper</strong> — select your app and upload your export file. Folders and tags are preserved.</div></div>
+        <div class="source-grid" id="sourceGrid">
+          <div class="source-card sel" onclick="selectSource(this,'pocket')"><div class="source-ico">🎯</div><div class="source-name">Pocket</div><div class="source-fmt">HTML export</div></div>
+          <div class="source-card" onclick="selectSource(this,'raindrop')"><div class="source-ico">🌧</div><div class="source-name">Raindrop.io</div><div class="source-fmt">JSON export</div></div>
+          <div class="source-card" onclick="selectSource(this,'pinboard')"><div class="source-ico">📌</div><div class="source-name">Pinboard</div><div class="source-fmt">JSON export</div></div>
+          <div class="source-card" onclick="selectSource(this,'instapaper')"><div class="source-ico">📰</div><div class="source-name">Instapaper</div><div class="source-fmt">HTML export</div></div>
+          <div class="source-card" onclick="selectSource(this,'notion')"><div class="source-ico">🗒</div><div class="source-name">Notion</div><div class="source-fmt">CSV export</div></div>
+          <div class="source-card" onclick="selectSource(this,'generic')"><div class="source-ico">📄</div><div class="source-name">Other</div><div class="source-fmt">Any HTML/JSON</div></div>
+        </div>
+        <div class="drop-zone" id="appsDrop">
+          <input type="file" accept=".html,.htm,.json,.csv" id="appsFile" onchange="handleAppsFile(event)"/>
+          <div class="dz-icon">📤</div>
+          <div class="dz-title">Drop your export file here</div>
+          <div class="dz-sub" id="appsDzSub">Select an app above, then upload your export file</div>
+          <div class="dz-formats"><span class="dz-fmt">.HTML</span><span class="dz-fmt">.JSON</span><span class="dz-fmt">.CSV</span></div>
+        </div>
+      </div>
+
+      <!-- ── CSV / JSON ── -->
+      <div class="im-section" id="tab-csv">
+        <div class="info-banner"><div class="info-banner-ico">📊</div><div class="info-banner-text">Upload any <strong>CSV or JSON</strong> file. LinkSync AI auto-detects URL, title, tags, and notes columns. For JSON, provide an array of objects with <code style="color:var(--accent);font-size:11px">url</code>, <code style="color:var(--accent);font-size:11px">title</code>, <code style="color:var(--accent);font-size:11px">tags</code> fields.</div></div>
+        <div class="drop-zone" id="csvDrop">
+          <input type="file" accept=".csv,.json" id="csvFile" onchange="handleCSVFile(event)"/>
+          <div class="dz-icon">📋</div>
+          <div class="dz-title">Drop CSV or JSON file here</div>
+          <div class="dz-sub">Auto-maps columns. First row treated as headers for CSV.</div>
+          <div class="dz-formats"><span class="dz-fmt">.CSV</span><span class="dz-fmt">.JSON</span></div>
+        </div>
+        <div style="font-size:11.5px;color:var(--text2);border-top:1px solid var(--border);padding-top:14px">
+          <div style="font-family:var(--font-d);font-size:11px;font-weight:700;color:var(--text1);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Expected CSV Format</div>
+          <div class="code-block" style="font-size:11px"><span class="kw">url</span>,<span class="kw">title</span>,<span class="kw">tags</span>,<span class="kw">notes</span>
+<span class="str">https://example.com</span>,<span class="str">Example Site</span>,<span class="str">dev,tools</span>,<span class="str">My notes here</span>
+<span class="str">https://another.com</span>,<span class="str">Another Link</span>,<span class="str">ai</span>,<span class="str"></span></div>
+          <button class="code-copy" onclick="copyCSVTemplate()">Copy Template</button>
+        </div>
+        <div style="font-size:11.5px;color:var(--text2)">
+          <div style="font-family:var(--font-d);font-size:11px;font-weight:700;color:var(--text1);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Expected JSON Format</div>
+          <div class="code-block" style="font-size:11px"><span class="cm">// Array of bookmark objects</span>
+[
+  {
+    <span class="kw">"url"</span>: <span class="str">"https://example.com"</span>,
+    <span class="kw">"title"</span>: <span class="str">"Example Site"</span>,
+    <span class="kw">"tags"</span>: [<span class="str">"dev"</span>, <span class="str">"tools"</span>],
+    <span class="kw">"notes"</span>: <span class="str">"Optional notes"</span>
+  }
+]</div>
+          <button class="code-copy" onclick="copyJSONTemplate()">Copy Template</button>
+        </div>
+      </div>
+
+      <!-- ── OPML / RSS ── -->
+      <div class="im-section" id="tab-opml">
+        <div class="info-banner"><div class="info-banner-ico">📡</div><div class="info-banner-text"><strong>OPML</strong> files store RSS feed subscriptions (exported from Feedly, Inoreader, NewsBlur, etc.). Each feed URL becomes a bookmark — perfect for saving your reading list.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>Feedly:</strong> Organize → Import/Export → Export as OPML</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Inoreader:</strong> Preferences → Import/Export → Export subscriptions</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text"><strong>NewsBlur:</strong> Account → Export → Download OPML</div></div>
+        </div>
+        <div class="drop-zone" id="opmlDrop">
+          <input type="file" accept=".opml,.xml" id="opmlFile" onchange="handleOPMLFile(event)"/>
+          <div class="dz-icon">📡</div>
+          <div class="dz-title">Drop your OPML or XML file here</div>
+          <div class="dz-sub">Feed titles and URLs are imported as bookmarks with the RSS tag</div>
+          <div class="dz-formats"><span class="dz-fmt">.OPML</span><span class="dz-fmt">.XML</span></div>
+        </div>
+      </div>
+
+      <!-- ── BOOKMARKLET ── -->
+      <div class="im-section" id="tab-bookmarklet">
+        <div class="info-banner"><div class="info-banner-ico">🔗</div><div class="info-banner-text"><strong>Drag the button below</strong> to your bookmarks bar. Then click it on any webpage to instantly save to LinkSync AI — pre-filled with page title and URL.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text">Make sure your browser <strong>bookmarks bar is visible</strong> (Ctrl+Shift+B / Cmd+Shift+B)</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Drag</strong> the green button below onto your bookmarks bar</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Navigate to any page and click <strong>"+ Save to LinkSync AI"</strong> in your bookmarks bar</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 0">
+          <a class="bookmarklet-drag" id="bookmarkletLink" href="#" onclick="return false;" draggable="true">
+            🔗 + Save to LinkSync AI
+          </a>
+          <div style="flex:1;min-width:160px">
+            <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px;font-family:var(--font-d);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Or copy the code:</div>
+            <div class="bookmarklet-code" id="bookmarkletCode" onclick="copyBookmarklet()"></div>
+          </div>
+        </div>
+        <button class="btn-outline" style="width:100%" onclick="copyBookmarklet()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Bookmarklet Code
+        </button>
+      </div>
+
+      <!-- ── EMAIL ── -->
+      <div class="im-section" id="tab-email">
+        <div class="info-banner"><div class="info-banner-ico">✉️</div><div class="info-banner-text">Forward or email any link to your <strong>unique LinkSync AI inbox address</strong>. The URL in the email body is saved as a bookmark instantly. Great for mobile sharing.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text">Copy your personal <strong>LinkSync AI inbox address</strong> below</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text">On any phone/desktop, use <strong>Share → Mail</strong> and send to this address</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Or <strong>forward newsletter emails</strong> — every URL in the body gets saved</div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">Add it to your <strong>contacts as "LinkSync AI"</strong> for fast mobile access</div></div>
+        </div>
+        <div class="fl">
+          <div class="fl-label">Your personal inbox address</div>
+          <div class="email-address-wrap">
+            <div class="email-addr" id="emailAddr">save+user_abc123@linksync-ai.app</div>
+            <button class="copy-btn" onclick="copyEmail()">Copy</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:6px">📱</div>
+            <div style="font-size:11.5px;font-weight:700;color:var(--text1);font-family:var(--font-d)">iOS Share Sheet</div>
+            <div style="font-size:10.5px;color:var(--text2);margin-top:3px">Share → Mail → paste address</div>
+          </div>
+          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:12px;text-align:center">
+            <div style="font-size:20px;margin-bottom:6px">📧</div>
+            <div style="font-size:11.5px;font-weight:700;color:var(--text1);font-family:var(--font-d)">Newsletter Saver</div>
+            <div style="font-size:10.5px;color:var(--text2);margin-top:3px">Forward any email to save all links</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── API ── -->
+      <div class="im-section" id="tab-api">
+        <div class="info-banner"><div class="info-banner-ico">⚡</div><div class="info-banner-text">Use the <strong>REST API</strong> to save bookmarks programmatically from any script, app, or browser extension. Authenticate with your API key.</div></div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">Endpoints</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.linksync-ai.app/v1/bookmarks')">Copy</button></div>
+            <div class="api-endpoint"><span class="api-method get">GET</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks</span></div>
+            <div class="api-endpoint"><span class="api-method" style="background:rgba(240,82,82,.1);color:#F05252">DEL</span><span class="api-url">https://api.linksync-ai.app/v1/bookmarks/:id</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">Example — Save a Bookmark</div>
+          <div class="code-block"><button class="code-copy" onclick="copyAPIExample()">Copy</button><span class="kw">curl</span> -X POST https://api.linksync-ai.app/v1/bookmarks \
+  -H <span class="str">"Authorization: Bearer YOUR_API_KEY"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "url": "https://example.com",
+    "title": "Example Site",
+    "tags": ["dev", "tools"],
+    "notes": "Saved via API"
+  }'</span></div>
+        </div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">Your API Key</div>
+          <div class="email-address-wrap">
+            <div class="email-addr" style="font-size:12px;letter-spacing:1px">mk_live_••••••••••••••••••••••</div>
+            <button class="copy-btn" onclick="showToast('Sign in to reveal your API key','warn')">Reveal</button>
+          </div>
+        </div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">Webhook — Receive Events</div>
+          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url" id="webhookUrl">https://your-server.com/linksync-webhook</span><button class="copy-btn" style="margin-left:auto;padding:4px 10px;font-size:11px" onclick="showToast('Configure webhook URL in Settings','info')">Set URL</button></div>
+        </div>
+      </div>
+
+      <!-- ── ZAPIER ── -->
+      <div class="im-section" id="tab-zapier">
+        <div class="info-banner"><div class="info-banner-ico">🔌</div><div class="info-banner-text">Connect LinkSync AI to <strong>6,000+ apps</strong> via Zapier or Make (formerly Integromat). Automatically save bookmarks from Twitter/X likes, Slack messages, Gmail, Notion and more.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text">Go to <strong>zapier.com</strong> or <strong>make.com</strong> and create a new Zap/Scenario</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text">Set your <strong>trigger</strong> (e.g. "New liked Tweet", "New starred email in Gmail")</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Set the <strong>action</strong> to "Webhooks by Zapier → POST" using your LinkSync AI API endpoint</div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">Map the URL and title fields, then <strong>test and enable</strong> your Zap</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="source-card" onclick="showToast('Twitter/X → LinkSync AI template coming soon','info')"><div class="source-ico">🐦</div><div class="source-name">Twitter/X Likes</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Gmail → LinkSync AI template coming soon','info')"><div class="source-ico">📧</div><div class="source-name">Gmail Stars</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Slack → LinkSync AI template coming soon','info')"><div class="source-ico">💬</div><div class="source-name">Slack Links</div><div class="source-fmt">via Zapier</div></div>
+          <div class="source-card" onclick="showToast('Notion → LinkSync AI template coming soon','info')"><div class="source-ico">🗒</div><div class="source-name">Notion DB</div><div class="source-fmt">via Make</div></div>
+          <div class="source-card" onclick="showToast('IFTTT → LinkSync AI template coming soon','info')"><div class="source-ico">⚡</div><div class="source-name">IFTTT</div><div class="source-fmt">Applet</div></div>
+          <div class="source-card" onclick="showToast('n8n → LinkSync AI template coming soon','info')"><div class="source-ico">🔄</div><div class="source-name">n8n</div><div class="source-fmt">Self-hosted</div></div>
+        </div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">Zapier Webhook URL</div>
+          <div class="api-endpoint"><span class="api-method post">POST</span><span class="api-url">https://api.linksync-ai.app/v1/zapier/hook</span><button class="code-copy" style="position:static;margin-left:auto" onclick="copyText('https://api.linksync-ai.app/v1/zapier/hook')">Copy</button></div>
+        </div>
+      </div>
+
+      <!-- ── PWA / MOBILE ── -->
+      <div class="im-section" id="tab-pwa">
+        <div class="info-banner"><div class="info-banner-ico">📱</div><div class="info-banner-text">Install LinkSync AI as a <strong>PWA</strong> to get native share sheet integration on iOS and Android — save any link from any app in 2 taps.</div></div>
+        <div class="how-steps">
+          <div class="how-step"><div class="how-num">1</div><div class="how-text"><strong>iOS Safari:</strong> Tap Share → Add to Home Screen → Tap "Add"</div></div>
+          <div class="how-step"><div class="how-num">2</div><div class="how-text"><strong>Android Chrome:</strong> Menu → Add to Home screen → Install</div></div>
+          <div class="how-step"><div class="how-num">3</div><div class="how-text">Now open any link in any app, tap <strong>Share → LinkSync AI</strong></div></div>
+          <div class="how-step"><div class="how-num">4</div><div class="how-text">LinkSync AI appears as <strong>"Save to LinkSync AI"</strong> in your native share sheet</div></div>
+        </div>
+        <div>
+          <div class="fl-label" style="margin-bottom:8px">manifest.json — Share Target Config</div>
+          <div class="pwa-manifest"><span class="kw">{
+  "name"</span>: <span class="str">"LinkSync AI"</span>,
+  <span class="kw">"short_name"</span>: <span class="str">"LinkSync"</span>,
+  <span class="kw">"display"</span>: <span class="str">"standalone"</span>,
+  <span class="kw">"share_target"</span>: {
+    <span class="kw">"action"</span>: <span class="str">"/save"</span>,
+    <span class="kw">"method"</span>: <span class="str">"POST"</span>,
+    <span class="kw">"enctype"</span>: <span class="str">"multipart/form-data"</span>,
+    <span class="kw">"params"</span>: {
+      <span class="kw">"title"</span>: <span class="str">"title"</span>,
+      <span class="kw">"text"</span>: <span class="str">"text"</span>,
+      <span class="kw">"url"</span>: <span class="str">"url"</span>
+    }
+  }
+}</div>
+          <button class="code-copy" onclick="copyPWAManifest()" style="position:relative;top:auto;right:auto;margin-top:6px;display:block">Copy manifest.json</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:8px">🍎</div><div style="font-size:12px;font-weight:700;color:var(--text1);font-family:var(--font-d)">iOS Share Sheet</div><div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Works after Add to Home Screen on Safari</div></div>
+          <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r8);padding:14px;text-align:center"><div style="font-size:24px;margin-bottom:8px">🤖</div><div style="font-size:12px;font-weight:700;color:var(--text1);font-family:var(--font-d)">Android Intent</div><div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">Native "Save to LinkSync AI" in all Android share sheets</div></div>
+        </div>
+      </div>
+
+    </div><!-- /im-body -->
+  </div>
+</div>
 
 <!-- ════════════════════════════════════════════
      PREVIEW MODAL
@@ -472,14 +669,47 @@
 </div>
 
 
-
+<!-- CMD PALETTE -->
+<div class="cmd-overlay" id="cmdPalette" onclick="if(event.target===this)closeCmd()">
+  <div class="cmd-box">
+    <div class="cmd-search"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" id="cmdInput" placeholder="Search bookmarks or type a command…" oninput="cmdFilter(this.value)"/></div>
+    <div class="cmd-results" id="cmdResults"></div>
+  </div>
+</div>
 
 <!-- TOAST STACK -->
 <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
+<!-- FLOATING AI CHAT -->
+<button class="ai-chat-fab" id="aiChatFab" type="button" aria-label="Open AI bookmark chat" title="AI Chat">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</button>
 
-
-
+<aside class="ai-chat-drawer" id="aiChatDrawer" aria-hidden="true">
+  <div class="ai-chat-head">
+    <div class="ai-chat-title-wrap">
+      <div class="ai-chat-title">Bookmark AI Assistant</div>
+      <div class="ai-chat-sub">Ask anything about your bookmarks</div>
+    </div>
+    <button class="ai-chat-close" id="aiChatClose" type="button" aria-label="Close AI chat">✕</button>
+  </div>
+  <div class="ai-chat-log" id="aiChatLog" aria-live="polite">
+    <div class="ai-chat-msg bot">Hi! Try: "How many starred bookmarks do I have?", "Show bookmarks about MCP", or "What are my top tags?"</div>
+  </div>
+  <div class="ai-chat-quick" id="aiChatQuick">
+    <button class="search-chip" type="button" data-q="How many bookmarks do I have?">Total count</button>
+    <button class="search-chip" type="button" data-q="Show my starred bookmarks">Starred</button>
+    <button class="search-chip" type="button" data-q="Show recent bookmarks from this week">Recent</button>
+    <button class="search-chip" type="button" data-q="What are my top tags?">Top tags</button>
+  </div>
+  <div class="ai-chat-input-row">
+    <input class="fi" id="aiChatInput" type="text" placeholder="Ask about your bookmarks..." autocomplete="off" />
+    <button class="btn-primary" id="aiChatSend" type="button">Ask</button>
+  </div>
+  <div class="ai-chat-status" id="aiChatStatus">Using your bookmark data from this account.</div>
+</aside>
 
 <script src="/components/social-share.js"></script>
 <script src="/main.js"></script>

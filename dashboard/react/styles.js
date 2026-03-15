@@ -1,5 +1,3 @@
-export const baseCss = `
-
 @media (max-width: 700px) {
   .bm-content-grid {
     gap: 14px;
@@ -124,7 +122,7 @@ export const baseCss = `
   .bm-tab-pills .bm-side-link { font-size: 13px; padding: 8px 10px; }
   .bm-content-grid { padding: 0 4px; }
 }
-
+export const baseCss = `
 :root {
   --bg: #080e17;
   --surface: #111e2d;
@@ -308,6 +306,29 @@ pre {
 .running { background: rgba(0, 212, 160, 0.14); color: var(--ok); border-color: rgba(0, 212, 160, 0.3); }
 .restarting { background: rgba(245, 166, 35, 0.14); color: var(--warn); border-color: rgba(245, 166, 35, 0.3); }
 .stopped { background: rgba(240, 82, 82, 0.14); color: var(--danger); border-color: rgba(240, 82, 82, 0.3); }
+.code-inline {
+  font-family: Consolas, "Courier New", monospace;
+  color: #8fd8ff;
+}
+.route-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.route-tab {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+.route-tab.active {
+  color: var(--accent);
+  border-color: rgba(6, 192, 224, 0.5);
+  background: rgba(6, 192, 224, 0.08);
+}
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, minmax(100px, 1fr)); }
 }
