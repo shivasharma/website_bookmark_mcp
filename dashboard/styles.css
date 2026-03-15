@@ -555,8 +555,13 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
     flex-direction: row;
     gap: 32px;
     padding: 32px 0 0 0;
-    min-width: 420px;
-    max-width: 600px;
+    min-width: 320px;
+    max-width: 420px;
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+    box-shadow: 2px 0 24px 0 rgba(6, 192, 224, 0.08), 0 1.5px 0 #f2f6fa;
   }
 
   .sidebar-two-col {
@@ -571,7 +576,29 @@ button{font-family:inherit}input,textarea,select{font-family:inherit}
     display: flex;
     flex-direction: column;
     gap: 8px;
-    min-width: 180px;
+    min-width: 140px;
+  }
+  @media (max-width: 900px) {
+    .bm-sidebar {
+      flex-direction: column;
+      min-width: 0;
+      max-width: 100vw;
+      width: 100vw;
+      height: auto;
+      border-radius: 0;
+      box-shadow: none;
+      position: static;
+      padding: 0;
+      gap: 0;
+    }
+    .sidebar-two-col {
+      flex-direction: column;
+      gap: 0;
+    }
+    .sidebar-col {
+      min-width: 0;
+      padding: 16px 12px;
+    }
   }
   background-color: var(--s4);
   outline: none;
