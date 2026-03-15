@@ -1,4 +1,5 @@
 
+
 import React, { useRef, useState } from 'react';
 
 export const ContactUs = () => {
@@ -28,16 +29,31 @@ export const ContactUs = () => {
   };
 
   return (
-    <form ref={form} onSubmit={sendFeedback}>
-      <label>Name</label>
-      <input type="text" name="user_name" required />
-      <label>Email</label>
-      <input type="email" name="user_email" required />
-      <label>Message</label>
-      <textarea name="message" required />
-      <input type="submit" value="Send" />
-      {status === 'SUCCESS' && <div style={{color:'green'}}>Feedback sent!</div>}
-      {status === 'FAILED' && <div style={{color:'red'}}>Failed to send feedback.</div>}
-    </form>
+    <div className="content" style={{maxWidth:480,margin:'32px auto'}}>
+      <div className="panel ios-card" style={{padding:'0 0 24px 0',maxWidth:420,margin:'0 auto'}}>
+        <div className="panel-hdr" style={{padding:'20px 24px 10px 24px'}}>
+          <div className="panel-ttl" style={{fontSize:18,fontWeight:700}}>Send Feedback</div>
+        </div>
+        <div className="panel-body" style={{padding:'0 24px'}}>
+          <form ref={form} onSubmit={sendFeedback} autoComplete="off">
+            <div className="form-field">
+              <div className="form-lbl">Name</div>
+              <input className="form-input" type="text" name="user_name" required placeholder="Your name" />
+            </div>
+            <div className="form-field">
+              <div className="form-lbl">Email</div>
+              <input className="form-input" type="email" name="user_email" required placeholder="you@email.com" />
+            </div>
+            <div className="form-field">
+              <div className="form-lbl">Message</div>
+              <textarea className="form-input" name="message" required placeholder="Type your feedback..." rows={4} style={{resize:'vertical'}} />
+            </div>
+            <button className="tb-btn btn-primary btn-full" type="submit" style={{marginTop:10}}>Send</button>
+            {status === 'SUCCESS' && <div style={{color:'var(--green)',marginTop:12}}>Feedback sent!</div>}
+            {status === 'FAILED' && <div style={{color:'var(--red)',marginTop:12}}>Failed to send feedback.</div>}
+          </form>
+        </div>
+      </div>
+    </div>
   );
 };
