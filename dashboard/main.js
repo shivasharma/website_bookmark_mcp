@@ -47,8 +47,8 @@ const authEls={
   topNotifyBadge:document.getElementById('topNotifyBadge'),
   menuLogoutBtn:document.getElementById('menuLogoutBtn'),
   menuLoginLink:document.getElementById('menuLoginLink'),
-  settingsMenuBtn:document.getElementById('settingsMenuBtn'),
-  topSettingsMenu:document.getElementById('topSettingsMenu'),
+  // settingsMenuBtn:document.getElementById('settingsMenuBtn'),
+  // topSettingsMenu:document.getElementById('topSettingsMenu'),
   userAvatarBtn:document.getElementById('userAvatarBtn')
 };
 
@@ -184,11 +184,7 @@ async function loadNotificationSummary(){
   }
 }
 
-function toggleSettingsMenu(force){
-  if(!authEls.topSettingsMenu)return;
-  const shouldOpen=typeof force==='boolean'?force:!authEls.topSettingsMenu.classList.contains('show');
-  authEls.topSettingsMenu.classList.toggle('show',shouldOpen);
-}
+// function toggleSettingsMenu(force) { /* removed */ }
 
 // ...existing code...
 
@@ -251,7 +247,7 @@ function renderZeroBookmarksState(){
     <button class="btn-outline" onclick="openImport()">📥 Import Bookmarks</button>
   </div>
   ${!tourDone?`<button class="empty-tour-btn" onclick="startOnboardTour()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Take a quick tour</button>`:''}
-// ...existing code...
+  ${isSuggestionsHidden()?`<div class="assist-panel assist-collapsed"><button class="suggest-show-btn" onclick="showSuggestions()">Show suggestions</button></div>`:`<div class="assist-panel"><div class="assist-header"><div class="assist-title">✦ Suggested resources to get started</div><button class="suggest-hide-btn" onclick="hideSuggestions()" title="Hide suggestions" aria-label="Hide suggestions">✕ Hide</button></div><div class="suggest-grid">${SUGGESTED_BOOKMARKS.map(item=>renderSuggestCard(item)).join('')}</div></div>`}
 </div>`;
 }
 
@@ -501,18 +497,7 @@ function setCategoryFilter(tag){
   render();
 }
 
-function renderSidebarCategories(){
-  const container=document.getElementById('sidebarCategories');
-  if(!container)return;
-  const freq=computeTagFrequency();
-  const topTags=getTopTags(freq,10);
-  if(!topTags.length){container.innerHTML='<div style="padding:4px 12px;font-size:11px;color:var(--text3)">No categories yet</div>';return;}
-  const colorCycle=['c1','c2','c3','c4','c5'];
-  container.innerHTML=topTags.map((tag,i)=>{
-    const isActive=currentFilter===tag;
-    return `<a class="nav-link${isActive?' active':''}" href="#" data-cat="${esc(tag)}" onclick="event.preventDefault();setCategoryFilter('${esc(tag)}')"><span class="stag ${colorCycle[i%5]}" style="width:8px;height:8px;min-width:8px;padding:0;border-radius:50%"></span>${esc(tag.charAt(0).toUpperCase()+tag.slice(1))}<span class="nav-count">${freq[tag]}</span></a>`;
-  }).join('');
-}
+// Sidebar categories removed
 
 function loadRecentSearches(){
   try{
@@ -577,7 +562,7 @@ function render(){
   document.getElementById('snReadLater').textContent=bookmarks.filter(b=>(b.tags||[]).some(t=>String(t).toLowerCase()==='read later')).length;
   container.className=currentView==='grid'?'bk-grid':currentView==='table'?'bk-table-wrap':'bk-list';
   renderDynamicTagPills();
-  renderSidebarCategories();
+  // renderSidebarCategories(); // sidebar categories removed
   if(!list.length){
     if(authBlocked){
         container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login to explore more features and also suggest best ideas</div><a class="btn-outline" href="/register" style="margin-top:10px;display:inline-flex">Login</a></div>`;
@@ -2541,18 +2526,7 @@ async function initDashboard(){
   if(authEls.menuLogoutBtn){
     authEls.menuLogoutBtn.addEventListener('click',async()=>{toggleSettingsMenu(false);await performLogout()});
   }
-  if(authEls.settingsMenuBtn){
-    authEls.settingsMenuBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
-  }
-  if(authEls.userAvatarBtn){
-    authEls.userAvatarBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
-  }
-  document.addEventListener('click',(event)=>{
-    if(!authEls.topSettingsMenu||!authEls.settingsMenuBtn)return;
-    const inMenu=authEls.topSettingsMenu.contains(event.target);
-    const onBtn=authEls.settingsMenuBtn.contains(event.target);
-    if(!inMenu&&!onBtn){toggleSettingsMenu(false)}
-  });
+  // Settings menu logic removed
   loadRecentSearches();
   renderRecentSearchChips();
   setupQuickSmartInput();

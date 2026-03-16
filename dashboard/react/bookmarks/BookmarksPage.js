@@ -569,6 +569,7 @@ export function BookmarksPage() {
     React.createElement(TopBar, {
       onOpenMcp: () => handleSectionChange("mcp"),
       onOpenNotifications: () => handleSectionChange("notifications"),
+      onOpenAIChat: () => handleSectionChange("aichat"),
       unreadCount,
       currentUser,
       onLogout: handleLogout,
