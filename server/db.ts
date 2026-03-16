@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { EventEmitter } from "node:events";
 import { Client, Pool } from "pg";
+import fs from "fs";
+import path from "path";
 import { randomUUID } from "node:crypto";
 import type {
   Bookmark,
@@ -13,8 +15,24 @@ import type {
 } from "./types.js";
 
 const connectionString = process.env.DATABASE_URL ?? "postgresql://postgres:postgres@localhost:5433/bookmark_mcp";
-
 const pool = new Pool({ connectionString });
+
+const ALLOW_LOCAL_FALLBACK = process.env.ALLOW_LOCAL_FALLBACK === "true";
+const BOOKMARKS_JSON_PATH = path.join(__dirname, "bookmarks.json");
+
+function readBookmarksJson() {
+  try {
+    const raw = fs.readFileSync(BOOKMARKS_JSON_PATH, "utf8");
+    const data = JSON.parse(raw);
+    return data && Array.isArray(data.bookmarks) ? data : { lastId: 0, bookmarks: [] };
+  } catch {
+    return { lastId: 0, bookmarks: [] };
+  }
+}
+
+function writeBookmarksJson(data) {
+  fs.writeFileSync(BOOKMARKS_JSON_PATH, JSON.stringify(data, null, 2));
+}
 const realtimeEvents = new EventEmitter();
 realtimeEvents.setMaxListeners(200);
 const BOOKMARKS_CHANNEL = "bookmark_events";
@@ -360,51 +378,58 @@ export async function saveBookmark(
   input: SaveBookmarkInput,
   source: BookmarkEventSource = "portal",
 ): Promise<Bookmark> {
+  if (ALLOW_LOCAL_FALLBACK) {
+    // File-based fallback
+    const data = readBookmarksJson();
+    let bookmark = data.bookmarks.find((b) => b.url === input.url);
+    if (bookmark) {
+      // Update existing
+      bookmark = Object.assign(bookmark, {
+        ...input,
+        updated_at: new Date().toISOString(),
+      });
+    } else {
+      // Add new
+      const id = (data.lastId || 0) + 1;
+      bookmark = {
+        id,
+        ...input,
+        is_favorite: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      data.bookmarks.push(bookmark);
+      data.lastId = id;
+    }
+    writeBookmarksJson(data);
+    return bookmark;
+  }
+  // DB mode
   const userId = input.user_id ?? Number(process.env.DEFAULT_USER_ID ?? 1);
-
   const existing = await pool.query(
-    `
-      SELECT * FROM bookmarks
-      WHERE user_id = $1 AND url = $2
-      LIMIT 1
-    `,
+    `SELECT * FROM bookmarks WHERE user_id = $1 AND url = $2 LIMIT 1`,
     [userId, input.url],
   );
-
   if (existing.rows.length > 0) {
     const updated = await updateBookmark(
       Number(existing.rows[0].id),
       {
-      title: input.title,
-      description: input.description,
-      tags: input.tags,
-      favicon: input.favicon,
-      notes: input.notes,
+        title: input.title,
+        description: input.description,
+        tags: input.tags,
+        favicon: input.favicon,
+        notes: input.notes,
       },
       userId,
       source,
     );
-    if (!updated) {
-      throw new Error("Failed to update existing bookmark");
-    }
+    if (!updated) throw new Error("Failed to update existing bookmark");
     return updated;
   }
-
   const { rows } = await pool.query(
-    `
-      INSERT INTO bookmarks (user_id, url, title, description, tags, favicon, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *
-    `,
-    [
-      userId,
-      input.url,
-      input.title ?? "",
-      input.description ?? "",
-      input.tags ?? [],
-      input.favicon ?? "",
-      input.notes ?? "",
-    ],
+    `INSERT INTO bookmarks (user_id, url, title, description, tags, favicon, notes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [userId, input.url, input.title ?? "", input.description ?? "", input.tags ?? [], input.favicon ?? "", input.notes ?? ""],
   );
   const created = rowToBookmark(rows[0]);
   await emitBookmarkEvent({
@@ -420,28 +445,49 @@ export async function saveBookmark(
 }
 
 export async function getBookmarkById(id: number, userId?: number): Promise<Bookmark | null> {
+  if (ALLOW_LOCAL_FALLBACK) {
+    const data = readBookmarksJson();
+    return data.bookmarks.find((b) => b.id === id) || null;
+  }
   const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
   const { rows } = await pool.query(
-    `
-      SELECT * FROM bookmarks
-      WHERE id = $1 AND user_id = $2
-      LIMIT 1
-    `,
+    `SELECT * FROM bookmarks WHERE id = $1 AND user_id = $2 LIMIT 1`,
     [id, effectiveUserId],
   );
-  if (!rows.length) {
-    return null;
-  }
+  if (!rows.length) return null;
   return rowToBookmark(rows[0]);
 }
 
 export async function listBookmarks(input: ListBookmarksInput = {}): Promise<{ items: Bookmark[]; total: number }> {
+  if (ALLOW_LOCAL_FALLBACK) {
+    const data = readBookmarksJson();
+    let items = data.bookmarks;
+    if (input.search) {
+      const q = input.search.toLowerCase();
+      items = items.filter(b =>
+        b.title?.toLowerCase().includes(q) ||
+        b.url?.toLowerCase().includes(q) ||
+        b.description?.toLowerCase().includes(q) ||
+        b.notes?.toLowerCase().includes(q)
+      );
+    }
+    if (input.tag) {
+      items = items.filter(b => Array.isArray(b.tags) && b.tags.includes(input.tag));
+    }
+    if (input.favorite) {
+      items = items.filter(b => b.is_favorite);
+    }
+    const offset = Math.max(0, Number(input.offset ?? 0));
+    const limit = Math.max(1, Math.min(100, Number(input.limit ?? 30)));
+    const paged = items.slice(offset, offset + limit);
+    return { items: paged, total: items.length };
+  }
+  // DB mode
   const values: unknown[] = [input.user_id ?? Number(process.env.DEFAULT_USER_ID ?? 1)];
   const where: string[] = ["user_id = $1"];
   let arg = 2;
   const limit = Math.max(1, Math.min(100, Number(input.limit ?? 30)));
   const offset = Math.max(0, Number(input.offset ?? 0));
-
   if (input.search) {
     where.push(
       `(LOWER(title) LIKE $${arg} OR LOWER(url) LIKE $${arg} OR LOWER(description) LIKE $${arg} OR LOWER(notes) LIKE $${arg})`,
@@ -449,36 +495,21 @@ export async function listBookmarks(input: ListBookmarksInput = {}): Promise<{ i
     values.push(`%${input.search.toLowerCase()}%`);
     arg += 1;
   }
-
   if (input.tag) {
     where.push(`$${arg} = ANY(tags)`);
     values.push(input.tag);
     arg += 1;
   }
-
   if (input.favorite) {
     where.push("is_favorite = TRUE");
   }
-
   const { rows: countRows } = await pool.query(
-    `
-      SELECT COUNT(*)::int AS total
-      FROM bookmarks
-      WHERE ${where.join(" AND ")}
-    `,
+    `SELECT COUNT(*)::int AS total FROM bookmarks WHERE ${where.join(" AND ")}`,
     values,
   );
-
   const pageValues = [...values, limit, offset];
   const { rows } = await pool.query(
-    `
-      SELECT *
-      FROM bookmarks
-      WHERE ${where.join(" AND ")}
-      ORDER BY created_at DESC
-      LIMIT $${arg}
-      OFFSET $${arg + 1}
-    `,
+    `SELECT * FROM bookmarks WHERE ${where.join(" AND ")} ORDER BY created_at DESC LIMIT $${arg} OFFSET $${arg + 1}`,
     pageValues,
   );
   return {
@@ -493,12 +524,23 @@ export async function updateBookmark(
   userId?: number,
   source: BookmarkEventSource = "portal",
 ): Promise<Bookmark | null> {
+  if (ALLOW_LOCAL_FALLBACK) {
+    const data = readBookmarksJson();
+    const idx = data.bookmarks.findIndex((b) => b.id === id);
+    if (idx === -1) return null;
+    const current = data.bookmarks[idx];
+    const updated = {
+      ...current,
+      ...fields,
+      updated_at: new Date().toISOString(),
+    };
+    data.bookmarks[idx] = updated;
+    writeBookmarksJson(data);
+    return updated;
+  }
   const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
   const current = await getBookmarkById(id, effectiveUserId);
-  if (!current) {
-    return null;
-  }
-
+  if (!current) return null;
   const merged: Bookmark = {
     ...current,
     url: fields.url ?? current.url,
@@ -510,38 +552,11 @@ export async function updateBookmark(
     is_favorite: fields.is_favorite ?? current.is_favorite,
     updated_at: new Date().toISOString(),
   };
-
   const { rows } = await pool.query(
-    `
-      UPDATE bookmarks
-      SET
-        url = $1,
-        title = $2,
-        description = $3,
-        tags = $4,
-        favicon = $5,
-        notes = $6,
-        is_favorite = $7,
-        updated_at = NOW()
-      WHERE id = $8 AND user_id = $9
-      RETURNING *
-    `,
-    [
-      merged.url,
-      merged.title,
-      merged.description,
-      merged.tags,
-      merged.favicon,
-      merged.notes,
-      merged.is_favorite,
-      id,
-      effectiveUserId,
-    ],
+    `UPDATE bookmarks SET url = $1, title = $2, description = $3, tags = $4, favicon = $5, notes = $6, is_favorite = $7, updated_at = NOW() WHERE id = $8 AND user_id = $9 RETURNING *`,
+    [merged.url, merged.title, merged.description, merged.tags, merged.favicon, merged.notes, merged.is_favorite, id, effectiveUserId],
   );
-
-  if (!rows.length) {
-    return null;
-  }
+  if (!rows.length) return null;
   const updated = rowToBookmark(rows[0]);
   await emitBookmarkEvent({
     action: "updated",
@@ -560,18 +575,20 @@ export async function deleteBookmark(
   userId?: number,
   source: BookmarkEventSource = "portal",
 ): Promise<Bookmark | null> {
+  if (ALLOW_LOCAL_FALLBACK) {
+    const data = readBookmarksJson();
+    const idx = data.bookmarks.findIndex((b) => b.id === id);
+    if (idx === -1) return null;
+    const [deleted] = data.bookmarks.splice(idx, 1);
+    writeBookmarksJson(data);
+    return deleted;
+  }
   const effectiveUserId = userId ?? Number(process.env.DEFAULT_USER_ID ?? 1);
   const { rows } = await pool.query(
-    `
-      DELETE FROM bookmarks
-      WHERE id = $1 AND user_id = $2
-      RETURNING *
-    `,
+    `DELETE FROM bookmarks WHERE id = $1 AND user_id = $2 RETURNING *`,
     [id, effectiveUserId],
   );
-  if (!rows.length) {
-    return null;
-  }
+  if (!rows.length) return null;
   const deleted = rowToBookmark(rows[0]);
   await emitBookmarkEvent({
     action: "deleted",

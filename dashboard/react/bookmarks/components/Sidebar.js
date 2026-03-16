@@ -83,32 +83,7 @@ export function Sidebar({ filter, section, onSectionChange, onFilterChange, tota
     "aside",
     { className: "bm-sidebar" },
     React.createElement("div", { className: "bm-side-title" }, "Library"),
-    React.createElement(NavLink, {
-      label: "All Bookmarks",
-      count: total,
-      icon: React.createElement(IconBookmark, { className: "bm-icon" }),
-      active: section === "bookmarks" && filter === "all",
-      onClick: () => openBookmarks("all")
-    }),
-    React.createElement(NavLink, {
-      label: "Starred",
-      count: starred,
-      icon: React.createElement(IconStar, { className: "bm-icon" }),
-      active: section === "bookmarks" && filter === "starred",
-      onClick: () => openBookmarks("starred")
-    }),
-    React.createElement(NavLink, {
-      label: "Recent",
-      icon: React.createElement(IconClock, { className: "bm-icon" }),
-      active: section === "bookmarks" && filter === "recent",
-      onClick: () => openBookmarks("recent")
-    }),
-    React.createElement(NavLink, {
-      label: "Read Later",
-      icon: React.createElement(IconReadLater, { className: "bm-icon" }),
-      active: section === "bookmarks" && filter === "unread",
-      onClick: () => openBookmarks("unread")
-    }),
+    // ...existing code...
     React.createElement(NavLink, {
       label: "Notifications",
       count: unreadCount,
