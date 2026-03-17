@@ -435,8 +435,7 @@ function getUserId(req: express.Request): number {
   if (req.isAuthenticated() && req.user?.id) {
     return req.user.id;
   }
-  // Only allow local fallback if FORCE_INTRO_PAGE is not set
-  if (ALLOW_LOCAL_FALLBACK && process.env.FORCE_INTRO_PAGE !== 'true') {
+  if (ALLOW_LOCAL_FALLBACK) {
     return Number(process.env.DEFAULT_USER_ID ?? 1);
   }
   throw new Error("Authentication required");

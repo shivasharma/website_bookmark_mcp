@@ -22,14 +22,17 @@ function IconAIChat(props = {}) {
   );
 }
 
-// Patch NavLink (category support removed, if any)
-function NavLink({ label, active, onClick, icon, count }) {
+// Patch NavLink to support drop for tags/categories
+function NavLink({ label, active, onClick, icon, count, onDrop, onDragOver }) {
   return React.createElement(
     "button",
     {
       className: `bm-side-link${active ? " active" : ""}`,
       type: "button",
-      onClick
+      onClick,
+      onDrop: onDrop,
+      onDragOver: onDragOver,
+      style: onDrop ? { border: "2px dashed var(--accent)" } : undefined
     },
     icon,
     React.createElement("span", { className: "bm-side-label" }, label),
@@ -58,20 +61,23 @@ function CollapsibleSection({ title, children, defaultOpen = true }) {
   );
 }
 
-
-
 export function Sidebar({ filter, section, onSectionChange, onFilterChange, total, starred, unreadCount, onBookmarkDrop }) {
   function openBookmarks(nextFilter) {
     onSectionChange("bookmarks");
     onFilterChange(nextFilter);
   }
 
-  // Example profile data (replace with real user info if available)
-  const profile = {
-    name: "Alex Doe",
-    role: "Pro User",
-    avatar: "https://ui-avatars.com/api/?name=Alex+Doe&background=06c0e0&color=fff"
-  };
+  // Helper for drop
+  function handleDropTag(tag) {
+    return (e) => {
+      e.preventDefault();
+      const bookmarkId = e.dataTransfer.getData("bookmarkId");
+      if (bookmarkId && onBookmarkDrop) {
+        onBookmarkDrop(Number(bookmarkId), tag);
+      }
+    };
+  }
+  function allowDrop(e) { e.preventDefault(); }
 
   return React.createElement(
     "aside",

@@ -39,7 +39,43 @@ let currentSection = 'bookmarks';
 let _healthTimer = null;
 const RECENT_SEARCHES_KEY = 'linksync_recent_searches_v1';
 const MAX_RECENT_SEARCHES = 6;
-// ...existing code...
+const TUTORIAL_DISMISSED_KEY = 'linksync_first_save_tutorial_dismissed_v1';
+const LOCAL_FALLBACK_PREF_KEY = 'linksync_local_fallback_pref_v1';
+const ONBOARD_TOUR_KEY = 'linksync_onboard_tour_done_v1';
+try{localFallbackEnabled=localStorage.getItem(LOCAL_FALLBACK_PREF_KEY)==='true'}catch(e){localFallbackEnabled=false}
+const SUGGEST_HIDDEN_KEY='linksync_suggest_hidden_v1';
+const SUGGESTED_BOOKMARKS = [
+  { title: 'GitHub Trending', url: 'https://github.com/trending', meta: 'Dev' },
+  { title: 'MDN Web Docs', url: 'https://developer.mozilla.org/', meta: 'Dev' },
+  { title: 'OpenAI', url: 'https://openai.com/', meta: 'AI' },
+  { title: 'Hugging Face', url: 'https://huggingface.co/', meta: 'AI' },
+  { title: 'Figma Community', url: 'https://www.figma.com/community', meta: 'Design' },
+  { title: 'Awwwards', url: 'https://www.awwwards.com/', meta: 'Design' }
+];
+const INTEREST_CATALOG={
+  dev:[
+    {title:'GitHub Trending',url:'https://github.com/trending',meta:'Dev'},
+    {title:'MDN Web Docs',url:'https://developer.mozilla.org/',meta:'Dev'},
+    {title:'Stack Overflow',url:'https://stackoverflow.com/',meta:'Dev'},
+    {title:'Dev.to',url:'https://dev.to/',meta:'Dev'},
+  ],
+  ai:[
+    {title:'OpenAI',url:'https://openai.com/',meta:'AI'},
+    {title:'Hugging Face',url:'https://huggingface.co/',meta:'AI'},
+    {title:'Papers With Code',url:'https://paperswithcode.com/',meta:'AI'},
+    {title:'Anthropic',url:'https://www.anthropic.com/',meta:'AI'},
+  ],
+  design:[
+    {title:'Figma Community',url:'https://www.figma.com/community',meta:'Design'},
+    {title:'Awwwards',url:'https://www.awwwards.com/',meta:'Design'},
+    {title:'Dribbble',url:'https://dribbble.com/',meta:'Design'},
+    {title:'Behance',url:'https://www.behance.net/',meta:'Design'},
+  ],
+  tools:[
+    {title:'Product Hunt',url:'https://www.producthunt.com/',meta:'Tools'},
+    {title:'Notion',url:'https://www.notion.so/',meta:'Tools'},
+  ],
+};
 
 const authEls={
   signInBtn:document.getElementById('signInBtn'),
@@ -47,8 +83,8 @@ const authEls={
   topNotifyBadge:document.getElementById('topNotifyBadge'),
   menuLogoutBtn:document.getElementById('menuLogoutBtn'),
   menuLoginLink:document.getElementById('menuLoginLink'),
-  // settingsMenuBtn:document.getElementById('settingsMenuBtn'),
-  // topSettingsMenu:document.getElementById('topSettingsMenu'),
+  settingsMenuBtn:document.getElementById('settingsMenuBtn'),
+  topSettingsMenu:document.getElementById('topSettingsMenu'),
   userAvatarBtn:document.getElementById('userAvatarBtn')
 };
 
@@ -184,11 +220,63 @@ async function loadNotificationSummary(){
   }
 }
 
-// function toggleSettingsMenu(force) { /* removed */ }
+function toggleSettingsMenu(force){
+  if(!authEls.topSettingsMenu)return;
+  const shouldOpen=typeof force==='boolean'?force:!authEls.topSettingsMenu.classList.contains('show');
+  authEls.topSettingsMenu.classList.toggle('show',shouldOpen);
+}
 
-// ...existing code...
+function isSuggestionsHidden(){try{return localStorage.getItem(SUGGEST_HIDDEN_KEY)==='true'}catch{return false}}
+function hideSuggestions(){try{localStorage.setItem(SUGGEST_HIDDEN_KEY,'true')}catch{}render();showToast('Suggestions hidden','info')}
+function showSuggestions(){try{localStorage.removeItem(SUGGEST_HIDDEN_KEY)}catch{}render();showToast('Suggestions restored','info')}
 
-// ...existing code...
+function getUserTopInterests(){
+  const freq={};
+  for(const b of bookmarks){
+    for(const t of(b.tags||[])){
+      const key=String(t).toLowerCase();
+      freq[key]=(freq[key]||0)+1;
+    }
+  }
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+}
+
+function getPersonalizedSuggestions(){
+  const interests=getUserTopInterests();
+  const existing=new Set(bookmarks.map(b=>{try{return new URL(b.url.startsWith('http')?b.url:'https://'+b.url).hostname}catch{return ''}}));
+  const picks=[];
+  const seen=new Set();
+  for(const tag of interests){
+    const cat=INTEREST_CATALOG[tag];
+    if(!cat)continue;
+    for(const item of cat){
+      const host=new URL(item.url).hostname;
+      if(!existing.has(host)&&!seen.has(host)){picks.push(item);seen.add(host);}
+      if(picks.length>=6)break;
+    }
+    if(picks.length>=6)break;
+  }
+  if(picks.length<6){
+    for(const item of SUGGESTED_BOOKMARKS){
+      const host=new URL(item.url).hostname;
+      if(!existing.has(host)&&!seen.has(host)){picks.push(item);seen.add(host);}
+      if(picks.length>=6)break;
+    }
+  }
+  return picks;
+}
+
+function getSuggestTitle(){
+  const interests=getUserTopInterests();
+  const matched=interests.filter(t=>INTEREST_CATALOG[t]);
+  if(matched.length)return '✦ Based on Your Interests';
+  return '✦ Trending for You';
+}
+
+function renderSuggestCard(item){
+  return `<div class="suggest-card"><a class="suggest-card-link" href="${item.url}" target="_blank" rel="noopener noreferrer"><div class="suggest-name">${esc(item.title)}</div><div class="suggest-meta">${esc(item.meta)}</div></a><button class="suggest-save-btn" onclick="event.stopPropagation();quickSaveSuggestion('${item.url.replace(/'/g,"\\'")}')"
+  title="Save to bookmarks" aria-label="Save ${esc(item.title)} to bookmarks">★ Save</button></div>`;
+}
 
 async function quickSaveSuggestion(url){
   const btn=event?.target;
@@ -211,7 +299,15 @@ async function quickSaveSuggestion(url){
 }
 
 function renderAssistContent(list){
-// ...existing code...
+  const showSuggestions=list.length<=2;
+  const tutorialDismissed=String(localStorage.getItem(TUTORIAL_DISMISSED_KEY)||'')==='true';
+  if(!showSuggestions)return '';
+  if(isSuggestionsHidden())return `<div class="assist-panel assist-collapsed"><button class="suggest-show-btn" onclick="showSuggestions()">Show suggestions</button></div>`;
+  const items=getPersonalizedSuggestions();
+  if(!items.length)return '';
+  const title=getSuggestTitle();
+  const suggestions=`<div class="assist-panel"><div class="assist-header"><div class="assist-title">${title}</div><button class="suggest-hide-btn" onclick="hideSuggestions()" title="Hide suggestions" aria-label="Hide suggestions">✕ Hide</button></div><div class="suggest-grid">${items.map(item=>renderSuggestCard(item)).join('')}</div>${!tutorialDismissed?`<div class="mini-tutorial"><strong>How to save quickly:</strong> paste any URL in Quick Add and it auto-saves. This tip hides after your first saved bookmark.</div>`:''}</div>`;
+  return suggestions;
 }
 
 function renderZeroBookmarksState(){
@@ -497,7 +593,18 @@ function setCategoryFilter(tag){
   render();
 }
 
-// Sidebar categories removed
+function renderSidebarCategories(){
+  const container=document.getElementById('sidebarCategories');
+  if(!container)return;
+  const freq=computeTagFrequency();
+  const topTags=getTopTags(freq,10);
+  if(!topTags.length){container.innerHTML='<div style="padding:4px 12px;font-size:11px;color:var(--text3)">No categories yet</div>';return;}
+  const colorCycle=['c1','c2','c3','c4','c5'];
+  container.innerHTML=topTags.map((tag,i)=>{
+    const isActive=currentFilter===tag;
+    return `<a class="nav-link${isActive?' active':''}" href="#" data-cat="${esc(tag)}" onclick="event.preventDefault();setCategoryFilter('${esc(tag)}')"><span class="stag ${colorCycle[i%5]}" style="width:8px;height:8px;min-width:8px;padding:0;border-radius:50%"></span>${esc(tag.charAt(0).toUpperCase()+tag.slice(1))}<span class="nav-count">${freq[tag]}</span></a>`;
+  }).join('');
+}
 
 function loadRecentSearches(){
   try{
@@ -562,7 +669,7 @@ function render(){
   document.getElementById('snReadLater').textContent=bookmarks.filter(b=>(b.tags||[]).some(t=>String(t).toLowerCase()==='read later')).length;
   container.className=currentView==='grid'?'bk-grid':currentView==='table'?'bk-table-wrap':'bk-list';
   renderDynamicTagPills();
-  // renderSidebarCategories(); // sidebar categories removed
+  renderSidebarCategories();
   if(!list.length){
     if(authBlocked){
         container.innerHTML=`<div class="empty"><div class="empty-icon">🔒</div><div class="empty-t">Login to explore more features and also suggest best ideas</div><a class="btn-outline" href="/register" style="margin-top:10px;display:inline-flex">Login</a></div>`;
@@ -2526,7 +2633,18 @@ async function initDashboard(){
   if(authEls.menuLogoutBtn){
     authEls.menuLogoutBtn.addEventListener('click',async()=>{toggleSettingsMenu(false);await performLogout()});
   }
-  // Settings menu logic removed
+  if(authEls.settingsMenuBtn){
+    authEls.settingsMenuBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
+  }
+  if(authEls.userAvatarBtn){
+    authEls.userAvatarBtn.addEventListener('click',(event)=>{event.stopPropagation();toggleSettingsMenu()});
+  }
+  document.addEventListener('click',(event)=>{
+    if(!authEls.topSettingsMenu||!authEls.settingsMenuBtn)return;
+    const inMenu=authEls.topSettingsMenu.contains(event.target);
+    const onBtn=authEls.settingsMenuBtn.contains(event.target);
+    if(!inMenu&&!onBtn){toggleSettingsMenu(false)}
+  });
   loadRecentSearches();
   renderRecentSearchChips();
   setupQuickSmartInput();

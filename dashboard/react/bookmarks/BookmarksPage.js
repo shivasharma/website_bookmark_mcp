@@ -569,7 +569,6 @@ export function BookmarksPage() {
     React.createElement(TopBar, {
       onOpenMcp: () => handleSectionChange("mcp"),
       onOpenNotifications: () => handleSectionChange("notifications"),
-      onOpenAIChat: () => handleSectionChange("aichat"),
       unreadCount,
       currentUser,
       onLogout: handleLogout,
@@ -651,34 +650,6 @@ export function BookmarksPage() {
                     React.createElement("option", { value: "newest" }, "Newest"),
                     React.createElement("option", { value: "oldest" }, "Oldest"),
                     React.createElement("option", { value: "az" }, "A-Z")
-                  )
-                )
-              ),
-              // Pill navigation for categories and tags
-              React.createElement(
-                "div",
-                { className: "bm-pill-nav-scroll" },
-                [
-                  { key: "all", label: "All" },
-                  { key: "starred", label: "Starred" },
-                  { key: "recent", label: "Recent" },
-                  { key: "unread", label: "Read Later" },
-                  ...Array.from(new Set(bookmarks.flatMap((item) => item.tags || []))).map((tag) => ({ key: `tag:${tag}`, label: tag }))
-                ].map((pill) =>
-                  React.createElement(
-                    "button",
-                    {
-                      key: pill.key,
-                      className: `bm-pill${(filter === pill.key || (filter === "all" && pill.key === "all")) ? " active" : ""}`,
-                      onClick: () => {
-                        if (pill.key.startsWith("tag:")) {
-                          setFilter(pill.key);
-                        } else {
-                          setFilter(pill.key);
-                        }
-                      }
-                    },
-                    pill.label
                   )
                 )
               )
