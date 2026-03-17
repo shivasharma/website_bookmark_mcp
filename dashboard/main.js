@@ -158,7 +158,6 @@ async function loadBookmarks(){
 
 function renderAuthUi(){
   if(!authEls.signInBtn||!authEls.menuLogoutBtn||!authEls.userAvatarBtn||!authEls.menuLoginLink||!authEls.topNotifyBtn||!authEls.topNotifyBadge)return;
-  const sidebarNav = document.getElementById('sidebarNav');
   if(!currentUser){
     authEls.signInBtn.classList.remove('hidden');
     authEls.topNotifyBtn.classList.add('hidden');
@@ -169,7 +168,6 @@ function renderAuthUi(){
     authEls.userAvatarBtn.textContent='U';
     authEls.userAvatarBtn.title='Not signed in';
     setBookmarkUiVisible(false);
-    if(sidebarNav) sidebarNav.classList.add('hidden');
     return;
   }
   const label=currentUser.name||currentUser.email||'User';
@@ -188,7 +186,6 @@ function renderAuthUi(){
   authEls.userAvatarBtn.textContent=initial;
   authEls.userAvatarBtn.title=`Logged in as ${label}`;
   setBookmarkUiVisible(true);
-  if(sidebarNav) sidebarNav.classList.remove('hidden');
   // when user logs in, hide welcome and restore bookmark UI
   if(typeof hideWelcomeExperience==='function')hideWelcomeExperience();
 }
