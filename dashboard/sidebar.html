@@ -1,0 +1,66 @@
+<!-- sidebar.html -->
+<style>
+/* sidebar.css - styles for sidebar.html */
+.sidebar-nav {
+  background: #111E2D;
+  color: #EEF5FF;
+  width: 240px;
+  min-height: 100vh;
+  padding: 24px 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-right: 1px solid #1A3048;
+}
+.sidebar-section {
+  padding: 0 24px;
+  margin-bottom: 12px;
+}
+.sidebar-section h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #06C0E0;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.sidebar-section button {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #B3C7DD;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 0;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-section button.active, .sidebar-section button:hover {
+  background: #162539;
+  color: #EEF5FF;
+}
+</style>
+<aside class="sidebar-nav">
+  <div class="sidebar-section">
+    <h3>Library</h3>
+    <button class="active">All</button>
+    <button>Starred</button>
+    <button>Recent</button>
+    <button>Read Later</button>
+  </div>
+  <div class="sidebar-section">
+    <h3>Tools</h3>
+    <button>System Health</button>
+    <button>MCP Setup</button>
+  </div>
+  <div class="sidebar-section">
+    <h3>View</h3>
+    <button class="active">List</button>
+    <button>Grid</button>
+    <button>Table</button>
+    <button>Group by Category</button>
+  </div>
+</aside>
