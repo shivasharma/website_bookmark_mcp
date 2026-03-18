@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: server/Dockerfile.dev
+    volumes:
+      - ./server:/app/server        # live-sync server source files
+      - ./tsconfig.json:/app/tsconfig.json
+    environment:
+      NODE_ENV: development
+      SESSION_COOKIE_SECURE: "false"
+      ALLOW_LOCAL_FALLBACK: "true"

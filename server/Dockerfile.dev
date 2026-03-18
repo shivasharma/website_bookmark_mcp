@@ -1,0 +1,12 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Install deps (server only)
+COPY server/package.json ./package.json
+RUN npm install
+
+# tsconfig needed for module resolution
+COPY tsconfig.json ./
+
+# ./server is mounted as a live volume at runtime — no COPY needed
+CMD ["npx", "tsx", "watch", "--clear-screen=false", "server/api.ts"]
